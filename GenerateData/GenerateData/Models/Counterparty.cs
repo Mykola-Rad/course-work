@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace GenerateData.Models;
+﻿namespace GenerateData.Models;
 
 public partial class Counterparty
 {

@@ -22,30 +22,11 @@ namespace GenerateData.Generators
                 .RuleFor(p => p.UnitCode, f => f.PickRandom(context.AvailableUnitCodes))
                 .RuleFor(p => p.LastPrice, f => Math.Round(f.Random.Decimal(minProductPrice, maxProductPrice), 2));
 
-            var generatedProducts = new List<Product>();
-            var uniqueNames = new HashSet<string>();
-
-            while (generatedProducts.Count < count)
-            {
-                var product = productFaker.Generate();
-
-                string baseProductName = product.ProductName;
-                string uniqueProductName = baseProductName;
-
-                if (uniqueNames.Add(uniqueProductName))
-                    product.ProductName = uniqueProductName;
-                else
-                {
-                    int index = 1;
-                    do
-                        uniqueProductName = $"{baseProductName} {index++}";
-                    while (!uniqueNames.Add(uniqueProductName));
-
-                    product.ProductName = uniqueProductName;
-                }
-
-                generatedProducts.Add(product);
-            }
+            var generatedProducts = DataGenerationUtils.GenerateWithUniqueName(
+                count,
+                productFaker,
+                getName: product => product.ProductName,
+                setName: (product, name) => product.ProductName = name);
 
             context.AvailableProductNames.AddRange(generatedProducts.Select(p => p.ProductName));
 
