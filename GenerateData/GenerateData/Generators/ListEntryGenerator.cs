@@ -4,9 +4,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenerateData
+namespace GenerateData.Generators
 {
-    internal class StorageProductGenerator
+    internal class ListEntryGenerator
     {
     }
 }
