@@ -25,10 +25,7 @@ namespace GenerateData.Generators
 
             var generatedStorages = storageFaker.Generate(count);
 
-            if (context.GeneratedStorageNames == null)
-                context.GeneratedStorageNames = new List<string>();
-
-            context.GeneratedProductNames.AddRange(generatedStorages.Select(s => s.Name));
+            context.AvailableProductNames.AddRange(generatedStorages.Select(s => s.Name));
 
             return generatedStorages;
         }

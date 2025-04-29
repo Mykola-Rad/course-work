@@ -20,9 +20,6 @@ namespace GenerateData.Generators
                 new ProductUnit { UnitCode = "box", UnitName = "Box" }
             };
 
-            if (context.AvailableUnitCodes == null)
-                context.AvailableUnitCodes = new List<string>();
-
             context.AvailableUnitCodes.AddRange(predefinedUnits.Select(u => u.UnitCode));
 
             return predefinedUnits;

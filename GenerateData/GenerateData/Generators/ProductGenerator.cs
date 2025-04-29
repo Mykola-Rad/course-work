@@ -11,10 +11,10 @@ namespace GenerateData.Generators
         private const decimal maxProductPrice = 5000.00m;
         public List<Product> Generate(int count, GenerationContext context)
         {
-            if (context.AvailableUnitCodes == null || !context.AvailableUnitCodes.Any())
-            {
-                throw new InvalidOperationException("GenerationContext must contain AvailableUnitCodes before generating Products. Ensure ProductUnitGenerator runs first.");
-            }
+            if (!context.AvailableUnitCodes.Any())
+                throw new InvalidOperationException(
+                    "GenerationContext must contain AvailableUnitCodes " +
+                    "before generating Products. Ensure ProductUnitGenerator runs first.");
 
             var productFaker = new Faker<Product>()
                 .RuleFor(p => p.ProductName, f => DataGenerationUtils.GenerateValue(
@@ -47,10 +47,7 @@ namespace GenerateData.Generators
                 generatedProducts.Add(product);
             }
 
-            if (context.GeneratedProductNames == null)
-                context.GeneratedProductNames = new List<string>();
-
-            context.GeneratedProductNames.AddRange(generatedProducts.Select(p => p.ProductName));
+            context.AvailableProductNames.AddRange(generatedProducts.Select(p => p.ProductName));
 
             return generatedProducts;
         }
