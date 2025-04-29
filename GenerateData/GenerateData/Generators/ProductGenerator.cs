@@ -1,10 +1,14 @@
 ﻿using Bogus;
 using GenerateData.Models;
+using GenerateData.Utills;
 
 namespace GenerateData.Generators
 {
     public class ProductGenerator : IEntityGenerator<Product>
     {
+        private const int maxProductNameLength = 100;
+        private const decimal minProductPrice = 1.00m;
+        private const decimal maxProductPrice = 5000.00m;
         public List<Product> Generate(int count, GenerationContext context)
         {
             if (context.AvailableUnitCodes == null || !context.AvailableUnitCodes.Any())
@@ -13,9 +17,10 @@ namespace GenerateData.Generators
             }
 
             var productFaker = new Faker<Product>()
-                .RuleFor(p => p.ProductName, f => f.Commerce.ProductName())
+                .RuleFor(p => p.ProductName, f => DataGenerationUtils.GenerateValue(
+                    faker => faker.Commerce.ProductName(), maxProductNameLength, f))
                 .RuleFor(p => p.UnitCode, f => f.PickRandom(context.AvailableUnitCodes))
-                .RuleFor(p => p.LastPrice, f => Math.Round(f.Random.Decimal(1.00m, 5000.00m), 2));
+                .RuleFor(p => p.LastPrice, f => Math.Round(f.Random.Decimal(minProductPrice, maxProductPrice), 2));
 
             var generatedProducts = new List<Product>();
             var uniqueNames = new HashSet<string>();
