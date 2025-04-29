@@ -21,12 +21,9 @@ namespace GenerateData.Generators
             };
 
             if (context.AvailableUnitCodes == null)
-            {
                 context.AvailableUnitCodes = new List<string>();
-            }
 
             context.AvailableUnitCodes.AddRange(predefinedUnits.Select(u => u.UnitCode));
-            context.AvailableUnitCodes = context.AvailableUnitCodes.Distinct().ToList();
 
             return predefinedUnits;
         }
