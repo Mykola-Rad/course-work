@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace GenerateData
 {
-    public interface IEntityGenerator
+    public interface IEntityGenerator<TEntity> where TEntity : class
     {
-       void Generate(int count, GenerationContext context);
+       List<TEntity> Generate(int count, GenerationContext context);
     }
 }
