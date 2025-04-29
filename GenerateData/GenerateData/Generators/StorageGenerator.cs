@@ -1,5 +1,4 @@
 ﻿using Bogus;
-using Bogus.DataSets;
 using GenerateData.Models;
 using GenerateData.Utills;
 

@@ -1,17 +1,7 @@
-﻿using Bogus;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace GenerateData.Generators
+﻿namespace GenerateData.Generators
 {
     public class GenerationContext
     {
-        public Random Random { get; } = new Random();
-        public Faker Faker { get; } = new Faker();
-
         public List<string> AvailableProductNames { get; set; } = new List<string>();
         public List<int> AvailableInvoiceIds { get; set; } = new List<int>();
         public List<string> AvailableStorageNames { get; set; } = new List<string>();
