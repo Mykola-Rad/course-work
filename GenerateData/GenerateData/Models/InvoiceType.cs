@@ -4,9 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GenerateData.Generators
+namespace GenerateData.Models
 {
-    internal class InvoiceGenerator
+    public enum InvoiceType
     {
+        Supply,
+        Transfer,
+        Release
     }
 }

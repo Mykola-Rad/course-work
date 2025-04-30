@@ -1,7 +1,6 @@
 ﻿using Bogus;
 using GenerateData.Models;
 using GenerateData.Utills;
-using BCrypt.Net;
 
 namespace GenerateData.Generators
 {

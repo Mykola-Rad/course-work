@@ -9,7 +9,9 @@ namespace GenerateData.Generators
         private const decimal maxCount = 100.00m;
         public List<StorageProduct> Generate(int count, GenerationContext context)
         {
-            if (!context.AvailableStorageNames.Any() || !context.AvailableProductNames.Any())
+            List<string> availableStorageNames = context.AvailableStorageKeepers.Keys.ToList();
+
+            if (!availableStorageNames.Any() || !context.AvailableProductNames.Any())
             {
                 throw new InvalidOperationException(
                     "GenerationContext must contain AvailableStorageNames and AvailableProductNames " +
@@ -20,7 +22,7 @@ namespace GenerateData.Generators
             var storageProducts = new List<StorageProduct>();
 
             var storageProductFaker = new Faker<StorageProduct>()
-                .RuleFor(sp => sp.StorageName, f => f.PickRandom(context.AvailableStorageNames))
+                .RuleFor(sp => sp.StorageName, f => f.PickRandom(availableStorageNames))
                 .RuleFor(sp => sp.ProductName, f => f.PickRandom(context.AvailableProductNames))
                 .RuleFor(sp => sp.Count, f => Math.Round(f.Random.Decimal(minCount, maxCount), 2));
 

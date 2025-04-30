@@ -85,6 +85,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.TotalPrice)
                 .HasPrecision(20, 2)
                 .HasColumnName("total_price");
+            entity.Property(e => e.Type)
+                .HasColumnName("type")
+                .HasColumnType("invoice_type");
 
             entity.HasOne(d => d.CounterpartyNameNavigation).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.CounterpartyName)

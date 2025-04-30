@@ -24,9 +24,11 @@ namespace GenerateData.Generators
 
             var generatedStorages = storageFaker.Generate(count);
 
-            context.AvailableProductNames.AddRange(generatedStorages.Select(s => s.Name));
+            foreach (string storageName in generatedStorages.Select(s => s.Name))
+                if (!context.AvailableStorageKeepers.ContainsKey(storageName))
+                    context.AvailableStorageKeepers[storageName] = new List<string>();
 
-            return generatedStorages;
+                return generatedStorages;
         }
     }
 }

@@ -15,9 +15,9 @@ namespace GenerateData.Generators
         private const int maxLastNameLength = 50;
         public List<StorageKeeper> Generate(int count, GenerationContext context)
         {
-            if (!context.AvailableStorageNames.Any())
+            if (!context.AvailableStorageKeepers.Keys.Any())
                 throw new InvalidOperationException(
-                    "AvailableStorageNames must be populated before generating StorageKeepers.");
+                    "Storages must be populated before generating StorageKeepers.");
 
             var keeperFaker = new Faker<StorageKeeper>()
                 .RuleFor(k => k.PhoneNumber, f => f.Phone.PhoneNumber("+380#########"))
@@ -26,7 +26,7 @@ namespace GenerateData.Generators
                 .RuleFor(k => k.LastName, f => 
                     DataGenerationUtils.GenerateValue(faker => faker.Name.LastName(), maxLastNameLength, f))
                 .RuleFor(k => k.Email, f => f.Internet.Email())
-                .RuleFor(k => k.StorageName, f => f.PickRandom(context.AvailableStorageNames));
+                .RuleFor(k => k.StorageName, f => f.PickRandom(context.AvailableStorageKeepers.Keys.ToList()));
 
             var generatedKeepers = new List<StorageKeeper>();
 
@@ -43,7 +43,8 @@ namespace GenerateData.Generators
             if (generatedKeepers.Count < count)
                 generatedKeepers.AddRange(keeperFaker.Generate(count - generatedKeepers.Count));
 
-            context.AvailableKeeperPhones.AddRange(generatedKeepers.Select(k => k.PhoneNumber));
+            foreach (string storageName in generatedKeepers.Select(sk => sk.StorageName))
+                context.AvailableStorageKeepers[storageName].AddRange(generatedKeepers.Select(k => k.PhoneNumber));
 
             return generatedKeepers;
         }

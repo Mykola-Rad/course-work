@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace GenerateData.Models;
+﻿namespace GenerateData.Models;
 
 public partial class Invoice
 {
@@ -16,6 +13,8 @@ public partial class Invoice
     public string? SenderStorageName { get; set; }
 
     public string? ReceiverStorageName { get; set; }
+
+    public InvoiceType Type { get; set; }
 
     public DateOnly Date { get; set; }
 
