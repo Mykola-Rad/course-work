@@ -4,7 +4,7 @@ namespace GenerateData.Generators
 {
     public class ProductUnitGenerator : IEntityGenerator<ProductUnit>
     {
-        public List<ProductUnit> Generate(int count, GenerationContext context)
+        public List<ProductUnit> Generate(GenerationContext context, int count = 100)
         {
             var predefinedUnits = new List<ProductUnit>
             {

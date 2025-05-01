@@ -5,9 +5,9 @@ namespace GenerateData.Generators
 {
     public class StorageProductGenerator : IEntityGenerator<StorageProduct>
     {
-        private const decimal minCount = 1.00m;
-        private const decimal maxCount = 100.00m;
-        public List<StorageProduct> Generate(int count, GenerationContext context)
+        private const decimal _minCount = 1.00m;
+        private const decimal _maxCount = 100.00m;
+        public List<StorageProduct> Generate(GenerationContext context, int count = 100)
         {
             List<string> availableStorageNames = context.AvailableStorageKeepers.Keys.ToList();
 
@@ -24,7 +24,7 @@ namespace GenerateData.Generators
             var storageProductFaker = new Faker<StorageProduct>()
                 .RuleFor(sp => sp.StorageName, f => f.PickRandom(availableStorageNames))
                 .RuleFor(sp => sp.ProductName, f => f.PickRandom(context.AvailableProductNames))
-                .RuleFor(sp => sp.Count, f => Math.Round(f.Random.Decimal(minCount, maxCount), 2));
+                .RuleFor(sp => sp.Count, f => Math.Round(f.Random.Decimal(_minCount, _maxCount), 2));
 
             while (storageProducts.Count < count)
             {

@@ -11,9 +11,9 @@ namespace GenerateData.Generators
 {
     public class StorageKeeperGenerator : IEntityGenerator<StorageKeeper>
     {
-        private const int maxFirstNameLength = 50;
-        private const int maxLastNameLength = 50;
-        public List<StorageKeeper> Generate(int count, GenerationContext context)
+        private const int _maxFirstNameLength = 50;
+        private const int _maxLastNameLength = 50;
+        public List<StorageKeeper> Generate(GenerationContext context, int count = 100)
         {
             if (!context.AvailableStorageKeepers.Keys.Any())
                 throw new InvalidOperationException(
@@ -22,9 +22,9 @@ namespace GenerateData.Generators
             var keeperFaker = new Faker<StorageKeeper>()
                 .RuleFor(k => k.PhoneNumber, f => f.Phone.PhoneNumber("+380#########"))
                 .RuleFor(k => k.FirstName, f => 
-                    DataGenerationUtils.GenerateValue(faker => faker.Name.FirstName(), maxFirstNameLength, f))
+                    DataGenerationUtils.GenerateValue(faker => faker.Name.FirstName(), _maxFirstNameLength, f))
                 .RuleFor(k => k.LastName, f => 
-                    DataGenerationUtils.GenerateValue(faker => faker.Name.LastName(), maxLastNameLength, f))
+                    DataGenerationUtils.GenerateValue(faker => faker.Name.LastName(), _maxLastNameLength, f))
                 .RuleFor(k => k.Email, f => f.Internet.Email())
                 .RuleFor(k => k.StorageName, f => f.PickRandom(context.AvailableStorageKeepers.Keys.ToList()));
 
@@ -43,8 +43,8 @@ namespace GenerateData.Generators
             if (generatedKeepers.Count < count)
                 generatedKeepers.AddRange(keeperFaker.Generate(count - generatedKeepers.Count));
 
-            foreach (string storageName in generatedKeepers.Select(sk => sk.StorageName))
-                context.AvailableStorageKeepers[storageName].AddRange(generatedKeepers.Select(k => k.PhoneNumber));
+            foreach (var storageKeeper in generatedKeepers)
+                context.AvailableStorageKeepers[storageKeeper.StorageName].Add(storageKeeper.PhoneNumber);
 
             return generatedKeepers;
         }

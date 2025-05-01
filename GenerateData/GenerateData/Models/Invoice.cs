@@ -14,11 +14,9 @@ public partial class Invoice
 
     public string? ReceiverStorageName { get; set; }
 
-    public InvoiceType Type { get; set; }
+    public string Type { get; set; }
 
     public DateOnly Date { get; set; }
-
-    public decimal TotalPrice { get; set; }
 
     public virtual Counterparty? CounterpartyNameNavigation { get; set; }
 

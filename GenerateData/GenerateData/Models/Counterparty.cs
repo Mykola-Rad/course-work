@@ -9,4 +9,6 @@ public partial class Counterparty
     public string? Email { get; set; }
 
     public virtual ICollection<Invoice> Invoices { get; set; } = new List<Invoice>();
+
+    public virtual ICollection<CounterpartyRole> Roles { get; set; } = new List<CounterpartyRole>();
 }

@@ -1,11 +1,20 @@
 ﻿using Bogus;
+using GenerateData.Data;
 using GenerateData.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace GenerateData.Generators
 {
     public class ReleaseInvoiceGenerator : IEntityGenerator<Invoice>
     {
-        public List<Invoice> Generate(int count, GenerationContext context)
+        private readonly AppDbContext _dbContext;
+        private const string _invoiceType = "release";
+
+        public ReleaseInvoiceGenerator(AppDbContext dbContext)
+        {
+            _dbContext = dbContext;
+        }
+        public List<Invoice> Generate(GenerationContext context, int count = 100)
         {
             if (!context.AvailableStorageKeepers.Keys.Any())
                 throw new InvalidOperationException("Need available Storage names for supply invoices.");
@@ -19,9 +28,12 @@ namespace GenerateData.Generators
             for (int i = 0; i < count; i++)
             {
                 var invoice = new Invoice();
-                invoice.Type = InvoiceType.Transfer;
+                invoice.Type = _invoiceType;
 
-                invoice.SenderStorageName = faker.PickRandom(context.AvailableStorageKeepers.Keys.ToList());
+                invoice.SenderStorageName = faker.PickRandom(context.AvailableStorageKeepers
+                    .Where(kvp => kvp.Value != null && kvp.Value.Any())
+                    .Select(kvp => kvp.Key)
+                    .ToList());
                 invoice.SenderKeeperPhone = faker.PickRandom(context.AvailableStorageKeepers[invoice.SenderStorageName]);
                 invoice.CounterpartyName = faker.PickRandom(context.AvailableCounterpartyNames);
 
@@ -33,8 +45,6 @@ namespace GenerateData.Generators
 
                 generatedInvoices.Add(invoice);
             }
-
-            context.AvailableInvoiceIds.AddRange(generatedInvoices.Select(i => i.InvoiceId));
 
             return generatedInvoices;
         }

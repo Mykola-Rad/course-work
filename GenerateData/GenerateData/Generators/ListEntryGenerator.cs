@@ -1,32 +1,69 @@
-﻿using Bogus;
-using GenerateData.Models;
+﻿using GenerateData.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GenerateData.Generators
 {
     public class ListEntryGenerator : IEntityGenerator<ListEntry>
     {
-        private const int minCount = 1;
-        private const int maxCount = 100;
-        private const decimal minPrice = 10;
-        private const decimal maxPrice = 1000;
-        public List<ListEntry> Generate(int count, GenerationContext context)
+        private const int _minCount = 1;
+        private const int _maxCount = 100;
+        private const decimal _minPrice = 10;
+        private const decimal _maxPrice = 1000;
+        private readonly Random _random = new Random();
+
+        public ListEntryGenerator()
         {
-            var uniqueEntries = new HashSet<(string productName, int invoice_id)>();
+            _random = new Random();
+        }
+
+        public List<ListEntry> Generate(GenerationContext context, int count = 100)
+        {
+            if (!context.AvailableInvoiceIds.Any())
+                throw new InvalidOperationException(
+                    "GenerationContext must contain InvoiceId " +
+                    "before generating ListEntries.");
+            if (!context.AvailableProductNames.Any())
+                throw new InvalidOperationException(
+                    "GenerationContext must contain ProductNames " +
+                    "before generating ListEntries.");
+
             var listEntries = new List<ListEntry>();
+            int invoiceIdCount = context.AvailableInvoiceIds.Count;
+            int productsPerInvoice = invoiceIdCount > 0 ? count / invoiceIdCount : 0;
+            int remainingProducts = count % invoiceIdCount;
 
-            var faker = new Faker<ListEntry>()
-                .RuleFor(le => le.InvoiceId, f => f.PickRandom(context.AvailableInvoiceIds))
-                .RuleFor(le => le.ProductName, f => f.PickRandom(context.AvailableProductNames))
-                .RuleFor(le => le.Count, f => Math.Round(f.Random.Decimal(minCount, maxCount), 2))
-                .RuleFor(le => le.Price, f => Math.Round(f.Random.Decimal(minPrice, maxPrice), 2));
+            var shuffledProductNames = context.AvailableProductNames.OrderBy(_ => _random.Next()).ToList();
+            int productIndex = 0;
 
-            while (listEntries.Count < count)
+            foreach (var invoiceId in context.AvailableInvoiceIds)
             {
-                var entry = faker.Generate();
+                int currentProductsCount = productsPerInvoice + (remainingProducts > 0 ? 1 : 0);
+                remainingProducts--;
 
-                var combination = (entry.ProductName, entry.InvoiceId);
-                if (uniqueEntries.Add(combination))
-                    listEntries.Add(entry);
+                var productsForInvoice = shuffledProductNames
+                    .Skip(productIndex)
+                    .Take(currentProductsCount)
+                    .ToList();
+
+                foreach (var productName in productsForInvoice)
+                {
+                    listEntries.Add(new ListEntry
+                    {
+                        InvoiceId = invoiceId,
+                        ProductName = productName,
+                        Count = Math.Round((decimal)_random.Next(_minCount * 100, _maxCount * 100) / 100, 2),
+                        Price = Math.Round(_minPrice + (_maxPrice - _minPrice) * (decimal)_random.NextDouble(), 2)
+                    });
+                }
+
+                productIndex += currentProductsCount;
+                if (productIndex >= shuffledProductNames.Count)
+                {
+                    shuffledProductNames = context.AvailableProductNames.OrderBy(_ => _random.Next()).ToList();
+                    productIndex = 0;
+                }
             }
 
             return listEntries;

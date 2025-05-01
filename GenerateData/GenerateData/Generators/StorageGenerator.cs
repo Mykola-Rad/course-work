@@ -6,21 +6,26 @@ namespace GenerateData.Generators
 {
     public class StorageGenerator : IEntityGenerator<Storage>
     {
-        private const int maxStreetLength = 100;
-        private const int maxCityLength = 50;
-        private const int maxRegionLength = 30;
-        public List<Storage> Generate(int count, GenerationContext context)
+        private static int _storageCounter = 1;
+        private const int _maxStreetLength = 100;
+        private const int _maxCityLength = 50;
+        private const int _maxRegionLength = 30;
+        private const int _maxPostalCodeLength = 8;
+        private const int _maxBuildingNumberLength = 3;
+        public List<Storage> Generate(GenerationContext context, int count = 100)
         {
             var storageFaker = new Faker<Storage>()
-                .RuleFor(s => s.Name, f => $"Storage #{f.Random.Int(1, count)}")
+                .RuleFor(s => s.Name, f => $"Storage #{_storageCounter++}")
                 .RuleFor(s => s.StreetName, f => DataGenerationUtils.GenerateValue(
-                    faker => faker.Address.StreetName(), maxStreetLength, f))
-                .RuleFor(s => s.HouseNumber, f => f.Address.BuildingNumber())
+                    faker => faker.Address.StreetName(), _maxStreetLength, f))
+                .RuleFor(s => s.HouseNumber, f => 
+                DataGenerationUtils.GenerateValue(faker => faker.Address.BuildingNumber(), _maxBuildingNumberLength, f))
                 .RuleFor(s => s.City, f => DataGenerationUtils.GenerateValue(
-                    faker => faker.Address.City(), maxCityLength, f))
+                    faker => faker.Address.City(), _maxCityLength, f))
                 .RuleFor(s => s.Region, f => DataGenerationUtils.GenerateValue(
-                    faker => faker.Address.State(), maxRegionLength, f))
-                .RuleFor(s => s.PostalCode, f => f.Address.ZipCode());
+                    faker => faker.Address.State(), _maxRegionLength, f))
+                .RuleFor(s => s.PostalCode, f =>
+                DataGenerationUtils.GenerateValue(faker => faker.Address.ZipCode(), _maxPostalCodeLength, f));
 
             var generatedStorages = storageFaker.Generate(count);
 
