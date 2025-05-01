@@ -1,0 +1,11 @@
+﻿@{
+    ViewData["Title"] = "Доступ заборонено";
+    Layout = "_Layout";
+}
+
+<header>
+    <h1 class="text-danger">@ViewData["Title"]</h1>
+    <p class="text-danger">У вас немає дозволу на доступ до цього ресурсу.</p>
+</header>
+
+<a asp-controller="Home" asp-action="Index">Повернутися на головну</a>

@@ -86,7 +86,12 @@ namespace GenerateData
 
                 userGen.Role = _ownerRole;
                 var owners = userGen.Generate(generationContext, OwnersCount);
-
+                owners.Add(new User
+                {
+                    Username = "admin",
+                    PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin"),
+                    Role = _ownerRole
+                });
                 userGen.Role = _managerRole;
                 var managers = userGen.Generate(generationContext, ManagersCount);
 

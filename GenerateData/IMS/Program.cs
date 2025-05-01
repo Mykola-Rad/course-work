@@ -1,3 +1,7 @@
+using IMS.Data;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
+
 namespace IMS
 {
     public class Program
@@ -8,6 +12,33 @@ namespace IMS
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/Account/Login";
+
+                    options.AccessDeniedPath = "/Account/AccessDenied";
+
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(60);
+
+                    options.SlidingExpiration = true;
+                });
+
+            builder.Services.AddAuthorization(options =>
+            {
+                options.AddPolicy("RequireOwnerRole", policy =>
+                    policy.RequireRole("owner"));
+
+                options.AddPolicy("RequireManagerRole", policy =>
+                    policy.RequireRole("manager", "owner"));
+
+                options.AddPolicy("RequireStorageKeeperRole", policy =>
+                    policy.RequireRole("storage_keeper", "manager", "owner"));
+            });
 
             var app = builder.Build();
 
@@ -24,6 +55,7 @@ namespace IMS
 
             app.UseRouting();
 
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapControllerRoute(
