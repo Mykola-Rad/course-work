@@ -98,6 +98,10 @@ namespace GenerateData
                 await InsertUsersDirectlyAsync(keeperUsers);
                 await _context.SaveChangesAsync();
 
+                generationContext.AvailableUserIds.AddRange(_context.Users
+                    .Where(u => u.Role == _keeperRole)
+                    .Select(u => u.UserId));
+
                 _logger.LogInformation($"Згенеровано та збережено: {storages.Count} Storages, " +
                     $"{counterparties.Count} Counterparties, " +
                     $"{keeperUsers.Count + managers.Count + owners.Count} Users.");

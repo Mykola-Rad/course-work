@@ -1,7 +1,9 @@
-﻿using GenerateData.Models;
+﻿using System;
+using System.Collections.Generic;
+using IMS.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace GenerateData.Data;
+namespace IMS.Data;
 
 public partial class AppDbContext : DbContext
 {
