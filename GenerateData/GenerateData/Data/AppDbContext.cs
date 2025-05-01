@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using GenerateData.Models;
+﻿using GenerateData.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace GenerateData.Data;
@@ -13,6 +11,8 @@ public partial class AppDbContext : DbContext
     }
 
     public virtual DbSet<Counterparty> Counterparties { get; set; }
+
+    public virtual DbSet<CounterpartyRole> CounterpartyRoles { get; set; }
 
     public virtual DbSet<Invoice> Invoices { get; set; }
 
@@ -55,6 +55,39 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.PhoneNumber)
                 .HasMaxLength(13)
                 .HasColumnName("phone_number");
+
+            entity.HasMany(d => d.Roles).WithMany(p => p.CounterpartyNames)
+                .UsingEntity<Dictionary<string, object>>(
+                    "CounterpartyRoleMap",
+                    r => r.HasOne<CounterpartyRole>().WithMany()
+                        .HasForeignKey("RoleId")
+                        .HasConstraintName("counterparty_role_map_role_id_fkey"),
+                    l => l.HasOne<Counterparty>().WithMany()
+                        .HasForeignKey("CounterpartyName")
+                        .HasConstraintName("counterparty_role_map_counterparty_name_fkey"),
+                    j =>
+                    {
+                        j.HasKey("CounterpartyName", "RoleId").HasName("counterparty_role_map_pkey");
+                        j.ToTable("counterparty_role_map");
+                        j.IndexerProperty<string>("CounterpartyName")
+                            .HasMaxLength(100)
+                            .HasColumnName("counterparty_name");
+                        j.IndexerProperty<int>("RoleId").HasColumnName("role_id");
+                    });
+        });
+
+        modelBuilder.Entity<CounterpartyRole>(entity =>
+        {
+            entity.HasKey(e => e.RoleId).HasName("counterparty_role_pkey");
+
+            entity.ToTable("counterparty_role");
+
+            entity.HasIndex(e => e.Name, "counterparty_role_name_key").IsUnique();
+
+            entity.Property(e => e.RoleId).HasColumnName("role_id");
+            entity.Property(e => e.Name)
+                .HasMaxLength(50)
+                .HasColumnName("name");
         });
 
         modelBuilder.Entity<Invoice>(entity =>
@@ -82,9 +115,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.SenderStorageName)
                 .HasMaxLength(100)
                 .HasColumnName("sender_storage_name");
-            entity.Property(e => e.TotalPrice)
-                .HasPrecision(20, 2)
-                .HasColumnName("total_price");
+            entity.Property(e => e.Type)
+                .HasColumnName("type")
+                .HasColumnType("invoice_type");
 
             entity.HasOne(d => d.CounterpartyNameNavigation).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.CounterpartyName)
@@ -287,6 +320,9 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.PasswordHash)
                 .HasMaxLength(255)
                 .HasColumnName("password_hash");
+            entity.Property(e => e.Role)
+                .HasColumnName("role") 
+                .HasColumnType("user_role");
         });
 
         OnModelCreatingPartial(modelBuilder);
