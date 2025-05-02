@@ -1,0 +1,48 @@
+﻿@model IMS.Models.User
+
+@{
+    ViewData["Title"] = "Видалити користувача";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3 class="text-danger">Ви впевнені, що хочете видалити цього користувача?</h3>
+<div>
+    <h4>Користувач</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Username)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Username)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Role)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Role)
+        </dd>
+        <dt class="col-sm-3">
+            Прив'язаний комірник
+        </dt>
+        <dd class="col-sm-9">
+            @if (Model.StorageKeeper != null)
+            {
+                <span>@Model.StorageKeeper.LastName @Model.StorageKeeper.FirstName (@Model.StorageKeeper.PhoneNumber)</span>
+            }
+            else
+            {
+                <span class="text-muted">-- Немає --</span>
+            }
+        </dd>
+    </dl>
+
+    <form asp-action="DeleteUser" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="UserId" />
+        <button type="submit" class="btn btn-danger">Видалити</button> |
+        <a asp-action="Users" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>

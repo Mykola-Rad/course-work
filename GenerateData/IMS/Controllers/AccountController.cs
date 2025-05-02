@@ -36,7 +36,7 @@ namespace IMS.Controllers
 
                 if (user != null)
                 {
-                    bool isPasswordValid = true;// BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash);
+                    bool isPasswordValid = BCrypt.Net.BCrypt.Verify(model.Password, user.PasswordHash);
 
                     if (isPasswordValid)
                     {
@@ -44,7 +44,7 @@ namespace IMS.Controllers
                         {
                             new Claim(ClaimTypes.NameIdentifier, user.UserId.ToString()),
                             new Claim(ClaimTypes.Name, user.Username),                   
-                            new Claim(ClaimTypes.Role, user.Role)                         
+                            new Claim(ClaimTypes.Role, user.Role.ToString())                         
                         };
 
                         var claimsIdentity = new ClaimsIdentity(

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace IMS.Models;
+﻿namespace IMS.Models;
 
 public partial class User
 {
@@ -11,7 +8,7 @@ public partial class User
 
     public string PasswordHash { get; set; } = null!;
 
-    public string Role { get; set; }
+    public UserRole Role { get; set; }
 
     public virtual StorageKeeper? StorageKeeper { get; set; }
 }

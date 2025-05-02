@@ -1,0 +1,84 @@
+﻿@model IMS.ViewModels.UserViewModel
+
+@{
+    ViewData["Title"] = "Створити користувача";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="CreateUser" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="Username" class="form-label"></label>
+                <input asp-for="Username" class="form-control" />
+                <span asp-validation-for="Username" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Password" class="form-label"></label>
+                <input asp-for="Password" type="password" class="form-control" />
+                <span asp-validation-for="Password" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ConfirmPassword" class="form-label"></label>
+                <input asp-for="ConfirmPassword" type="password" class="form-control" />
+                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Role" class="form-label"></label>
+                <select asp-for="Role" asp-items="Html.GetEnumSelectList<UserRole>()" class="form-select" id="roleSelect">
+                    <option value="">-- Оберіть роль --</option>
+                </select>
+                <span asp-validation-for="Role" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3" id="storageKeeperSelectDiv" style="display: none;">
+                <label asp-for="SelectedStorageKeeperPhoneNumber" class="form-label"></label>
+                <select asp-for="SelectedStorageKeeperPhoneNumber" asp-items="@(new SelectList(Model.AvailableKeepers ?? Enumerable.Empty<SelectListItem>(), "Value", "Text"))" class="form-select">
+                    <option value="">-- Не вибрано --</option>
+                </select>
+                <span asp-validation-for="SelectedStorageKeeperPhoneNumber" class="text-danger"></span>
+                <div class="form-text">Оберіть зі списку існуючих комірників, які ще не мають логіну.</div>
+            </div>
+
+
+            <div class="mb-3">
+                <button type="submit" class="btn btn-primary">Створити</button>
+                <a asp-action="Users" class="btn btn-secondary">Назад до списку</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function toggleKeeperSelect() {
+                var selectedRole = $('#roleSelect').val();
+                if (selectedRole === '@UserRole.storage_keeper.ToString()') {
+                    $('#storageKeeperSelectDiv').show();
+                } else {
+                    $('#storageKeeperSelectDiv').hide();
+                    // Опціонально: очищуємо вибір комірника, якщо змінили роль
+                    // $('#SelectedStorageKeeperPhoneNumber').val('');
+                }
+            }
+
+            toggleKeeperSelect();
+
+            $('#roleSelect').on('change', function () {
+                toggleKeeperSelect();
+            });
+        });
+    </script>
+ }
