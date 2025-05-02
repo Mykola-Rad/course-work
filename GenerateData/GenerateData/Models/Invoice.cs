@@ -18,6 +18,8 @@ public partial class Invoice
 
     public DateOnly Date { get; set; }
 
+    public string Status { get; set; } = null!;
+
     public virtual Counterparty? CounterpartyNameNavigation { get; set; }
 
     public virtual ICollection<ListEntry> ListEntries { get; set; } = new List<ListEntry>();

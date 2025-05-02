@@ -34,7 +34,8 @@ public partial class AppDbContext : DbContext
     {
         modelBuilder
             .HasPostgresEnum("invoice_type", new[] { "supply", "transfer", "release" })
-            .HasPostgresEnum("user_role", new[] { "owner", "manager", "storage_keeper" });
+            .HasPostgresEnum("user_role", new[] { "owner", "manager", "storage_keeper" })
+            .HasPostgresEnum("invoice_status", new[] { "draft", "processing", "processed", "cancelled" });
 
         modelBuilder.Entity<Counterparty>(entity =>
         {
@@ -118,6 +119,10 @@ public partial class AppDbContext : DbContext
             entity.Property(e => e.Type)
                 .HasColumnName("type")
                 .HasColumnType("invoice_type");
+            entity.Property(e => e.Status)
+                          .HasColumnType("invoice_status") 
+                          .HasDefaultValue(InvoiceStatus.draft)
+                          .IsRequired();
 
             entity.HasOne(d => d.CounterpartyNameNavigation).WithMany(p => p.Invoices)
                 .HasForeignKey(d => d.CounterpartyName)
