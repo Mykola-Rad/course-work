@@ -114,7 +114,7 @@ namespace IMS.Controllers
         }
 
         // GET: Product/Edit/НазваТовару
-        [HttpGet("Edit/{productName}")]
+        [HttpGet("Product/Edit/{productName}")]
         [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> Edit(string productName)
         {
@@ -136,7 +136,7 @@ namespace IMS.Controllers
         }
 
         // POST: Product/Edit/НазваТовару
-        [HttpPost("Edit/{productName}")]
+        [HttpPost("Product/Edit/{productName}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> Edit([FromRoute] string productName, [Bind("ProductName,UnitCode,LastPrice")] Product productFromForm)

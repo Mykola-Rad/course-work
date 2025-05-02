@@ -1,0 +1,80 @@
+﻿@model IMS.Models.Storage
+
+@{
+    ViewData["Title"] = $"Видалити склад: {Model.Name}";
+    Layout = "_Layout";
+    bool canDelete = ViewBag.CanDelete ?? true; 
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3 class="text-danger">Ви впевнені, що хочете видалити цей склад?</h3>
+
+@if (!canDelete && ViewBag.WarningMessage != null)
+{
+    <div class="alert alert-warning" role="alert">
+        @ViewBag.WarningMessage <br />
+        Видалення неможливе, доки існують ці залежності. Видаліть або перепризначте пов'язані записи.
+    </div>
+}
+else
+{
+    <p>Ця дія видалить всю інформацію про склад.</p>
+}
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Name)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Name)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.City)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.City)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.StreetName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.StreetName)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.HouseNumber)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.HouseNumber)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Region)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Region)
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.PostalCode)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.PostalCode)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Name" />
+
+        @if (canDelete)
+        {
+            <button type="submit" class="btn btn-danger">Видалити</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-danger" disabled title="@ViewBag.WarningMessage">Видалити</button>
+        }
+        | <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>

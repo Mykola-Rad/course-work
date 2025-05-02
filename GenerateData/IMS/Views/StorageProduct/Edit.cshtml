@@ -1,0 +1,50 @@
+﻿@model IMS.ViewModels.EditStorageProductViewModel
+
+@{
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" asp-route-storageName="@Model.StorageName" asp-route-productName="@Model.ProductName" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input type="hidden" asp-for="StorageName" />
+            <input type="hidden" asp-for="ProductName" />
+
+            <div class="mb-3">
+                <label class="form-label">Склад</label>
+                <p class="form-control-plaintext"><strong>@Html.DisplayFor(model => model.StorageName)</strong></p>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Товар</label>
+                <p class="form-control-plaintext"><strong>@Html.DisplayFor(model => model.ProductDisplayName) (@Html.DisplayFor(model => model.UnitName))</strong></p>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Count" class="form-label"></label>
+                <input asp-for="Count" type="number" step="any" min="0" class="form-control" />
+                <span asp-validation-for="Count" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="MinimalCount" class="form-label"></label>
+                <input asp-for="MinimalCount" type="number" step="any" min="0" class="form-control" />
+                <span asp-validation-for="MinimalCount" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 mt-4">
+                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+                <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.StorageName" class="btn btn-secondary">Скасувати</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }
