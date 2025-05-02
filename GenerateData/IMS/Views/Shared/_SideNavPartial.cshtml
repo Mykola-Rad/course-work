@@ -1,0 +1,90 @@
+﻿@using System.Security.Claims
+@using IMS.Models // Простір імен для UserRole, якщо enum там
+
+@* Перевіряємо, чи користувач автентифікований *@
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <nav class="nav flex-column">
+        <li class="nav-item">
+            <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Дашборд</a>
+        </li>
+
+        @* --- Розділ "Запаси" (Доступ: S, M, O) --- *@
+        @if (User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item nav-section-header">
+                Запаси
+            </li>
+            <li class="nav-item ms-2">
+                @* Невеликий відступ *@
+                <a class="nav-link" asp-controller="Inventory" asp-action="StockLevels">Поточні залишки</a> @* Приклад *@
+            </li>
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Documents" asp-action="Invoices">Накладні/Рух</a> @* Приклад *@
+            </li>
+        }
+
+        @* --- Розділ "Довідники" (Доступ різний) --- *@
+        @if (User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item nav-section-header">
+                Довідники
+            </li>
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Catalog" asp-action="Products">Товари</a> @* Приклад *@
+            </li>
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Catalog" asp-action="Storages">Склади</a> @* Приклад *@
+            </li>
+        }
+        @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Catalog" asp-action="ProductUnits">Одиниці виміру</a> @* Приклад *@
+            </li>
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Catalog" asp-action="Counterparties">Контрагенти</a> @* Приклад *@
+            </li>
+        }
+
+        @* --- Розділ "Звіти" (Доступ: M, O) --- *@
+        @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item nav-section-header">
+                Звіти
+            </li>
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Reports" asp-action="StockReport">Звіт по залишках</a> @* Приклад *@
+            </li>
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Reports" asp-action="MovementReport">Звіт по руху</a> @* Приклад *@
+            </li>
+        }
+
+        @* --- Розділ "Адміністрування" (Доступ різний) --- *@
+        @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item nav-section-header">
+                Адміністрування
+            </li>
+            <li class="nav-item ms-2">
+                @* Посилання на керування користувачами, доступне M (обмежено?) і O (повністю) *@
+                <a class="nav-link" asp-controller="Admin" asp-action="Users">Персонал/Користувачі</a> @* Приклад *@
+            </li>
+        }
+        @if (User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="Admin" asp-action="Settings">Налаштування системи</a> @* Приклад *@
+            </li>
+        }
+
+        @* --- Мій профіль (Завжди внизу перед кнопкою Вихід, якщо панель не прокручується) --- *@
+        @* Якщо блок user-info в _Layout притиснутий до низу, цей пункт можна розмістити вище *@
+        <li class="nav-item" style="margin-top: 2rem;">
+            @* Додатковий відступ зверху перед профілем *@
+            <a class="nav-link" asp-controller="UserProfile" asp-action="Index">Мій профіль</a> @* Приклад *@
+        </li>
+
+    </nav>
+}

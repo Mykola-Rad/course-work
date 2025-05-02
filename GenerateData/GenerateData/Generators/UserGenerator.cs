@@ -22,12 +22,6 @@ namespace GenerateData.Generators
                     setName: (u, name) => u.Username = name
             );
 
-            
-            context.AvailableUsernames.AddRange(generatedUsers.Select(u => u.Username));
-
-            if (Role == _defaultRole)
-                context.AvailableKeeperUsernames.AddRange(generatedUsers.Select(u => u.Username));
-
             return generatedUsers;
         }
 

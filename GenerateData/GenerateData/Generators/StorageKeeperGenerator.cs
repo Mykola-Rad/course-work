@@ -30,13 +30,13 @@ namespace GenerateData.Generators
 
             var generatedKeepers = new List<StorageKeeper>();
 
-            List<string> keeperUsernames = context.AvailableKeeperUsernames;
+            List<int> keeperUserIds = context.AvailableUserIds;
 
-            while (keeperUsernames.Count > 0 && generatedKeepers.Count < count)
+            while (keeperUserIds.Count > 0 && generatedKeepers.Count < count)
             {
                 var keeper = keeperFaker.Generate();
-                keeper.Username = keeperUsernames[0];
-                keeperUsernames.RemoveAt(0);
+                keeper.UserId = keeperUserIds[0];
+                keeperUserIds.RemoveAt(0);
                 generatedKeepers.Add(keeper);
             }
 

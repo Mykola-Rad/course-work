@@ -1,4 +1,7 @@
-﻿namespace GenerateData.Models;
+﻿using System;
+using System.Collections.Generic;
+
+namespace IMS.Models;
 
 public partial class User
 {
