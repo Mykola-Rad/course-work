@@ -1,0 +1,64 @@
+﻿@model IEnumerable<IMS.Models.Product>
+ @using IMS.Models
+
+@{
+    ViewData["Title"] = "Довідник товарів";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+{
+    <p>
+        <a asp-action="Create" class="btn btn-primary">Створити новий товар</a>
+    </p>
+}
+
+<table class="table table-sm table-bordered table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ProductName)
+            </th>
+            <th>
+                Одиниця виміру
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().LastPrice)
+            </th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductName)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UnitCode)
+                </td>
+                <td>
+                    @item.LastPrice.ToString("C2")
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-productName="@item.ProductName" class="btn btn-sm btn-info">Деталі</a>
+
+                    @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+                    {
+                        <text> | </text> 
+                        <a asp-action="Edit" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-secondary">Редагувати</a>
+                        <text> | </text> 
+                        <a asp-action="Delete" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-danger">Видалити</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+@* Можна додати скрипти для сортування/фільтрації таблиці на стороні клієнта, якщо потрібно *@
+ }

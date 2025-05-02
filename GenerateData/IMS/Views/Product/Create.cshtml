@@ -1,0 +1,44 @@
+﻿@model IMS.Models.Product
+
+@{
+    ViewData["Title"] = "Створити товар";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>Новий товар</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="ProductName" class="form-label"></label>
+                <input asp-for="ProductName" class="form-control" />
+                <span asp-validation-for="ProductName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="UnitCode" class="form-label">Одиниця виміру</label>
+                <select asp-for="UnitCode" class="form-select" asp-items="ViewBag.UnitCode">
+                    <option value="">-- Оберіть одиницю --</option>
+                </select>
+                <span asp-validation-for="UnitCode" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="LastPrice" class="form-label"></label>
+                <input asp-for="LastPrice" type="number" step="1.00" min="0" class="form-control" />
+                <span asp-validation-for="LastPrice" class="text-danger"></span>
+            </div>
+            <div class="mb-3 mt-4">
+                <button type="submit" class="btn btn-primary">Створити</button>
+                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }
