@@ -1,0 +1,49 @@
+﻿@model IMS.Models.Product
+
+@{
+    ViewData["Title"] = "Редагувати товар";
+    Layout = "_Layout";
+    var originalName = ViewBag.OriginalProductName ?? Model.ProductName;
+}
+
+<h1>@ViewData["Title"]</h1>
+<h4>Товар: @originalName</h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" asp-route-productName="@originalName" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="ProductName" class="form-label"></label>
+                <input asp-for="ProductName" class="form-control" />
+                <span asp-validation-for="ProductName" class="text-danger"></span>
+                <div class="form-text text-warning">Увага: Ви редагуєте первинний ключ. Переконайтеся, що нова назва унікальна.</div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="UnitCode" class="form-label">Одиниця виміру</label>
+                <select asp-for="UnitCode" class="form-select" asp-items="ViewBag.UnitCode">
+                    <option value="">-- Оберіть одиницю --</option>
+                </select>
+                <span asp-validation-for="UnitCode" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="LastPrice" class="form-label"></label>
+                <input asp-for="LastPrice" type="number" step="any" min="0" class="form-control" />
+                <span asp-validation-for="LastPrice" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 mt-4">
+                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }

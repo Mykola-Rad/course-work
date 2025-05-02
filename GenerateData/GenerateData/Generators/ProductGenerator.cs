@@ -8,7 +8,7 @@ namespace GenerateData.Generators
     {
         private const int _maxProductNameLength = 100;
         private const decimal _minProductPrice = 1.00m;
-        private const decimal _maxProductPrice = 5000.00m;
+        private const decimal _maxProductPrice = 1000.00m;
         public List<Product> Generate(GenerationContext context, int count = 100)
         {
             if (!context.AvailableUnitCodes.Any())

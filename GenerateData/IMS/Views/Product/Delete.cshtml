@@ -1,0 +1,57 @@
+﻿@model IMS.Models.Product
+
+@{
+    ViewData["Title"] = "Видалити товар";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3 class="text-danger">Ви впевнені, що хочете видалити цей товар?</h3>
+
+@if (ViewData["WarningMessage"] != null)
+{
+    <div class="alert alert-warning" role="alert">
+        @ViewData["WarningMessage"] <br />
+    </div>
+}
+
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ProductName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.ProductName)
+        </dd>
+        <dt class="col-sm-3">
+            Одиниця виміру
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.UnitCodeNavigation.UnitName) (@Html.DisplayFor(model => model.UnitCode))
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.LastPrice)
+        </dt>
+        <dd class="col-sm-9">
+            @Model.LastPrice.ToString("C2")
+        </dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="ProductName" />
+
+        @if (ViewData["WarningMessage"] != null)
+        {
+            <button type="submit" class="btn btn-danger" disabled title="Неможливо видалити товар через наявні залежності">Видалити</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-danger">Видалити</button>
+        }
+        | <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>

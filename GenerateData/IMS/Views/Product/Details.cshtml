@@ -1,0 +1,40 @@
+﻿@model IMS.Models.Product
+ @using IMS.Models
+
+@{
+    ViewData["Title"] = "Деталі товару";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]: @Model.ProductName</h1>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.ProductName)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.ProductName)
+        </dd>
+        <dt class="col-sm-3">
+            Одиниця виміру
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.UnitCodeNavigation.UnitName) (@Html.DisplayFor(model => model.UnitCode))
+        </dd>
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.LastPrice)
+        </dt>
+        <dd class="col-sm-9">
+            @Model.LastPrice.ToString("C2")
+        </dd>
+    </dl>
+</div>
+<div class="mt-3">
+    @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+    {
+        <a asp-action="Edit" asp-route-productName="@Model.ProductName" class="btn btn-secondary">Редагувати</a> <text>|</text>
+    }
+    <a asp-action="Index" class="btn btn-outline-secondary">Назад до списку</a>
+</div>
