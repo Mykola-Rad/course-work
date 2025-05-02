@@ -8,21 +8,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - IMS</title>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    @* Підключаємо наш оновлений CSS *@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     @* <link rel="stylesheet" href="~/IMS.styles.css" asp-append-version="true" /> *@
 </head>
 <body>
     <div class="page-wrapper">
-        @* Обгортка для притискання футера *@
         <aside class="sidebar">
             <div class="sidebar-sticky">
                 <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">IMS</a>
 
-                @* Викликаємо Partial View для навігації *@
                 <partial name="_SideNavPartial" />
 
-                @* Додаємо інформацію про користувача та кнопку виходу внизу панелі *@
                 @if (User.Identity != null && User.Identity.IsAuthenticated)
                 {
                     <div class="user-info">
@@ -38,16 +34,27 @@
         </aside>
 
         <main role="main" class="main-content">
+            @if (TempData["SuccessMessage"] != null)
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @TempData["SuccessMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["ErrorMessage"] != null)
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
             @RenderBody()
         </main>
 
-    </div> @* Кінець page-wrapper *@
+    </div> 
 
-    @* Футер можна розмістити тут, якщо він не має бути всередині main-content *@
     <footer class="border-top footer text-muted" style="margin-left: 250px;">
-        @* Додаємо відступ для футера *@
         <div class="container-fluid">
-            @* Або просто container *@
             &copy; @DateTime.Now.Year - IMS - Inventory Management System
         </div>
     </footer>

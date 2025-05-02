@@ -324,8 +324,9 @@ public partial class AppDbContext : DbContext
                 .HasMaxLength(101)
                 .HasColumnName("username");
             entity.Property(e => e.Role)
-                .HasColumnName("role")
-                .HasColumnType("user_role");
+                       .HasColumnName("role")
+                       .HasColumnType("user_role");
+              
         });
 
         OnModelCreatingPartial(modelBuilder);
