@@ -64,21 +64,19 @@
     <script>
         $(document).ready(function () {
             function toggleKeeperSelect() {
-                var selectedRole = $('#roleSelect').val();
-                if (selectedRole === '@UserRole.storage_keeper.ToString()') {
+                var selectedRoleValue = $('#roleSelect').val(); 
+
+                var storageKeeperExpectedValue = '@((int)UserRole.storage_keeper)';
+
+                if (selectedRoleValue === storageKeeperExpectedValue) {
                     $('#storageKeeperSelectDiv').show();
                 } else {
                     $('#storageKeeperSelectDiv').hide();
-                    // Опціонально: очищуємо вибір комірника, якщо змінили роль
-                    // $('#SelectedStorageKeeperPhoneNumber').val('');
                 }
             }
 
             toggleKeeperSelect();
-
-            $('#roleSelect').on('change', function () {
-                toggleKeeperSelect();
-            });
+            $('#roleSelect').on('change', toggleKeeperSelect);
         });
     </script>
  }
