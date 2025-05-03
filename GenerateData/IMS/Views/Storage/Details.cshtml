@@ -2,188 +2,297 @@
  @using IMS.Models
 
 @{
-    ViewData["Title"] = $"Деталі: {Model.Name}";
-    Layout = "_Layout";
-    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+	ViewData["Title"] = $"Деталі: {Model.Name}";
+	Layout = "_Layout";
+	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
 }
 
 <h1>Склад: @Model.Name</h1>
 
 <nav class="mt-3">
-    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-        <button class="nav-link active" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="true">Інформація</button>
-        @if (canManage)
-        {
-            <button class="nav-link" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="false">Залишки товарів</button>
-            <button class="nav-link" id="nav-keepers-tab" data-bs-toggle="tab" data-bs-target="#nav-keepers" type="button" role="tab" aria-controls="nav-keepers" aria-selected="false">Призначені комірники</button>
-        }
-        else if (User.IsInRole(UserRole.storage_keeper.ToString()))
-        {
-            <button class="nav-link" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="false">Залишки товарів</button>
-        }
-    </div>
+	<div class="nav nav-tabs" id="nav-tab" role="tablist">
+		<button class="nav-link active" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="true">Інформація</button>
+		@if (canManage)
+		{
+			<button class="nav-link" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="false">Залишки товарів</button>
+			<button class="nav-link" id="nav-keepers-tab" data-bs-toggle="tab" data-bs-target="#nav-keepers" type="button" role="tab" aria-controls="nav-keepers" aria-selected="false">Призначені комірники</button>
+		}
+		else if (User.IsInRole(UserRole.storage_keeper.ToString()))
+		{
+			<button class="nav-link" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="false">Залишки товарів</button>
+		}
+	</div>
 </nav>
 
 <div class="tab-content pt-3" id="nav-tabContent">
 
-    <div class="tab-pane fade show active" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
-        <h4>Адреса та деталі</h4>
-        <hr />
-        <dl class="row">
-            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
-            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.City)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.City)</dd>
-            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.StreetName)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.StreetName)</dd>
-            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.HouseNumber)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.HouseNumber)</dd>
-            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Region)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.Region)</dd>
-            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PostalCode)</dt>
-            <dd class="col-sm-9">@Html.DisplayFor(model => model.PostalCode)</dd>
-        </dl>
-        @if (canManage)
-        {
-            <a asp-action="Edit" asp-route-name="@Model.Name" class="btn btn-secondary btn-sm mt-2">Редагувати інформацію про склад</a>
-        }
-    </div>
+	<div class="tab-pane fade show active" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
+		<h4>Адреса та деталі</h4>
+		<hr />
+		<dl class="row">
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.City)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.City)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.StreetName)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.StreetName)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.HouseNumber)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.HouseNumber)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Region)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Region)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.PostalCode)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.PostalCode)</dd>
+		</dl>
+		@if (canManage)
+		{
+			<a asp-action="Edit" asp-route-name="@Model.Name" class="btn btn-secondary btn-sm mt-2">Редагувати інформацію про склад</a>
+		}
+	</div>
 
-    <div class="tab-pane fade" id="nav-stock" role="tabpanel" aria-labelledby="nav-stock-tab" tabindex="0">
-        <div class="d-flex justify-content-between align-items-center mb-2">
-            <h4>Товари на складі</h4>
-            @if (canManage)
-            {
-                <a asp-controller="StorageProduct" asp-action="Add" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">
-                    <i class="bi bi-plus-circle"></i> Додати товар на склад
-                </a>
-            }
-        </div>
-        <hr />
-        @if (Model.StorageProducts?.Any() ?? false)
-        {
-            <table class="table table-sm table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>Товар</th>
-                        <th>Кількість</th>
-                        <th>Одиниця</th>
-                        <th>Мін. залишок</th>
-                        @if (canManage)
-                        {
-                            <th>Дії</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var item in Model.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
-                    {
-                        <tr>
-                            <td>@item.ProductNameNavigation?.ProductName</td>
-                            <td>@item.Count</td>
-                            <td>@item.ProductNameNavigation?.UnitCodeNavigation?.UnitName</td>
-                            <td>@item.MinimalCount</td>
-                            @if (canManage)
-                            {
-                                <td>
-                                    <a asp-controller="StorageProduct" asp-action="Edit" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-secondary">Змінити</a>
-                                    <text> | </text>
-                                    <a asp-controller="StorageProduct" asp-action="Delete" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-danger">Видалити</a>
-                                </td>
-                            }
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p class="text-muted">На цьому складі немає зареєстрованих залишків товарів.</p>
-        }
-    </div>
+	<div class="tab-pane fade" id="nav-stock" role="tabpanel" aria-labelledby="nav-stock-tab" tabindex="0">
+		<div class="d-flex justify-content-between align-items-center mb-2">
+			<h4>Товари на складі</h4>
+			@if (User.IsInRole(UserRole.owner.ToString()))
+			{
+				<a asp-controller="StorageProduct" asp-action="Add" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">
+					<i class="bi bi-plus-circle"></i> Додати товар на склад
+				</a>
+			}
+		</div>
+		<hr />
+		@if (Model.StorageProducts?.Any() ?? false)
+		{
+			<table class="table table-sm table-hover">
+				<thead class="table-light">
+					<tr>
+						<th>Товар</th>
+						<th>Кількість</th>
+						<th>Одиниця</th>
+						<th>Мін. залишок</th>
+						@if (canManage)
+						{
+							<th>Дії</th>
+						}
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var item in Model.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
+					{
+						<tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
+							<td>@item.ProductNameNavigation?.ProductName</td>
+							<td>@item.Count</td>
+							<td>@item.ProductNameNavigation?.UnitCodeNavigation?.UnitName</td>
 
-    @if (canManage)
-    {
-        <div class="tab-pane fade" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <h4>Призначені комірники</h4>
-                @* <a asp-action="AssignKeeper" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">Призначити комірника</a> *@
-            </div>
-            <hr />
-            @if (Model.StorageKeepers?.Any() ?? false)
-            {
-                <table class="table table-sm table-hover">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Прізвище</th>
-                            <th>Ім'я</th>
-                            <th>Телефон (ID)</th>
-                            <th>Email</th>
-                            <th>Дії</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (var keeper in Model.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
-                        {
-                            <tr>
-                                <td>@Html.DisplayFor(modelItem => keeper.LastName)</td>
-                                <td>@Html.DisplayFor(modelItem => keeper.FirstName)</td>
-                                <td>@Html.DisplayFor(modelItem => keeper.PhoneNumber)</td>
-                                <td>@Html.DisplayFor(modelItem => keeper.Email)</td>
-                                <td>
-                                    @* Сюди можна додати посилання на редагування/видалення/відв'язку комірника від складу *@
-                                    @* <a asp-controller="Admin" asp-action="EditUser" asp-route-id="@keeper.UserId" class="btn btn-sm btn-outline-secondary">Редагувати користувача</a> *@
-                                    @* <a asp-controller="StorageKeeper" asp-action="Edit" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-sm btn-outline-secondary">Редагувати профіль</a> *@
-                                    @* <form asp-action="UnassignKeeper" method="post" style="display:inline;">...</form> *@
-                                    <span class="text-muted">--</span> 
-                                </td>
-                            </tr>
-                        }
-                    </tbody>
-                </table>
-            }
-            else
-            {
-                <p class="text-muted">До цього складу не призначено комірників.</p>
-            }
-        </div>
-    } 
+							<td class="min-count-td">
+								<span class="min-count-display">
+									@item.MinimalCount.ToString("N2") 
+								</span>
+								
+								<div class="min-count-edit input-group input-group-sm" style="display: none;">
+									<input type="number" step="any" min="0" class="form-control min-count-input"
+										   value="@item.MinimalCount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" 
+										   aria-label="Мінімальний залишок">
+									<button class="btn btn-outline-success min-count-save" type="button" title="Зберегти">
+										<i class="bi bi-check-lg"></i> 
+									</button>
+									<button class="btn btn-outline-secondary min-count-cancel" type="button" title="Скасувати">
+										<i class="bi bi-x-lg"></i> 
+									</button>
+								</div>
+								<div class="text-danger small min-count-error mt-1" style="display: none;"></div> 
+							</td>
 
+							@if (canManage)
+							{
+								<td>
+									<button type="button" class="btn btn-sm btn-outline-primary edit-min-inline-btn"
+											title="Редагувати мінімальний залишок">
+										<i class="bi bi-pencil-fill"></i> Мін.
+									</button>
+
+									@if (User.IsInRole(UserRole.owner.ToString()))
+									{
+										<a asp-controller="StorageProduct" asp-action="Edit" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-warning" title="Ручне коригування кількості та мін. залишку">Кориг.</a>
+										<text> | </text>
+										<a asp-controller="StorageProduct" asp-action="Delete" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-danger" title="Видалити запис про товар зі складу">Видалити</a>
+									}
+								</td>
+							}
+						</tr>
+					}
+				</tbody>
+			</table>
+
+			@Html.AntiForgeryToken()
+		}
+		else
+		{
+			<p class="text-muted">На цьому складі немає зареєстрованих залишків товарів.</p>
+		}
+	</div>
+
+	@if (canManage)
+	{
+		<div class="tab-pane fade" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
+			<div class="d-flex justify-content-between align-items-center mb-2">
+				<h4>Призначені комірники</h4>
+				@* <a asp-action="AssignKeeper" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">Призначити комірника</a> *@
+			</div>
+			<hr />
+			@if (Model.StorageKeepers?.Any() ?? false)
+			{
+				<table class="table table-sm table-hover">
+					<thead class="table-light">
+						<tr>
+							<th>Прізвище</th>
+							<th>Ім'я</th>
+							<th>Телефон (ID)</th>
+							<th>Email</th>
+							<th>Дії</th>
+						</tr>
+					</thead>
+					<tbody>
+						@foreach (var keeper in Model.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
+						{
+							<tr>
+								<td>@Html.DisplayFor(modelItem => keeper.LastName)</td>
+								<td>@Html.DisplayFor(modelItem => keeper.FirstName)</td>
+								<td>@Html.DisplayFor(modelItem => keeper.PhoneNumber)</td>
+								<td>@Html.DisplayFor(modelItem => keeper.Email)</td>
+								<td>
+									@* Сюди можна додати посилання на редагування/видалення/відв'язку комірника від складу *@
+									@* <a asp-controller="StorageKeeper" asp-action="Edit" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-sm btn-outline-secondary">Редагувати профіль</a> *@
+									@* <form asp-action="UnassignKeeper" method="post" style="display:inline;">...</form> *@
+									<span class="text-muted">--</span>
+								</td>
+							</tr>
+						}
+					</tbody>
+				</table>
+			}
+			else
+			{
+				<p class="text-muted">До цього складу не призначено комірників.</p>
+			}
+		</div>
+	}
 </div>
-
-
 <div class="mt-4">
-    <a asp-action="Index" class="btn btn-outline-secondary">Назад до списку складів</a>
+	<a asp-action="Index" class="btn btn-outline-secondary">Назад до списку складів</a>
 </div>
 
 @section Scripts {
-    <script>
-        $(document).ready(function () {
-            var hash = window.location.hash;
+	<script>
+		$(document).ready(function () {
+			var hash = window.location.hash;
 
-            if (hash) {
-                var triggerEl = document.querySelector('.nav-tabs button[data-bs-target="' + hash + '"]');
+			if (hash) {
+				var triggerEl = document.querySelector('.nav-tabs button[data-bs-target="' + hash + '"]');
 
-                if (triggerEl) {
-                    var tab = new bootstrap.Tab(triggerEl); 
-                    tab.show();
-                }
-            }
+				if (triggerEl) {
+					var tab = new bootstrap.Tab(triggerEl);
+					tab.show();
+				}
+			}
 
-            var tabTriggerList = [].slice.call(document.querySelectorAll('#nav-tab button'));
-            tabTriggerList.forEach(function (tabTriggerEl) {
-                var tab = new bootstrap.Tab(tabTriggerEl);
+			var tabTriggerList = [].slice.call(document.querySelectorAll('#nav-tab button'));
+			tabTriggerList.forEach(function (tabTriggerEl) {
+				var tab = new bootstrap.Tab(tabTriggerEl);
 
-                tabTriggerEl.addEventListener('click', function (event) {
-                    var newHash = tabTriggerEl.getAttribute('data-bs-target');
-                    if (history.pushState) {
-                         history.pushState(null, '', newHash);
-                    } else {
-                         window.location.hash = newHash;
-                    }
-                });
-            });
+				tabTriggerEl.addEventListener('click', function (event) {
+					var newHash = tabTriggerEl.getAttribute('data-bs-target');
+					if (history.pushState) {
+						 history.pushState(null, '', newHash);
+					} else {
+						 window.location.hash = newHash;
+					}
+				});
+			});
 
-        });
-    </script>
+		});
+	</script>
+     <script>
+         $(document).ready(function () {
+             $('table').on('click', '.edit-min-inline-btn', function () {
+                 var td = $(this).closest('tr').find('td.min-count-td'); 
+                 td.find('.min-count-display').hide(); 
+                 td.find('.min-count-edit').show(); 
+                 td.find('.min-count-input').focus().select(); 
+                 td.find('.min-count-error').hide().text('');
+             });
+
+             $('table').on('click', '.min-count-cancel', function () {
+                 var td = $(this).closest('td.min-count-td');
+                 td.find('.min-count-edit').hide();
+                 td.find('.min-count-display').show();
+                 td.find('.min-count-error').hide().text(''); 
+             });
+
+             $('table').on('click', '.min-count-save', function () {
+                 var saveButton = $(this);
+                 var td = saveButton.closest('td.min-count-td');
+                 var editDiv = td.find('.min-count-edit');
+                 var displaySpan = td.find('.min-count-display');
+                 var errorDiv = td.find('.min-count-error');
+                 var inputField = editDiv.find('.min-count-input');
+                 var tr = td.closest('tr'); 
+
+                 var storageName = tr.data('storage-name');
+                 var productName = tr.data('product-name');
+				var newValue = inputField.val()?.replace(',', '.');
+
+                 errorDiv.hide().text(''); 
+                 if (newValue === '' || newValue === null || isNaN(parseFloat(newValue)) || parseFloat(newValue) < 0) {
+                      errorDiv.text('Введіть коректне невід\'ємне число.').show();
+                      return;
+                 }
+
+                 var token = $('input[name="__RequestVerificationToken"]').val();
+                 var postUrl = "@Url.Action("EditMinimalCountOnly", "StorageProduct")";
+
+                 var dataToSend = {
+                     StorageName: storageName,
+                     ProductName: productName,
+                     MinimalCount: newValue, 
+                      __RequestVerificationToken: token 
+                 };
+
+                 console.log("Sending AJAX Data:", dataToSend); 
+
+                 saveButton.prop('disabled', true);
+
+                 $.ajax({
+                     url: postUrl,
+                     method: "POST",
+                     data: dataToSend, 
+                     success: function (response) {
+                         console.log("AJAX Success:", response); 
+                         if (response.success) {
+                              var formattedValue = parseFloat(response.newMinimalCount).toLocaleString('uk-UA', {
+                                  minimumFractionDigits: 2,
+                                  maximumFractionDigits: 2
+                              });
+                             displaySpan.text(formattedValue); 
+                             editDiv.hide(); 
+                             displaySpan.show(); 
+                         } else {
+                             var errorMessage = response.message || "Помилка збереження.";
+                              if(response.errors && response.errors.length > 0) {
+                                   errorMessage += ": " + response.errors.join("; ");
+                              }
+                             errorDiv.text(errorMessage).show();
+                         }
+                     },
+                     error: function (jqXHR, textStatus, errorThrown) {
+                         console.error("AJAX Error: " + textStatus + " - " + errorThrown);
+                         console.error("Server Response: ", jqXHR.responseText);
+                         errorDiv.text('Помилка зв\'язку з сервером.').show();
+                     },
+                     complete: function() {
+                         saveButton.prop('disabled', false);
+                     }
+                 });
+             });
+         });
+	</script>
  }
