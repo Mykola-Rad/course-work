@@ -1,0 +1,43 @@
+﻿@model IEnumerable<IMS.Models.ProductUnit>
+
+@{
+    ViewData["Title"] = "Одиниці виміру";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Створити нову одиницю</a>
+</p>
+
+<table class="table table-sm table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().UnitCode)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().UnitName)
+            </th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UnitCode)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.UnitName)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-secondary">Редагувати</a> |
+                    <a asp-action="Delete" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-danger">Видалити</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

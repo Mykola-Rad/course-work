@@ -1,7 +1,6 @@
 ﻿@using System.Security.Claims
 @using IMS.Models
 
-@* Перевіряємо, чи користувач автентифікований *@
 @if (User.Identity != null && User.Identity.IsAuthenticated)
 {
     <nav class="nav flex-column">
@@ -9,81 +8,72 @@
             <a class="nav-link" asp-area="" asp-controller="Home" asp-action="Index">Дашборд</a>
         </li>
 
-        @* --- Розділ "Запаси" (Доступ: S, M, O) --- *@
         @if (User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item nav-section-header">
                 Запаси
             </li>
             <li class="nav-item ms-2">
-                @* Невеликий відступ *@
-                <a class="nav-link" asp-controller="Inventory" asp-action="StockLevels">Поточні залишки</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Inventory" asp-action="StockLevels">Поточні залишки</a> 
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Documents" asp-action="Invoices">Накладні/Рух</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Documents" asp-action="Invoices">Накладні/Рух</a> 
             </li>
         }
 
-        @* --- Розділ "Довідники" (Доступ різний) --- *@
         @if (User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item nav-section-header">
                 Довідники
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Product" asp-action="Index">Товари</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Product" asp-action="Index">Товари</a>
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Storage" asp-action="Index">Склади</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Storage" asp-action="Index">Склади</a>
             </li>
         }
         @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Catalog" asp-action="ProductUnits">Одиниці виміру</a> @* Приклад *@
+                <a class="nav-link" asp-controller="ProductUnit" asp-action="Index">Одиниці виміру</a>
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Catalog" asp-action="Counterparties">Контрагенти</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Catalog" asp-action="Counterparties">Контрагенти</a>
             </li>
         }
 
-        @* --- Розділ "Звіти" (Доступ: M, O) --- *@
         @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item nav-section-header">
                 Звіти
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Reports" asp-action="StockReport">Звіт по залишках</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Reports" asp-action="StockReport">Звіт по залишках</a> 
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Reports" asp-action="MovementReport">Звіт по руху</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Reports" asp-action="MovementReport">Звіт по руху</a> 
             </li>
         }
 
-        @* --- Розділ "Адміністрування" (Доступ різний) --- *@
         @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item nav-section-header">
                 Адміністрування
             </li>
             <li class="nav-item ms-2">
-                @* Посилання на керування користувачами, доступне M (обмежено?) і O (повністю) *@
-                <a class="nav-link" asp-controller="Admin" asp-action="Users">Персонал/Користувачі</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Admin" asp-action="Users">Персонал/Користувачі</a> 
             </li>
         }
         @if (User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Admin" asp-action="Settings">Налаштування системи</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Admin" asp-action="Settings">Налаштування системи</a>
             </li>
         }
 
-        @* --- Мій профіль (Завжди внизу перед кнопкою Вихід, якщо панель не прокручується) --- *@
-        @* Якщо блок user-info в _Layout притиснутий до низу, цей пункт можна розмістити вище *@
         <li class="nav-item" style="margin-top: 2rem;">
-            @* Додатковий відступ зверху перед профілем *@
-            <a class="nav-link" asp-controller="UserProfile" asp-action="Index">Мій профіль</a> @* Приклад *@
+            <a class="nav-link" asp-controller="UserProfile" asp-action="Index">Мій профіль</a>
         </li>
 
     </nav>
