@@ -1,0 +1,71 @@
+﻿@model IMS.Models.Counterparty
+
+@{
+    ViewData["Title"] = $"Видалити: {Model.Name}";
+    Layout = "_Layout";
+    bool canDelete = ViewBag.CanDelete ?? true;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3 class="text-danger">Ви впевнені, що хочете видалити цього контрагента?</h3>
+
+@if (!canDelete && ViewBag.WarningMessage != null)
+{
+    <div class="alert alert-warning" role="alert">
+        @ViewBag.WarningMessage <br />
+        Видалення неможливе, доки існують ці залежності.
+    </div>
+}
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+
+        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+
+        <dt class="col-sm-3">Призначені Ролі</dt>
+        <dd class="col-sm-9">
+            @if (Model.Roles != null && Model.Roles.Any())
+            {
+                foreach (var role in Model.Roles.OrderBy(r => r.Name))
+                {
+                    string badgeClass = "text-bg-secondary";
+                    switch (role.Name?.ToLowerInvariant())
+                    {
+                        case "supplier": badgeClass = "text-bg-primary"; break;
+                        case "customer": badgeClass = "text-bg-success"; break;
+                    }
+                    <span class="badge rounded-pill @badgeClass me-1" style="font-size: 0.8em;">
+                        @role.Name
+                    </span>
+                }
+            }
+            else
+            {
+                <span class="text-muted">-- Не призначено --</span>
+            }
+        </dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Name" />
+
+        @if (canDelete)
+        {
+            <button type="submit" class="btn btn-danger">Видалити</button>
+        }
+        else
+        {
+            <button type="submit" class="btn btn-danger" disabled title="@ViewBag.WarningMessage">Видалити</button>
+        }
+        | <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>

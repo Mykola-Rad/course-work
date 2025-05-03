@@ -1,0 +1,77 @@
+﻿@model IEnumerable<IMS.Models.Counterparty>
+
+@{
+    ViewData["Title"] = "Контрагенти";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Додати контрагента</a>
+</p>
+
+<table class="table table-sm table-hover">
+    <thead class="table-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Name)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().PhoneNumber)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Email)
+            </th>
+            <th>
+                Ролі 
+            </th>
+            <th>Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => item.Name)</td>
+                <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
+                <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                <td>
+                    @if (item.Roles != null && item.Roles.Any())
+                    {
+                        @foreach (var role in item.Roles.OrderBy(r => r.Name)) 
+                        {
+                            string badgeClass = "text-bg-secondary";
+
+                            switch (role.Name?.ToLowerInvariant()) 
+                            {
+                                case "supplier":
+                                    badgeClass = "text-bg-primary"; 
+                                    break;
+                                case "customer": 
+                                    badgeClass = "text-bg-success"; 
+                                    break;
+                                default:
+                                    badgeClass = "text-bg-secondary";
+                                    break;
+                            }
+
+                            <span class="badge rounded-pill @badgeClass me-1">
+                                @role.Name
+                            </span>
+                        }
+                    }
+                    else
+                    {
+                        <span class="text-muted">-- Не призначено --</span>
+                    }
+                </td>
+                <td>
+                    <a asp-action="Details" asp-route-name="@item.Name" class="btn btn-sm btn-info">Деталі</a>
+                    <a asp-action="Edit" asp-route-name="@item.Name" class="btn btn-sm btn-outline-secondary">Редагувати</a> |
+                    <a asp-action="Delete" asp-route-name="@item.Name" class="btn btn-sm btn-outline-danger">Видалити</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

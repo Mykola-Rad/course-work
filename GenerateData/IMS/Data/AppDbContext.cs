@@ -122,6 +122,7 @@ public partial class AppDbContext : DbContext
                 .HasColumnName("type")
                 .HasColumnType("invoice_type");
             entity.Property(e => e.Status)
+                          .HasColumnName("status")
                           .HasColumnType("invoice_status")
                           .HasDefaultValue(InvoiceStatus.draft)
                           .IsRequired();
