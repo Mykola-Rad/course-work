@@ -15,8 +15,12 @@ namespace IMS
             builder.Services.AddControllersWithViews();
 
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"), 
-                o => o.MapEnum<UserRole>("user_role")));
+                options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"),
+                o => {
+                    o.MapEnum<UserRole>("user_role"); 
+                    o.MapEnum<InvoiceStatus>("invoice_status"); 
+                    o.MapEnum<InvoiceType>("invoice_type");
+                }));
 
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>

@@ -34,7 +34,7 @@
                 <a class="nav-link" asp-controller="Product" asp-action="Index">Товари</a> @* Приклад *@
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Catalog" asp-action="Storages">Склади</a> @* Приклад *@
+                <a class="nav-link" asp-controller="Storage" asp-action="Index">Склади</a> @* Приклад *@
             </li>
         }
         @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))

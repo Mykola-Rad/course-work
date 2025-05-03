@@ -28,6 +28,7 @@ namespace GenerateData.Generators
             {
                 var invoice = new Invoice();
                 invoice.Type = _invoiceType;
+                invoice.Status = faker.PickRandom<InvoiceStatus>().ToString();
 
                 invoice.ReceiverStorageName = faker.PickRandom(context.AvailableStorageKeepers
                     .Where(kvp => kvp.Value != null && kvp.Value.Any())

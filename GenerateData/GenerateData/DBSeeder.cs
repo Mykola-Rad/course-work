@@ -285,7 +285,7 @@ namespace GenerateData
 
 
             var sql = @"
-                INSERT INTO public.""invoice"" (counterparty_name, sender_keeper_phone, receiver_keeper_phone, sender_storage_name, receiver_storage_name, type, date)
+                INSERT INTO public.""invoice"" (counterparty_name, sender_keeper_phone, receiver_keeper_phone, sender_storage_name, receiver_storage_name, type, date, status)
                 VALUES {0}";
 
             var invoiceValues = new List<string>();
@@ -296,7 +296,7 @@ namespace GenerateData
                                     $"{(invoice.ReceiverKeeperPhone == null ? "NULL" : $"'{invoice.ReceiverKeeperPhone.Replace("'", "''")}'")}, " +
                                     $"{(invoice.SenderStorageName == null ? "NULL" : $"'{invoice.SenderStorageName.Replace("'", "''")}'")}, " +
                                     $"{(invoice.ReceiverStorageName == null ? "NULL" : $"'{invoice.ReceiverStorageName.Replace("'", "''")}'")}, " +
-                                    $"'{invoice.Type}', '{invoice.Date.ToString("yyyy-MM-dd")}')");
+                                    $"'{invoice.Type}', '{invoice.Date.ToString("yyyy-MM-dd")}', '{invoice.Status}')");
             }
 
             var values = string.Join(",", invoiceValues);
