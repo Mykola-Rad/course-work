@@ -1,0 +1,40 @@
+﻿@model IMS.Models.ProductUnit
+
+@{
+    ViewData["Title"] = $"Редагувати одиницю: {ViewBag.OriginalUnitCode}"; 
+    Layout = "_Layout";
+    var originalUnitCode = ViewBag.OriginalUnitCode ?? Model.UnitCode;
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" asp-route-unitCode="@originalUnitCode" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="UnitCode" class="form-label"></label>
+                <input asp-for="UnitCode" class="form-control" />
+                <span asp-validation-for="UnitCode" class="text-danger"></span>
+                <div class="form-text text-warning">Увага: Ви редагуєте первинний ключ (Код одиниці). Переконайтеся, що новий код унікальний.</div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="UnitName" class="form-label"></label>
+                <input asp-for="UnitName" class="form-control" />
+                <span asp-validation-for="UnitName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 mt-4">
+                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }

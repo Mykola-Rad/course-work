@@ -1,0 +1,38 @@
+﻿@model IMS.Models.ProductUnit
+
+@{
+    ViewData["Title"] = "Створити одиницю виміру";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-3">
+                <label asp-for="UnitCode" class="form-label"></label>
+                <input asp-for="UnitCode" class="form-control" />
+                <span asp-validation-for="UnitCode" class="text-danger"></span>
+                <div class="form-text">Код має бути унікальним (напр., 'kg', 'pcs', 'm').</div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="UnitName" class="form-label"></label>
+                <input asp-for="UnitName" class="form-control" />
+                <span asp-validation-for="UnitName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 mt-4">
+                <button type="submit" class="btn btn-primary">Створити</button>
+                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }
