@@ -1,0 +1,299 @@
+2025-05-04 00:23:20.082 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 00:23:20.124 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 00:23:20.176 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 00:23:20.178 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 00:23:20.180 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 00:23:21.038 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 218.6191 ms
+2025-05-04 00:23:26.148 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 1453.3039 ms
+2025-05-04 00:23:27.998 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 00:23:28.187 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 369.0886 ms
+2025-05-04 00:24:22.437 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 00:24:22.473 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 00:24:22.528 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 00:24:22.529 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 00:24:22.531 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 00:24:24.404 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 00:24:24.985 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 1989.2619 ms
+2025-05-04 00:24:27.409 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Create responded 200 in 107.1505 ms
+2025-05-04 00:24:56.585 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 79.1639 ms
+2025-05-04 00:25:42.209 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 15.4946 ms
+2025-05-04 00:29:17.513 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 00:29:17.559 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 00:29:17.640 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 00:29:17.642 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 00:29:17.643 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 00:29:18.453 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 254.4003 ms
+2025-05-04 00:29:22.381 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 1880.5376 ms
+2025-05-04 00:29:24.590 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 00:29:24.838 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 487.5923 ms
+2025-05-04 00:30:45.994 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 00:30:46.046 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 00:30:46.118 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 00:30:46.119 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 00:30:46.121 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 00:30:47.153 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 258.7129 ms
+2025-05-04 00:30:51.767 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 1183.0542 ms
+2025-05-04 00:30:52.318 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Product responded 200 in 2614.4165 ms
+2025-05-04 00:30:53.844 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 00:30:53.990 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 320.6944 ms
+2025-05-04 00:31:01.172 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Create responded 200 in 4423.1994 ms
+2025-05-04 00:31:14.422 +03:00 [ERR] (Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor) The view 'Index' was not found. Searched locations: ["/Views/StorageKeeper/Index.cshtml","/Views/Shared/Index.cshtml"]
+2025-05-04 00:31:14.440 +03:00 [ERR] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers responded 500 in 96.8646 ms
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-05-04 00:31:14.469 +03:00 [ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-05-04 00:37:55.312 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 00:37:55.353 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 00:37:55.418 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 00:37:55.419 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 00:37:55.420 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 00:37:55.999 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 160.5462 ms
+2025-05-04 00:38:02.152 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 1637.9142 ms
+2025-05-04 00:38:04.284 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 00:38:04.481 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 398.5020 ms
+2025-05-04 00:39:01.024 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 00:39:01.064 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 00:39:01.119 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 00:39:01.120 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 00:39:01.121 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 00:39:02.794 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 00:39:03.392 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 1899.7080 ms
+2025-05-04 00:40:08.217 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 00:40:08.249 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 00:40:08.300 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 00:40:08.302 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 00:40:08.303 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 00:40:09.858 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 00:40:10.514 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 1853.3663 ms
+2025-05-04 00:40:11.835 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Edit/+380293940819 responded 200 in 115.1527 ms
+2025-05-04 00:40:17.190 +03:00 [ERR] (Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor) The view 'Index' was not found. Searched locations: ["/Views/StorageKeeper/Index.cshtml","/Views/Shared/Index.cshtml"]
+2025-05-04 00:40:17.197 +03:00 [ERR] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers responded 500 in 149.4376 ms
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-05-04 00:40:17.212 +03:00 [ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-05-04 00:40:19.403 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Edit/+380293940819 responded 200 in 18.7344 ms
+2025-05-04 00:40:20.715 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 16.0168 ms
+2025-05-04 13:12:35.555 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 13:12:35.618 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 13:12:35.712 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 13:12:35.715 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 13:12:35.717 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 13:12:36.582 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 302 in 74.9872 ms
+2025-05-04 13:12:38.481 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Account/Login responded 200 in 1864.4598 ms
+2025-05-04 13:12:38.528 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/jquery/dist/jquery.min.js responded 304 in 2.9783 ms
+2025-05-04 13:12:38.528 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /css/site.css responded 304 in 5.0591 ms
+2025-05-04 13:12:38.528 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js responded 304 in 2.1201 ms
+2025-05-04 13:12:38.528 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/dist/css/bootstrap.min.css responded 304 in 9.2775 ms
+2025-05-04 13:12:38.528 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/dist/js/bootstrap.bundle.min.js responded 304 in 3.8930 ms
+2025-05-04 13:12:38.529 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/jquery-validation/dist/jquery.validate.min.js responded 304 in 0.5049 ms
+2025-05-04 13:12:38.529 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /js/site.js responded 304 in 0.2089 ms
+2025-05-04 13:12:48.019 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP POST /Account/Login responded 302 in 3004.2515 ms
+2025-05-04 13:12:48.296 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 261.1538 ms
+2025-05-04 13:12:52.340 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 334.0962 ms
+2025-05-04 13:12:54.895 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 13:12:55.135 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 565.0049 ms
+2025-05-04 13:13:00.099 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Create responded 200 in 136.4663 ms
+2025-05-04 13:13:04.795 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 29.6585 ms
+2025-05-04 13:26:35.146 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 13:26:35.207 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 13:26:35.298 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 13:26:35.301 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 13:26:35.303 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 13:26:37.658 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 13:26:38.558 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 2963.7653 ms
+2025-05-04 13:26:38.699 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /favicon.ico responded 304 in 3.6032 ms
+2025-05-04 13:27:14.936 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Details/+380293940819 responded 200 in 148.4213 ms
+2025-05-04 13:27:28.806 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 171.0776 ms
+2025-05-04 13:27:31.773 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 208.6095 ms
+2025-05-04 13:27:33.712 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 25.9303 ms
+2025-05-04 13:27:38.142 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Details/+380293940819 responded 200 in 17.0047 ms
+2025-05-04 13:27:53.454 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Admin/EditUser/200 responded 200 in 241.3407 ms
+2025-05-04 13:28:07.069 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Admin/Users responded 200 in 404.5255 ms
+2025-05-04 13:28:12.066 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Catalog/Counterparties responded 404 in 3.5780 ms
+2025-05-04 13:28:14.090 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Admin/Users responded 200 in 199.5207 ms
+2025-05-04 13:28:15.794 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 139.2212 ms
+2025-05-04 13:28:18.084 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 21.3022 ms
+2025-05-04 13:28:23.743 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Create responded 200 in 104.7523 ms
+2025-05-04 13:28:42.002 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP POST /StorageKeepers/Create responded 302 in 269.6431 ms
+2025-05-04 13:28:42.037 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 20.9436 ms
+2025-05-04 13:28:49.585 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Edit/+38909888767 responded 200 in 96.9382 ms
+2025-05-04 13:28:55.684 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP POST /StorageKeepers/Edit/+38909888767 responded 302 in 60.6888 ms
+2025-05-04 13:28:55.754 +03:00 [ERR] (Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor) The view 'Index' was not found. Searched locations: ["/Views/StorageKeeper/Index.cshtml","/Views/Shared/Index.cshtml"]
+2025-05-04 13:28:55.770 +03:00 [ERR] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers responded 500 in 68.8521 ms
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-05-04 13:28:55.812 +03:00 [ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-05-04 13:29:22.295 +03:00 [WRN] (IMS.Controllers.StorageKeeperController) Спроба редагування неіснуючого комірника: +38909888767
+2025-05-04 13:29:22.299 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Edit/+38909888767 responded 302 in 10.4025 ms
+2025-05-04 13:29:24.211 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 19.0306 ms
+2025-05-04 13:29:38.410 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Details/+38909888760 responded 200 in 10.5848 ms
+2025-05-04 13:29:49.375 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Edit/+38909888760 responded 200 in 17.3968 ms
+2025-05-04 13:29:55.442 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Details/+38909888760 responded 200 in 15.6443 ms
+2025-05-04 13:29:57.804 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 27.8559 ms
+2025-05-04 13:31:01.895 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Delete/+38909888760 responded 200 in 175.0304 ms
+2025-05-04 13:31:07.006 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP POST /StorageKeepers/Delete/+38909888760 responded 302 in 54.5180 ms
+2025-05-04 13:31:07.038 +03:00 [ERR] (Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor) The view 'Index' was not found. Searched locations: ["/Views/StorageKeeper/Index.cshtml","/Views/Shared/Index.cshtml"]
+2025-05-04 13:31:07.046 +03:00 [ERR] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers responded 500 in 22.6644 ms
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-05-04 13:31:07.062 +03:00 [ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The view 'Index' was not found. The following locations were searched:
+/Views/StorageKeeper/Index.cshtml
+/Views/Shared/Index.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewEngines.ViewEngineResult.EnsureSuccessful(IEnumerable`1 originalLocations)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-05-04 13:31:15.284 +03:00 [WRN] (IMS.Controllers.StorageKeeperController) Спроба видалення неіснуючого комірника: +38909888760
+2025-05-04 13:31:15.290 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Delete/+38909888760 responded 302 in 12.1715 ms
+2025-05-04 13:31:18.617 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 24.1927 ms
+2025-05-04 13:33:04.330 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 186.9317 ms

@@ -5,6 +5,7 @@ using IMS.Data;
 using IMS.Models;
 using IMS.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using System.Security.Cryptography.X509Certificates;
 
 namespace IMS.Controllers
 {
@@ -22,6 +23,7 @@ namespace IMS.Controllers
 
         // GET: StorageProduct/Add?storageName=Склад1 
         // GET: StorageProduct/Add 
+        [Authorize(Roles = nameof(UserRole.owner))]
         public async Task<IActionResult> Add(string? storageName = null) 
         {
             var viewModel = new AddStorageProductViewModel();
@@ -87,10 +89,22 @@ namespace IMS.Controllers
                     MinimalCount = model.MinimalCount
                 };
 
+                var userName = User.Identity?.Name ?? "System";
+
                 try
                 {
                     _context.StorageProducts.Add(newStorageProduct);
                     await _context.SaveChangesAsync();
+
+                    _logger.LogWarning(
+                        "MANUAL STOCK ADD by {User}: Added Product '{ProductName}' to Storage '{StorageName}'. Initial Count: {Count}, Initial MinimalCount: {MinimalCount}.",
+                        userName,
+                        newStorageProduct.ProductName,
+                        newStorageProduct.StorageName,
+                        newStorageProduct.Count,
+                        newStorageProduct.MinimalCount
+                    );
+
                     TempData["SuccessMessage"] = $"Товар '{model.SelectedProductName}' успішно додано на склад '{targetStorageName}'.";
                     return RedirectToAction("Details", "Storage", new { name = targetStorageName }, "nav-stock");
                 }
@@ -108,6 +122,7 @@ namespace IMS.Controllers
 
         // GET: Storage/Склад1/Product/Edit/Товар1
         [HttpGet("StorageProduct/Edit/{storageName}/{productName}")]
+        [Authorize(Roles = nameof(UserRole.owner))]
         public async Task<IActionResult> Edit(string storageName, string productName)
         {
             if (string.IsNullOrEmpty(storageName) || string.IsNullOrEmpty(productName))
@@ -133,7 +148,8 @@ namespace IMS.Controllers
                 ProductDisplayName = storageProduct.ProductNameNavigation?.ProductName,
                 UnitName = storageProduct.ProductNameNavigation?.UnitCodeNavigation?.UnitName, 
                 Count = storageProduct.Count,
-                MinimalCount = storageProduct.MinimalCount
+                MinimalCount = storageProduct.MinimalCount,
+                AdjustmentReason = ""
             };
 
             ViewData["Title"] = $"Редагувати залишки: {viewModel.ProductDisplayName ?? productName} на складі {storageName}";
@@ -143,6 +159,7 @@ namespace IMS.Controllers
         // POST: Storage/Склад1/Product/Edit/Товар1
         [HttpPost("StorageProduct/Edit/{storageName}/{productName}")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = nameof(UserRole.owner))]
         public async Task<IActionResult> Edit(string storageName, string productName, EditStorageProductViewModel model)
         {
             if (string.IsNullOrEmpty(storageName) || storageName != model.StorageName ||
@@ -165,6 +182,10 @@ namespace IMS.Controllers
                     return RedirectToAction("Details", "Storage", new { name = storageName }, "nav-stock");
                 }
 
+                var oldCount = entityToUpdate.Count;
+                var oldMinimalCount = entityToUpdate.MinimalCount;
+                var userName = User.Identity?.Name ?? "System";
+
                 try
                 {
                     entityToUpdate.Count = model.Count;
@@ -173,6 +194,19 @@ namespace IMS.Controllers
                     _context.StorageProducts.Update(entityToUpdate);
 
                     await _context.SaveChangesAsync();
+
+                    _logger.LogWarning(
+                        "STOCK ADJUSTMENT by {User}: Product '{ProductName}' on Storage '{StorageName}'. Count changed from {OldCount} to {NewCount}. MinimalCount changed from {OldMinimalCount} to {NewMinimalCount}. Reason: {Reason}",
+                        userName,
+                        entityToUpdate.ProductName,
+                        entityToUpdate.StorageName,
+                        oldCount,
+                        entityToUpdate.Count,
+                        oldMinimalCount,
+                        entityToUpdate.MinimalCount,
+                        string.IsNullOrEmpty(model.AdjustmentReason) ? "N/A" : model.AdjustmentReason
+                    );
+
                     TempData["SuccessMessage"] = $"Залишки товару '{model.ProductName}' на складі '{model.StorageName}' оновлено.";
                     return RedirectToAction("Details", "Storage", new { name = model.StorageName }, "nav-stock");
                 }
@@ -203,6 +237,7 @@ namespace IMS.Controllers
         }
 
         // GET: Storage/Склад1/Product/Delete/Товар1
+        [Authorize(Roles = nameof(UserRole.owner))]
         public async Task<IActionResult> Delete(string storageName, string productName)
         {
             if (string.IsNullOrEmpty(storageName) || string.IsNullOrEmpty(productName))
@@ -220,6 +255,9 @@ namespace IMS.Controllers
                 return RedirectToAction("Details", "Storage", new { name = storageName }, "nav-stock");
             }
 
+            ViewBag.WarningMessage = $"Увага! Ви збираєтеся повністю видалити запис про товар '{storageProduct.ProductNameNavigation?.ProductName ?? productName}' зі складу '{storageName}'. Поточний зареєстрований залишок: {storageProduct.Count}. Ця дія незворотня і може призвести до розбіжностей в обліку, якщо залишок не нульовий.";
+            ViewBag.CanDelete = true;
+
             ViewData["Title"] = $"Видалити {storageProduct.ProductNameNavigation?.ProductName ?? productName} зі складу {storageName}";
             return View(storageProduct);
         }
@@ -227,6 +265,7 @@ namespace IMS.Controllers
         // POST: Storage/Склад1/Product/Delete/Товар1
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
+        [Authorize(Roles = nameof(UserRole.owner))]
         public async Task<IActionResult> DeleteConfirmed(string storageName, string productName)
         {
             if (string.IsNullOrEmpty(storageName) || string.IsNullOrEmpty(productName))
@@ -245,6 +284,17 @@ namespace IMS.Controllers
                     return RedirectToAction("Details", "Storage", new { name = storageName }, "nav-stock");
                 }
 
+                var userName = User.Identity?.Name ?? "System";
+                var currentCount = storageProduct.Count;
+
+                _logger.LogWarning(
+                    "MANUAL STOCK RECORD DELETE by {User}: Deleting StorageProduct entry for Product '{ProductName}' from Storage '{StorageName}'. Current Count was: {Count}.",
+                    userName,
+                    storageProduct.ProductName,
+                    storageProduct.StorageName,
+                    currentCount 
+                );
+
                 _context.StorageProducts.Remove(storageProduct);
                 await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = $"Товар '{productName}' успішно видалено зі складу '{storageName}'.";
@@ -258,6 +308,72 @@ namespace IMS.Controllers
             return RedirectToAction("Details", "Storage", new { name = storageName }, "nav-stock");
         }
 
+        [HttpPost("EditMinimalCountOnly")]
+        [ValidateAntiForgeryToken]
+        [Authorize(Policy = "RequireManagerRole")]
+        public async Task<IActionResult> EditMinimalCountOnly(EditMinimalCountViewModel model)
+        {
+            // --- Повертаємо Ручний Парсинг і Валідацію MinimalCount ---
+            decimal parsedMinimalCount = 0;
+            var minimalCountString = Request.Form["MinimalCount"].FirstOrDefault();
+            bool isParsed = decimal.TryParse(minimalCountString, // Рядок вже має містити крапку завдяки JS
+                                            System.Globalization.NumberStyles.Any,
+                                            System.Globalization.CultureInfo.InvariantCulture, // Очікуємо крапку
+                                            out parsedMinimalCount);
+
+            if (!isParsed || parsedMinimalCount < 0)
+            {
+                ModelState.AddModelError(nameof(model.MinimalCount), "Некоректне значення мінімального залишку.");
+            }
+            else
+            {
+                model.MinimalCount = parsedMinimalCount; // Записуємо коректне значення
+                                                         // Видаляємо помилку від стандартного біндера, якщо вона була
+                ModelState.Remove(nameof(model.MinimalCount));
+            }
+
+            if (ModelState.IsValid)
+            {
+                var entityToUpdate = await _context.StorageProducts
+                                            .FirstOrDefaultAsync(sp => sp.StorageName == model.StorageName && sp.ProductName == model.ProductName);
+
+                if (entityToUpdate == null)
+                {
+                    return Json(new { success = false, message = "Запис про залишки не знайдено." });
+                }
+
+                var oldMinimalCount = entityToUpdate.MinimalCount;
+                var userName = User.Identity?.Name ?? "System";
+
+                try
+                {
+                    entityToUpdate.MinimalCount = model.MinimalCount;
+
+                    _context.StorageProducts.Update(entityToUpdate);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation(
+                        "MINIMAL COUNT UPDATE by {User}: Product '{ProductName}' on Storage '{StorageName}'. MinimalCount changed from {OldMinimalCount} to {NewMinimalCount}.",
+                        userName, entityToUpdate.ProductName, entityToUpdate.StorageName, oldMinimalCount, entityToUpdate.MinimalCount
+                    );
+
+                    return Json(new { success = true, newMinimalCount = entityToUpdate.MinimalCount });
+                }
+                catch (DbUpdateConcurrencyException)
+                {
+                    _logger.LogWarning("Конфлікт паралельного доступу при оновленні MinimalCount {ProductName} на {StorageName}", model.ProductName, model.StorageName);
+                    return Json(new { success = false, message = "Дані були змінені іншим користувачем. Оновіть сторінку." });
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Помилка оновлення MinimalCount {ProductName} на {StorageName}", model.ProductName, model.StorageName);
+                    return Json(new { success = false, message = "Не вдалося оновити мінімальний залишок." });
+                }
+            }
+
+            var errors = ModelState.Values.SelectMany(v => v.Errors).Select(e => e.ErrorMessage).ToList();
+            return Json(new { success = false, message = "Помилка валідації.", errors = errors });
+        }
 
         private async Task PopulateAvailableProductsForStorage(AddStorageProductViewModel viewModel, string storageName)
         {
