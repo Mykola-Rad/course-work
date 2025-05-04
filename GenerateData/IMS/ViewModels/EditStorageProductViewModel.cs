@@ -22,5 +22,9 @@ namespace IMS.ViewModels
         [Range(0, 99999999.99, ErrorMessage = "Мінімальний залишок має бути невід'ємним.")]
         [Display(Name = "Мінімальний залишок")]
         public decimal MinimalCount { get; set; }
+
+        [StringLength(500, ErrorMessage = "Причина не може перевищувати 500 символів.")]
+        [Display(Name = "Причина коригування (необов'язково)")]
+        public string? AdjustmentReason { get; set; }
     }
 }

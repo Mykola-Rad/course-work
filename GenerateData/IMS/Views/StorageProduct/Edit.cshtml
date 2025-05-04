@@ -1,10 +1,12 @@
 ﻿@model IMS.ViewModels.EditStorageProductViewModel
 
 @{
+    ViewData["Title"] = $"Коригування: {Model.ProductDisplayName ?? Model.ProductName} на складі {Model.StorageName}";
     Layout = "_Layout";
 }
 
 <h1>@ViewData["Title"]</h1>
+<p class="text-danger">Увага! Виконується ручне коригування залишків. Використовуйте обережно.</p>
 <hr />
 
 <div class="row">
@@ -35,6 +37,13 @@
                 <label asp-for="MinimalCount" class="form-label"></label>
                 <input asp-for="MinimalCount" type="number" step="any" min="0" class="form-control" />
                 <span asp-validation-for="MinimalCount" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="AdjustmentReason" class="form-label"></label>
+                <textarea asp-for="AdjustmentReason" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="AdjustmentReason" class="text-danger"></span>
+                <div class="form-text">Вкажіть причину зміни (напр., 'Інвентаризація 01.01.2024', 'Списання пошкодженого', 'Корекція помилки').</div>
             </div>
 
             <div class="mb-3 mt-4">

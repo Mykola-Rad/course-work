@@ -1,0 +1,64 @@
+﻿@model IMS.ViewModels.StorageKeeperViewModel
+
+@{
+    ViewData["Title"] = $"Редагувати: {Model.FirstName} {Model.LastName}";
+    Layout = "_Layout";
+    // Отримуємо оригінальний номер (був переданий з GET)
+    var originalPhoneNumber = Model.OriginalPhoneNumber ?? Model.PhoneNumber;
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" asp-route-originalPhoneNumber="@originalPhoneNumber" method="post">
+            @Html.AntiForgeryToken()
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <input type="hidden" asp-for="OriginalPhoneNumber" value="@originalPhoneNumber" />
+
+            <div class="mb-3">
+                <label asp-for="PhoneNumber" class="form-label"></label>
+                <input asp-for="PhoneNumber" class="form-control" />
+                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
+                <div class="form-text text-warning">Увага: Ви редагуєте первинний ключ (Телефон). Переконайтеся, що новий номер унікальний і відповідає формату +XXXXXXXXXXXX.</div>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="FirstName" class="form-label"></label>
+                <input asp-for="FirstName" class="form-control" />
+                <span asp-validation-for="FirstName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="LastName" class="form-label"></label>
+                <input asp-for="LastName" class="form-control" />
+                <span asp-validation-for="LastName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label"></label>
+                <input asp-for="Email" type="email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="StorageName" class="form-label"></label>
+                <select asp-for="StorageName" class="form-select" asp-items="@Model.AvailableStorages">
+                    <option value="">-- Оберіть склад --</option>
+                </select>
+                <span asp-validation-for="StorageName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3 mt-4">
+                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }

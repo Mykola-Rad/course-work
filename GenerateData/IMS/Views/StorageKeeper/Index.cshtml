@@ -1,0 +1,90 @@
+﻿@model IEnumerable<IMS.Models.StorageKeeper>
+
+@{
+    ViewData["Title"] = "Керування комірниками";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Додати нового комірника</a>
+</p>
+
+@await Html.PartialAsync("_StatusMessagePartial") 
+
+<table class="table table-sm table-hover table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().LastName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().FirstName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().PhoneNumber) (ID)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Email)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().StorageNameNavigation)
+            </th>
+            <th>
+                Прив'язаний логін
+            </th>
+            <th style="width: 220px;">Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.LastName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.FirstName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
+                    <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                    <td>
+                        @if (item.StorageNameNavigation != null)
+                        {
+                            <a asp-controller="Storage" asp-action="Details" asp-route-name="@item.StorageName">
+                                @Html.DisplayFor(modelItem => item.StorageNameNavigation.Name)
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">Н/Д</span>
+                        }
+                    </td>
+                    <td>
+                        @if (item.User != null)
+                        {
+                            <a asp-controller="Admin" asp-action="EditUser" asp-route-id="@item.UserId">
+                                @item.User.Username
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-- Немає --</span>
+                            @* Можна додати посилання на Створення User і прив'язку? Або це робиться в Admin/Users *@
+                        }
+                    </td>
+                    <td>
+                        <a asp-action="Details" asp-route-phoneNumber="@item.PhoneNumber" class="btn btn-sm btn-outline-info">Деталі</a> |
+                        <a asp-action="Edit" asp-route-phoneNumber="@item.PhoneNumber" class="btn btn-sm btn-outline-secondary">Редагувати</a> |
+                        <a asp-action="Delete" asp-route-phoneNumber="@item.PhoneNumber" class="btn btn-sm btn-outline-danger">Видалити</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="7" class="text-center text-muted">Немає зареєстрованих комірників.</td>
+            </tr>
+        }
+    </tbody>
+</table>
