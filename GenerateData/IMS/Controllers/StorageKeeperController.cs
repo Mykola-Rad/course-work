@@ -59,6 +59,7 @@ namespace IMS.Controllers
                 {
                     viewModel.StorageName = storageName;
                     ViewData["Title"] = $"Додати комірника на склад '{storageName}'";
+                    ViewBag.ContextStorageName = storageName;
                 }
                 else
                 {
@@ -73,7 +74,7 @@ namespace IMS.Controllers
         // POST: StorageKeepers/Create
         [HttpPost("Create")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(StorageKeeperViewModel model)
+        public async Task<IActionResult> Create(StorageKeeperViewModel model, string? contextStorageName)
         {
             if (await StorageKeeperExists(model.PhoneNumber))
             {
@@ -107,10 +108,11 @@ namespace IMS.Controllers
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = $"Профіль комірника '{storageKeeper.FirstName} {storageKeeper.LastName}' успішно створено.";
 
-                    if (!string.IsNullOrEmpty(model.StorageName) && await _context.Storages.AnyAsync(s => s.Name == model.StorageName))
+                    if (!string.IsNullOrEmpty(contextStorageName))
                     {
                         return RedirectToAction("Details", "Storage", new { name = model.StorageName });
                     }
+
                     return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateException ex)
