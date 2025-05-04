@@ -1,0 +1,55 @@
+﻿@model IEnumerable<IMS.ViewModels.ProductStockSummaryViewModel>
+
+@{
+    ViewData["Title"] = "Загальні залишки по товарах";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<p class="text-muted">Показано загальну кількість кожного товару на всіх складах.</p>
+
+<table class="table table-sm table-hover table-striped">
+    <thead class="table-light">
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ProductName)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().TotalCount)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ProductUnitName)
+            </th>
+            <th>Деталі</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                            @Html.DisplayFor(modelItem => item.ProductName)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.TotalCount)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.ProductUnitName)
+                    </td>
+                    <td>
+                        <a asp-action="DetailsByProduct" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-info">Details</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3" class="text-center text-muted">Залишки товарів відсутні.</td>
+            </tr>
+        }
+    </tbody>
+</table>

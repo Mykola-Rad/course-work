@@ -1,0 +1,51 @@
+﻿@model IMS.ViewModels.ProductStockDetailsViewModel
+
+@{
+    ViewData["Title"] = $"Залишки товару: {Model.ProductName}";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+<p><strong>Одиниця виміру:</strong> @(Model.ProductUnitName ?? "Н/Д")</p>
+<hr />
+
+<h4>Розподіл по складах:</h4>
+
+@if (Model.StockDetails.Any())
+{
+    <table class="table table-sm table-striped table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Склад</th>
+                <th>Кількість</th>
+                <th>Мін. залишок</th>
+                <th>Дії</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.StockDetails)
+            {
+                <tr>
+                    <td>
+                        @item.StorageName
+                    </td>
+                    <td>@item.Count.ToString("N2")</td>
+                    <td>@item.MinimalCount.ToString("N2")</td>
+                    <td>
+                        <a asp-controller="Storage" asp-action="Details" asp-route-name="@item.StorageName" class="btn btn-sm btn-outline-info">Деталі</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p class="text-muted">Інформація про залишки для цього товару відсутня.</p>
+}
+
+
+<div class="mt-4">
+    <a asp-action="Index" class="btn btn-outline-secondary">Назад до загальних залишків</a>
+    <a asp-controller="Product" asp-action="Details" asp-route-productName="@Model.ProductName" class="btn btn-outline-info">Деталі товару</a>
+</div>

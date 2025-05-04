@@ -1,0 +1,180 @@
+﻿@model IEnumerable<IMS.Models.StorageProduct>
+ @using IMS.Models
+
+@{
+	ViewData["Title"] = ViewData["Title"] ?? "Поточні залишки";
+	Layout = "_Layout";
+	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<table class="table table-sm table-hover">
+	<thead class="table-light">
+		<tr>
+			<th>Товар</th>
+			<th>Кількість</th>
+			<th>Одиниця</th>
+			<th>Мін. залишок</th>
+			<th>Дії</th>
+		</tr>
+	</thead>
+	<tbody>
+		@if (Model.Any())
+		{
+			@foreach (var item in Model)
+			{
+				<tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
+					<td>@(item.ProductNameNavigation?.ProductName ?? item.ProductName)</td>
+					<td>@item.Count.ToString("N2")</td>
+					<td>@(item.ProductNameNavigation?.UnitCodeNavigation?.UnitName ?? "Н/Д")</td>
+
+					<td class="min-count-td">
+						<span class="min-count-display">@item.MinimalCount.ToString("N2")</span>
+						<div class="min-count-edit input-group input-group-sm" style="display: none;">
+							<input type="number" step="any" min="0" class="form-control min-count-input"
+								   value="@item.MinimalCount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)">
+							<button class="btn btn-outline-success btn-sm min-count-save" type="button" title="Зберегти"><i class="bi bi-check-lg"></i></button>
+							<button class="btn btn-outline-secondary btn-sm min-count-cancel" type="button" title="Скасувати"><i class="bi bi-x-lg"></i></button>
+						</div>
+						<div class="text-danger small min-count-error mt-1" style="display: none;"></div>
+					</td>
+					<td>
+						<button type="button" class="btn btn-sm btn-outline-primary edit-min-inline-btn"
+								title="Редагувати мінімальний залишок">
+							<i class="bi bi-pencil-fill"></i> Мін.
+						</button>
+					</td>
+
+				</tr>
+			}
+		}
+		else
+		{
+			<tr>
+				<td colspan="@(canManage ? "5" : "4")" class="text-center text-muted">Залишки на вашому складі відсутні або склад не призначено.</td>
+			</tr>
+		}
+	</tbody>
+</table>
+
+@if (canManage)
+{
+	@Html.AntiForgeryToken()
+}
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			var hash = window.location.hash;
+
+			if (hash) {
+				var triggerEl = document.querySelector('.nav-tabs button[data-bs-target="' + hash + '"]');
+
+				if (triggerEl) {
+					var tab = new bootstrap.Tab(triggerEl);
+					tab.show();
+				}
+			}
+
+			var tabTriggerList = [].slice.call(document.querySelectorAll('#nav-tab button'));
+			tabTriggerList.forEach(function (tabTriggerEl) {
+				var tab = new bootstrap.Tab(tabTriggerEl);
+
+				tabTriggerEl.addEventListener('click', function (event) {
+					var newHash = tabTriggerEl.getAttribute('data-bs-target');
+					if (history.pushState) {
+						 history.pushState(null, '', newHash);
+					} else {
+						 window.location.hash = newHash;
+					}
+				});
+			});
+
+		});
+	</script>
+	<script>
+		$(document).ready(function () {
+			$('table').on('click', '.edit-min-inline-btn', function () {
+				var td = $(this).closest('tr').find('td.min-count-td');
+				td.find('.min-count-display').hide();
+				td.find('.min-count-edit').show();
+				td.find('.min-count-input').focus().select();
+				td.find('.min-count-error').hide().text('');
+			});
+
+			$('table').on('click', '.min-count-cancel', function () {
+				var td = $(this).closest('td.min-count-td');
+				td.find('.min-count-edit').hide();
+				td.find('.min-count-display').show();
+				td.find('.min-count-error').hide().text('');
+			});
+
+			$('table').on('click', '.min-count-save', function () {
+				var saveButton = $(this);
+				var td = saveButton.closest('td.min-count-td');
+				var editDiv = td.find('.min-count-edit');
+				var displaySpan = td.find('.min-count-display');
+				var errorDiv = td.find('.min-count-error');
+				var inputField = editDiv.find('.min-count-input');
+				var tr = td.closest('tr');
+
+				var storageName = tr.data('storage-name');
+				var productName = tr.data('product-name');
+			   var newValue = inputField.val()?.replace(',', '.');
+
+				errorDiv.hide().text('');
+				if (newValue === '' || newValue === null || isNaN(parseFloat(newValue)) || parseFloat(newValue) < 0) {
+					 errorDiv.text('Введіть коректне невід\'ємне число.').show();
+					 return;
+				}
+
+				var token = $('input[name="__RequestVerificationToken"]').val();
+				var postUrl = "@Url.Action("EditMinimalCountOnly", "StorageProduct")";
+
+				var dataToSend = {
+					StorageName: storageName,
+					ProductName: productName,
+					MinimalCount: newValue,
+					 __RequestVerificationToken: token
+				};
+
+				console.log("Sending AJAX Data:", dataToSend);
+
+				saveButton.prop('disabled', true);
+
+				$.ajax({
+					url: postUrl,
+					method: "POST",
+					data: dataToSend,
+					success: function (response) {
+						console.log("AJAX Success:", response);
+						if (response.success) {
+							 var formattedValue = parseFloat(response.newMinimalCount).toLocaleString('uk-UA', {
+								 minimumFractionDigits: 2,
+								 maximumFractionDigits: 2
+							 });
+							displaySpan.text(formattedValue);
+							editDiv.hide();
+							displaySpan.show();
+						} else {
+							var errorMessage = response.message || "Помилка збереження.";
+							 if(response.errors && response.errors.length > 0) {
+								  errorMessage += ": " + response.errors.join("; ");
+							 }
+							errorDiv.text(errorMessage).show();
+						}
+					},
+					error: function (jqXHR, textStatus, errorThrown) {
+						console.error("AJAX Error: " + textStatus + " - " + errorThrown);
+						console.error("Server Response: ", jqXHR.responseText);
+						errorDiv.text('Помилка зв\'язку з сервером.').show();
+					},
+					complete: function() {
+						saveButton.prop('disabled', false);
+					}
+				});
+			});
+		});
+	</script>
+ }
