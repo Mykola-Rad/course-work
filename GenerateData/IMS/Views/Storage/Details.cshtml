@@ -1,13 +1,13 @@
-﻿@model IMS.Models.Storage
+﻿ @model IMS.ViewModels.StorageDetailsViewModel
  @using IMS.Models
 
 @{
-	ViewData["Title"] = $"Деталі: {Model.Name}";
+	ViewData["Title"] = $"Деталі: {Model.Storage.Name}";
 	Layout = "_Layout";
 	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
 }
 
-<h1>Склад: @Model.Name</h1>
+<h1>Склад: @Model.Storage.Name</h1>
 
 <nav class="mt-3">
 	<div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -16,6 +16,7 @@
 		{
 			<button class="nav-link" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="false">Залишки товарів</button>
 			<button class="nav-link" id="nav-keepers-tab" data-bs-toggle="tab" data-bs-target="#nav-keepers" type="button" role="tab" aria-controls="nav-keepers" aria-selected="false">Призначені комірники</button>
+			<button class="nav-link" id="nav-storage-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-storage-invoices" type="button" role="tab" aria-controls="nav-storage-invoices" aria-selected="false">Накладні</button>
 		}
 		else if (User.IsInRole(UserRole.storage_keeper.ToString()))
 		{
@@ -30,22 +31,22 @@
 		<h4>Адреса та деталі</h4>
 		<hr />
 		<dl class="row">
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.City)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.City)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.StreetName)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.StreetName)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.HouseNumber)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.HouseNumber)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Region)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Region)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.PostalCode)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.PostalCode)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.Name)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.Name)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.City)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.City)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.StreetName)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.StreetName)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.HouseNumber)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.HouseNumber)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.Region)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.Region)</dd>
+			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.PostalCode)</dt>
+			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.PostalCode)</dd>
 		</dl>
 		@if (canManage)
 		{
-			<a asp-action="Edit" asp-route-name="@Model.Name" class="btn btn-secondary btn-sm mt-2">Редагувати інформацію про склад</a>
+			<a asp-action="Edit" asp-route-name="@Model.Storage.Name" class="btn btn-secondary btn-sm mt-2">Редагувати інформацію про склад</a>
 		}
 	</div>
 
@@ -54,13 +55,13 @@
 			<h4>Товари на складі</h4>
 			@if (User.IsInRole(UserRole.owner.ToString()))
 			{
-				<a asp-controller="StorageProduct" asp-action="Add" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">
+				<a asp-controller="StorageProduct" asp-action="Add" asp-route-storageName="@Model.Storage.Name" class="btn btn-success btn-sm">
 					<i class="bi bi-plus-circle"></i> Додати товар на склад
 				</a>
 			}
 		</div>
 		<hr />
-		@if (Model.StorageProducts?.Any() ?? false)
+		@if (Model.Storage.StorageProducts?.Any() ?? false)
 		{
 			<table class="table table-sm table-hover">
 				<thead class="table-light">
@@ -76,7 +77,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in Model.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
+					@foreach (var item in Model.Storage.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
 					{
 						<tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
 							<td>@item.ProductNameNavigation?.ProductName</td>
@@ -136,10 +137,10 @@
 		<div class="tab-pane fade" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
 			<div class="d-flex justify-content-between align-items-center mb-2">
 				<h4>Призначені комірники</h4>
-				<a asp-controller="StorageKeeper" asp-action="Create" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">Створити комірника</a>
+				<a asp-controller="StorageKeeper" asp-action="Create" asp-route-storageName="@Model.Storage.Name" class="btn btn-success btn-sm">Створити комірника</a>
 			</div>
 			<hr />
-			@if (Model.StorageKeepers?.Any() ?? false)
+			@if (Model.Storage.StorageKeepers?.Any() ?? false)
 			{
 				<table class="table table-sm table-hover">
 					<thead class="table-light">
@@ -152,7 +153,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						@foreach (var keeper in Model.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
+						@foreach (var keeper in Model.Storage.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
 						{
 							<tr>
 								<td>@Html.DisplayFor(modelItem => keeper.LastName)</td>
@@ -180,6 +181,76 @@
 			}
 		</div>
 	}
+	<div class="tab-pane fade" id="nav-storage-invoices" role="tabpanel" aria-labelledby="nav-storage-invoices-tab" tabindex="0">
+		<div class="d-flex justify-content-between align-items-center mb-2">
+			<h4>Накладні, пов'язані зі складом</h4>
+			@if (canManage)
+			{
+				<div>
+					<a asp-controller="Invoice" asp-action="Create" asp-route-senderStorageName="@Model.Storage.Name" class="btn btn-sm btn-outline-success me-1">Створити Накладну</a>
+				</div>
+			}
+		</div>
+		@* TODO: Додати фільтри за типом/статусом пізніше *@
+		<hr />
+		@if (Model.RelatedInvoices.Any())
+		{
+			<table class="table table-sm table-hover">
+				<thead class="table-light">
+					<tr>
+						<th>ID</th>
+						<th>Дата</th>
+						<th>Тип</th>
+						<th>Статус</th>
+						<th>Сума</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					@foreach (var invoice in Model.RelatedInvoices.OrderByDescending(i => i.Date).ThenByDescending(i => i.InvoiceId))
+					{
+						<tr>
+							<td>
+								@invoice.InvoiceId
+							</td>
+							<td>@invoice.Date.ToString("dd.MM.yyyy")</td>
+							<td>@invoice.Type</td>
+							<td>@invoice.Status</td>
+							<td>
+							@if (invoice.Type == InvoiceType.supply || invoice.Type == InvoiceType.release)
+							{
+								@((invoice.ListEntries?.Sum(le => le.Count * le.Price) ?? 0).ToString("C2"))
+							}
+							else
+							{
+								<span class="text-muted">—</span> 
+							}
+							</td>
+							<td>
+								<a asp-controller="Invoice" asp-action="Details" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-info">Деталі</a>
+
+								@if (invoice.Status == InvoiceStatus.draft)
+								{
+									<text> | </text>
+									<a asp-controller="Invoice" asp-action="Edit" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-secondary">Редагувати</a>
+								}
+
+								@if (invoice.Status == InvoiceStatus.draft)
+								{
+									<text> | </text>
+									<a asp-controller="Invoice" asp-action="Delete" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-danger">Видалити</a>
+								}
+							</td>
+						</tr>
+					}
+				</tbody>
+			</table>
+		}
+		else
+		{
+			<p class="text-muted">Немає накладних, пов'язаних з цим складом.</p>
+		}
+	</div>
 </div>
 <div class="mt-4">
 	<a asp-action="Index" class="btn btn-outline-secondary">Назад до списку складів</a>
