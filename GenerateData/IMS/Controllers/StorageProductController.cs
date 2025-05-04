@@ -6,6 +6,7 @@ using IMS.Models;
 using IMS.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.Security.Cryptography.X509Certificates;
+using System.Security.Claims;
 
 namespace IMS.Controllers
 {
@@ -20,6 +21,148 @@ namespace IMS.Controllers
             _context = context;
             _logger = logger;
         }
+
+        // GET: StorageProduct
+        [HttpGet("")]
+        [AllowAnonymous]
+        public async Task<IActionResult> Index()
+        {
+            try
+            {
+                var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                bool isKeeper = User.IsInRole(UserRole.storage_keeper.ToString());
+
+                if (isKeeper) 
+                {
+                    return await GetKeeperStockViewAsync(userIdString); 
+                }
+                else 
+                {
+                    return await GetManagerStockSummaryViewAsync(); 
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка при отриманні залишків на складах (Index action)");
+                TempData["ErrorMessage"] = "Не вдалося завантажити залишки.";
+                return RedirectToAction("Index", "Home"); 
+            }
+        }
+
+        // GET: StorageProduct/ByProduct/НазваТовару
+        [HttpGet("StorageProduct/ByProduct/{productName}")]
+        [Authorize(Policy = "RequireManagerRole")] 
+        public async Task<IActionResult> DetailsByProduct(string productName)
+        {
+            if (string.IsNullOrEmpty(productName))
+            {
+                return NotFound("Назву товару не вказано.");
+            }
+
+            ViewData["Title"] = $"Залишки товару: {productName}";
+
+            try
+            {
+                var stockDetails = await _context.StorageProducts
+                    .Where(sp => sp.ProductName == productName)
+                    .Include(sp => sp.StorageNameNavigation) 
+                    .Include(sp => sp.ProductNameNavigation.UnitCodeNavigation) 
+                    .OrderBy(sp => sp.StorageName)
+                    .AsNoTracking()
+                    .ToListAsync();
+
+                if (!stockDetails.Any())
+                {
+                    bool productExists = await _context.Products.AnyAsync(p => p.ProductName == productName);
+                    if (!productExists)
+                    {
+                        TempData["ErrorMessage"] = $"Товар з назвою '{productName}' не знайдено.";
+                    }
+                    else
+                    {
+                        TempData["InfoMessage"] = $"Товар '{productName}' відсутній на залишках на будь-якому складі.";
+                    }
+                    return RedirectToAction(nameof(Index));
+                }
+
+                string? unitName = stockDetails.First().ProductNameNavigation?.UnitCodeNavigation?.UnitName;
+
+                var viewModel = new ProductStockDetailsViewModel
+                {
+                    ProductName = productName,
+                    ProductUnitName = unitName,
+                    StockDetails = stockDetails
+                };
+
+                return View("DetailsByProduct", viewModel);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка при отриманні деталей залишків для товару {ProductName}", productName);
+                TempData["ErrorMessage"] = "Не вдалося завантажити деталізацію залишків.";
+                return RedirectToAction(nameof(Index));
+            }
+        }
+
+        private async Task<IActionResult> GetKeeperStockViewAsync(string? userIdString)
+        {
+            ViewData["Title"] = "Поточні залишки на вашому складі";
+            List<StorageProduct> keeperStockList = new List<StorageProduct>(); 
+
+            if (int.TryParse(userIdString, out int userId))
+            {
+                var keeperStorageName = await _context.StorageKeepers
+                                                      .Where(sk => sk.UserId == userId)
+                                                      .Select(sk => sk.StorageName)
+                                                      .FirstOrDefaultAsync();
+
+                if (!string.IsNullOrEmpty(keeperStorageName))
+                {
+                    ViewData["Title"] = $"Залишки на складі: {keeperStorageName}";
+                    keeperStockList = await _context.StorageProducts
+                        .Where(sp => sp.StorageName == keeperStorageName)
+                        .Include(sp => sp.ProductNameNavigation.UnitCodeNavigation)
+                        .OrderBy(sp => sp.ProductName)
+                        .AsNoTracking()
+                        .ToListAsync();
+                }
+                else
+                {
+                    _logger.LogWarning("StorageKeeper with User ID {UserId} is not assigned to a storage.", userId);
+                    TempData["InfoMessage"] = "Вам не призначено склад для перегляду залишків."; 
+                }
+            }
+            else
+            {
+                _logger.LogError("Could not parse User ID {UserIdString} for StorageKeeper filtering.", userIdString ?? "NULL");
+                TempData["ErrorMessage"] = "Помилка визначення користувача.";
+            }
+            return View("IndexKeeper", keeperStockList);
+        }
+
+        private async Task<IActionResult> GetManagerStockSummaryViewAsync()
+        {
+            ViewData["Title"] = "Загальні залишки по товарах";
+
+            var summaryList = await _context.StorageProducts
+                .Include(sp => sp.ProductNameNavigation.UnitCodeNavigation)
+                .GroupBy(sp => new {
+                    sp.ProductName,
+                    UnitName = sp.ProductNameNavigation.UnitCodeNavigation.UnitName
+                })
+                .Select(g => new ProductStockSummaryViewModel
+                {
+                    ProductName = g.Key.ProductName,
+                    ProductUnitName = g.Key.UnitName,
+                    TotalCount = g.Sum(sp => sp.Count)
+                })
+                .OrderBy(s => s.ProductName)
+                .AsNoTracking()
+                .ToListAsync();
+
+            return View("IndexManager", summaryList);
+        }
+
 
         // GET: StorageProduct/Add?storageName=Склад1 
         // GET: StorageProduct/Add 
