@@ -136,7 +136,7 @@
 		<div class="tab-pane fade" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
 			<div class="d-flex justify-content-between align-items-center mb-2">
 				<h4>Призначені комірники</h4>
-				@* <a asp-action="AssignKeeper" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">Призначити комірника</a> *@
+				<a asp-controller="StorageKeeper" asp-action="Create" asp-route-storageName="@Model.Name" class="btn btn-success btn-sm">Створити комірника</a>
 			</div>
 			<hr />
 			@if (Model.StorageKeepers?.Any() ?? false)
@@ -146,7 +146,7 @@
 						<tr>
 							<th>Прізвище</th>
 							<th>Ім'я</th>
-							<th>Телефон (ID)</th>
+							<th>Телефон</th>
 							<th>Email</th>
 							<th>Дії</th>
 						</tr>
@@ -160,10 +160,14 @@
 								<td>@Html.DisplayFor(modelItem => keeper.PhoneNumber)</td>
 								<td>@Html.DisplayFor(modelItem => keeper.Email)</td>
 								<td>
-									@* Сюди можна додати посилання на редагування/видалення/відв'язку комірника від складу *@
-									@* <a asp-controller="StorageKeeper" asp-action="Edit" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-sm btn-outline-secondary">Редагувати профіль</a> *@
-									@* <form asp-action="UnassignKeeper" method="post" style="display:inline;">...</form> *@
-									<span class="text-muted">--</span>
+									<a asp-controller="StorageKeeper" asp-action="Details"
+									   asp-route-phoneNumber="@keeper.PhoneNumber"
+									   asp-route-fromStorage="true"
+									   class="btn btn-sm btn-outline-info">Деталі</a>
+									<text> | </text>
+									<a asp-controller="StorageKeeper" asp-action="Edit" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-outline-secondary btn-sm">Редагувати</a>
+									<text> | </text>
+									<a asp-controller="StorageKeeper" asp-action="Delete" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-outline-danger btn-sm">Delete</a>
 								</td>
 							</tr>
 						}
