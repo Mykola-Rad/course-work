@@ -1,0 +1,221 @@
+﻿@model IMS.ViewModels.InvoiceViewModel
+ @using IMS.Models 
+
+@{
+    ViewData["Title"] = $"Редагувати Накладну №{Model.InvoiceId}";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+<hr />
+
+<form asp-action="Edit" asp-route-id="@Model.InvoiceId" method="post" id="invoiceForm">
+    @Html.AntiForgeryToken()
+    <div asp-validation-summary="All" class="text-danger mb-3"></div> 
+    <input type="hidden" asp-for="InvoiceId" /> 
+
+    <h4>Основні дані</h4>
+    <div class="row g-3 mb-3 align-items-end">
+        <div class="col-md-3">
+            <label asp-for="Date" class="form-label"></label>
+            <input asp-for="Date" class="form-control" value="@Model.Date.ToString("yyyy-MM-dd")" type="date" />
+            <span asp-validation-for="Date" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Type" class="form-label"></label>
+            <select asp-for="Type" asp-items="@Model.AvailableTypes" class="form-select" id="invoiceTypeSelect">
+            </select>
+            <span asp-validation-for="Type" class="text-danger"></span>
+        </div>
+        <div class="col-md-3">
+            <label asp-for="Status" class="form-label"></label>
+            <input asp-for="Status" class="form-control" readonly />
+        </div>
+    </div>
+
+    <h4>Сторони, Склади, Виконавці</h4>
+    <div class="row g-3 mb-3">
+        <div class="col-md-6 form-group" id="counterpartyDiv" style="display: none;">
+            <label asp-for="CounterpartyName" class="form-label"></label>
+            <select asp-for="CounterpartyName" asp-items="@Model.AvailableCounterparties" class="form-select">
+                <option value="">-- Оберіть контрагента --</option>
+            </select>
+            <span asp-validation-for="CounterpartyName" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 form-group" id="senderStorageDiv" style="display: none;">
+            <label asp-for="SenderStorageName" class="form-label"></label>
+            <select asp-for="SenderStorageName" asp-items="@Model.AvailableStorages" class="form-select">
+                <option value="">-- Оберіть склад --</option>
+            </select>
+            <span asp-validation-for="SenderStorageName" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 form-group" id="receiverStorageDiv" style="display: none;">
+            <label asp-for="ReceiverStorageName" class="form-label"></label>
+            <select asp-for="ReceiverStorageName" asp-items="@Model.AvailableStorages" class="form-select">
+                <option value="">-- Оберіть склад --</option>
+            </select>
+            <span asp-validation-for="ReceiverStorageName" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 form-group" id="senderKeeperDiv" style="display: none;">
+            <label asp-for="SenderKeeperPhone" class="form-label"></label>
+            <select asp-for="SenderKeeperPhone" asp-items="@Model.AvailableKeepers" class="form-select">
+                <option value="">-- Оберіть комірника --</option>
+            </select>
+            <span asp-validation-for="SenderKeeperPhone" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 form-group" id="receiverKeeperDiv" style="display: none;">
+            <label asp-for="ReceiverKeeperPhone" class="form-label"></label>
+            <select asp-for="ReceiverKeeperPhone" asp-items="@Model.AvailableKeepers" class="form-select">
+                <option value="">-- Оберіть комірника --</option>
+            </select>
+            <span asp-validation-for="ReceiverKeeperPhone" class="text-danger"></span>
+        </div>
+    </div>
+
+
+    <h4 class="mt-4">Товарні позиції</h4>
+    <table class="table table-sm table-bordered" id="listEntriesTable">
+        <thead class="table-light">
+            <tr>
+                <th>Товар</th>
+                <th style="width: 120px;">Кількість</th>
+                <th style="width: 100px;">Од. вим.</th>
+                <th style="width: 150px;">Ціна</th>
+                <th style="width: 150px;">Сума</th>
+                <th style="width: 50px;"></th> 
+            </tr>
+        </thead>
+        <tbody id="listEntriesBody">
+            @for (int i = 0; i < Model.ListEntries.Count; i++)
+            {
+                <tr class="@(Model.ListEntries[i].IsMarkedForDeletion ? "d-none" : "")">
+                    <td>
+                        @Html.DisplayFor(m => Model.ListEntries[i].ProductName)
+                        <input type="hidden" asp-for="@Model.ListEntries[i].ProductName" />
+                        <input type="hidden" asp-for="@Model.ListEntries[i].IsMarkedForDeletion" class="delete-marker" />
+                        <input type="hidden" name="ListEntries.Index" value="@i" /> 
+                    </td>
+                    <td><input asp-for="@Model.ListEntries[i].Count" type="number" class="form-control entry-count" step="any" min="0.01" /></td>
+                    <td class="entry-unit">@Html.DisplayFor(m => Model.ListEntries[i].UnitName)</td>
+                    <td><input asp-for="@Model.ListEntries[i].Price" type="number" class="form-control entry-price" step="any" min="0" /></td>
+                    <td class="entry-total text-end">@Model.ListEntries[i].LineTotal.ToString("N2")</td>
+                    <td><button type="button" class="btn btn-sm btn-outline-danger remove-entry-btn"><i class="bi bi-trash"></i></button></td>
+                </tr>
+            }
+        </tbody>
+        <tfoot>
+            <tr> <td colspan="6"> <button type="button" id="addEntryButton" class="..."> Додати позицію </button> </td> </tr>
+        </tfoot>
+    </table>
+    <div id="listEntriesError" class="text-danger">@Html.ValidationMessage("ListEntries")</div>
+
+    <div class="mb-3 mt-4">
+        <button type="submit" class="btn btn-primary">Зберегти зміни</button>
+        <a asp-action="Details" asp-route-id="@Model.InvoiceId" class="btn btn-secondary">Скасувати</a>
+    </div>
+
+</form>
+
+<table style="display:none;">
+    <tr id="newEntryTemplate">
+        <td>
+            <select name="ListEntries[#index#].ProductName" class="form-select product-select">
+                <option value="">-- Оберіть товар --</option>
+                @foreach (var item in (SelectList)Model.AvailableProducts)
+                {
+                    <option value="@item.Value">@item.Text</option>
+                }
+            </select>
+            <input type="hidden" name="ListEntries.Index" value="#index#" />
+            <input type="hidden" name="ListEntries[#index#].ListEntryId" value="0" />
+            <input type="hidden" name="ListEntries[#index#].IsMarkedForDeletion" value="false" class="delete-marker" />
+        </td>
+        <td><input type="number" name="ListEntries[#index#].Count" class="form-control entry-count" step="any" min="0.01" value="1" /></td>
+        <td class="entry-unit">---</td>
+        <td><input type="number" name="ListEntries[#index#].Price" class="form-control entry-price" step="any" min="0" value="0" /></td>
+        <td class="entry-total text-end">0.00</td>
+        <td><button type="button" class="btn btn-sm btn-outline-danger remove-entry-btn"><i class="bi bi-trash"></i></button></td>
+    </tr>
+</table>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function () {
+            function toggleInvoiceFields() {
+                var invoiceType = $('#invoiceTypeSelect').val();
+                var typeEnum = {
+                    Supply: '@InvoiceType.supply.ToString()',
+                    Release: '@InvoiceType.release.ToString()',
+                    Transfer: '@InvoiceType.transfer.ToString()'
+                };
+
+                var needsCounterparty = (invoiceType == typeEnum.Supply || invoiceType == typeEnum.Release);
+                var needsSenderStorage = (invoiceType == typeEnum.Release || invoiceType == typeEnum.Transfer);
+                var needsReceiverStorage = (invoiceType == typeEnum.Supply || invoiceType == typeEnum.Transfer);
+                var needsSenderKeeper = needsSenderStorage;
+                var needsReceiverKeeper = needsReceiverStorage;
+                var needsPrice = needsCounterparty;
+
+                $('#counterpartyDiv').toggle(needsCounterparty);
+                $('#senderStorageDiv').toggle(needsSenderStorage);
+                $('#receiverStorageDiv').toggle(needsReceiverStorage);
+                $('#senderKeeperDiv').toggle(needsSenderKeeper);
+                $('#receiverKeeperDiv').toggle(needsReceiverKeeper);
+
+                 $('#listEntriesTable th:nth-child(4)').toggle(needsPrice);
+                 $('#listEntriesTable th:nth-child(5)').toggle(needsPrice);
+                 $('#listEntriesTable td:nth-child(4)').toggle(needsPrice);
+                 $('#listEntriesTable td:nth-child(5)').toggle(needsPrice);
+            }
+
+            toggleInvoiceFields();
+            $('#invoiceTypeSelect').on('change', toggleInvoiceFields);
+
+            var entryIndex = 0;
+            function updateEntryIndexes() {
+                $('#listEntriesBody tr').each(function(index, tr) {
+                    $(tr).find(':input').each(function() {
+                        var name = $(this).attr('name');
+                        if (name) {
+                            var newName = name.replace(/\[.*?\]/, '[' + index + ']');
+                            $(this).attr('name', newName);
+                        }
+                    });
+                     $(tr).find('input[name$=".Index"]').val(index);
+                });
+                entryIndex = $('#listEntriesBody tr').length;
+            }
+
+            $('#addEntryButton').on('click', function () {
+                var newRow = $('#newEntryTemplate').clone().removeAttr('id');
+                newRow.html(newRow.html().replace(/#index#/g, entryIndex));
+                $('#listEntriesBody').append(newRow);
+                entryIndex++;
+                 updateEntryIndexes();
+                 $('#listEntriesError').text('');
+            });
+
+            $('#listEntriesBody').on('click', '.remove-entry-btn', function () {
+                var tr = $(this).closest('tr');
+                var deleteMarkerInput = tr.find('.delete-marker'); 
+
+                deleteMarkerInput.val('true'); 
+                tr.addClass('d-none'); 
+
+                updateEntryIndexes(); 
+            });
+
+            $('#listEntriesBody').on('input', '.entry-count, .entry-price', function () {
+                var tr = $(this).closest('tr');
+                var count = parseFloat(tr.find('.entry-count').val()?.replace(',', '.')) || 0;
+                var price = parseFloat(tr.find('.entry-price').val()?.replace(',', '.')) || 0;
+                var total = (count * price).toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+                tr.find('.entry-total').text(total);
+            });
+
+            toggleInvoiceFields();
+            updateEntryIndexes();
+        });
+    </script>
+ }

@@ -17,7 +17,7 @@
                 <a class="nav-link" asp-controller="StorageProduct" asp-action="Index">Поточні залишки</a> 
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Documents" asp-action="Invoices">Накладні/Рух</a> 
+                <a class="nav-link" asp-controller="Invoice" asp-action="Index">Накладні</a> 
             </li>
         }
 
@@ -46,19 +46,6 @@
         @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item nav-section-header">
-                Звіти
-            </li>
-            <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Reports" asp-action="StockReport">Звіт по залишках</a> 
-            </li>
-            <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Reports" asp-action="MovementReport">Звіт по руху</a> 
-            </li>
-        }
-
-        @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
-        {
-            <li class="nav-item nav-section-header">
                 Персонал 
             </li>
             <li class="nav-item ms-2">
@@ -75,10 +62,5 @@
                 <a class="nav-link" asp-controller="Admin" asp-action="Users">Облікові записи</a>
             </li>
         }
-
-        <li class="nav-item" style="margin-top: 2rem;">
-            <a class="nav-link" asp-controller="UserProfile" asp-action="Index">Мій профіль</a>
-        </li>
-
     </nav>
 }

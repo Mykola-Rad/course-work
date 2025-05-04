@@ -1,0 +1,44 @@
+﻿@model IMS.Models.Invoice
+
+@{
+    ViewData["Title"] = $"Видалити Накладну №{Model.InvoiceId}";
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h3 class="text-danger">Ви впевнені, що хочете видалити цю чернетку накладної?</h3>
+<p class="text-danger">Ця дія є незворотною!</p>
+
+<div>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-3">ID Накладної</dt>
+        <dd class="col-sm-9">@Model.InvoiceId</dd>
+
+        <dt class="col-sm-3">Дата</dt>
+        <dd class="col-sm-9">@Model.Date.ToString("dd.MM.yyyy")</dd>
+
+        <dt class="col-sm-3">Тип</dt>
+        <dd class="col-sm-9">@Model.Type</dd>
+
+        <dt class="col-sm-3">Статус</dt>
+        <dd class="col-sm-9">@Model.Status</dd>
+
+        <dt class="col-sm-3">Контрагент</dt>
+        <dd class="col-sm-9">@(Model.CounterpartyName ?? "-")</dd>
+
+        <dt class="col-sm-3">Склад-Відправник</dt>
+        <dd class="col-sm-9">@(Model.SenderStorageName ?? "-")</dd>
+
+        <dt class="col-sm-3">Склад-Одержувач</dt>
+        <dd class="col-sm-9">@(Model.ReceiverStorageName ?? "-")</dd>
+    </dl>
+
+    <form asp-action="Delete" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="InvoiceId" />
+        <button type="submit" class="btn btn-danger">Так, Видалити Чернетку</button> |
+        <a asp-action="Details" asp-route-id="@Model.InvoiceId" class="btn btn-secondary">Скасувати</a>
+    </form>
+</div>

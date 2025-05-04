@@ -1,0 +1,84 @@
+﻿@model List<IMS.Models.Invoice>
+ @using IMS.Models
+
+@{
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    var typesInList = Model.Select(i => i.Type).Distinct().ToList();
+    bool showAllColumns = typesInList.Count > 1 || !typesInList.Any();
+    bool showSupplyCols = showAllColumns || typesInList.Contains(InvoiceType.supply);
+    bool showReleaseCols = showAllColumns || typesInList.Contains(InvoiceType.release);
+    bool showTransferCols = showAllColumns || typesInList.Contains(InvoiceType.transfer);
+}
+
+<table class="table table-sm table-hover table-bordered mt-2">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Дата</th>
+            @if (showAllColumns)
+            {
+                <th>Тип</th>
+            }
+            <th>Статус</th>
+            @if (showSupplyCols || showReleaseCols)
+            {
+                <th>Контрагент</th>
+            } 
+            @if (showReleaseCols || showTransferCols)
+            {
+                <th>Зі складу</th>
+            } 
+            @if (showSupplyCols || showTransferCols)
+            {
+                <th>На склад</th>
+            }
+            <th style="width: 180px;">Дії</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model) 
+        {
+            <tr>
+                <td>@item.InvoiceId</td>
+                <td>@item.Date.ToString("dd.MM.yyyy")</td>
+                @if (showAllColumns)
+                {
+                    <td>@item.Type</td>
+                }
+                <td>@item.Status</td>
+
+                @if (showSupplyCols || showReleaseCols)
+                {
+                    <td>
+                        @if (!string.IsNullOrEmpty(item.CounterpartyName))
+                        {
+                            <a asp-controller="Counterparty" asp-action="Details" asp-route-name="@item.CounterpartyName">@item.CounterpartyName</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted">-</span>
+                        }
+                    </td>
+                }
+                @if (showReleaseCols || showTransferCols)
+                {
+                    <td>@(item.SenderStorageName ?? "-")</td>
+                }
+                @if (showSupplyCols || showTransferCols)
+                {
+                    <td>@(item.ReceiverStorageName ?? "-")</td>
+                }
+                <td>
+                    <a asp-controller="Invoice" asp-action="Details" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-info">Деталі</a>
+                    @if (canManage && item.Status == InvoiceStatus.draft)
+                    {
+                        <text> | </text>
+                        <a asp-controller="Invoice" asp-action="Edit" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-secondary">Редаг.</a>
+                        <text> | </text>
+                        <a asp-controller="Invoice" asp-action="Delete" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-danger">Видал.</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
