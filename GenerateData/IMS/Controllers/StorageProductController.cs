@@ -11,6 +11,7 @@ using System.Security.Claims;
 namespace IMS.Controllers
 {
     [Authorize(Policy = "RequireManagerRole")]
+    [Route("StorageProduct")]
     public class StorageProductController : Controller
     {
         private readonly AppDbContext _context;
