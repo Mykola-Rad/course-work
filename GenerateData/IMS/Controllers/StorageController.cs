@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using IMS.Data; 
 using IMS.Models;
 using Npgsql;
+using IMS.ViewModels;
 
 namespace IMS.Controllers
 {
@@ -39,32 +40,69 @@ namespace IMS.Controllers
         }
 
         // GET: Storage/Details/НазваСкладу
-        public async Task<IActionResult> Details(string name) 
+        [HttpGet("Details/{name}")]
+        [Authorize(Policy = "RequireStorageKeeperRole")]
+        public async Task<IActionResult> Details(string name)
         {
-            if (string.IsNullOrEmpty(name))
-            {
-                return NotFound("Не вказано назву складу.");
-            }
+            if (string.IsNullOrEmpty(name)) return BadRequest();
 
-            ViewData["Title"] = $"Деталі складу: {name}"; 
+            ViewData["Title"] = $"Деталі складу: {name}";
 
             try
             {
-                var storage = await _context.Storages 
-                    .Include(s => s.StorageProducts) 
-                        .ThenInclude(sp => sp.ProductNameNavigation) 
-                            .ThenInclude(p => p.UnitCodeNavigation)
-                    .Include(s => s.StorageKeepers)
-                    .FirstOrDefaultAsync(m => m.Name == name); 
+                var storage = await _context.Storages
+                                            .AsNoTracking()
+                                            .FirstOrDefaultAsync(m => m.Name == name);
 
                 if (storage == null)
                 {
                     _logger.LogWarning("Спроба перегляду деталей неіснуючого складу: {StorageName}", name);
                     TempData["ErrorMessage"] = $"Склад з назвою '{name}' не знайдено.";
-                    return RedirectToAction(nameof(Index)); 
+                    return RedirectToAction(nameof(Index));
                 }
 
-                return View(storage);
+                var viewModel = new StorageDetailsViewModel
+                {
+                    Storage = storage,
+                    RelatedInvoices = new List<Invoice>(),
+                };
+
+
+                viewModel.Storage.StorageProducts = await _context.StorageProducts
+                        .Where(sp => sp.StorageName == name)
+                        .Include(sp => sp.ProductNameNavigation)
+                            .ThenInclude(p => p.UnitCodeNavigation)
+                        .OrderBy(sp => sp.ProductName)
+                        .AsNoTracking()
+                        .ToListAsync();
+
+                viewModel.Storage.StorageKeepers = await _context.StorageKeepers
+                        .Where(sk => sk.StorageName == name)
+                        .Include(sk => sk.User)
+                        .OrderBy(sk => sk.LastName).ThenBy(sk => sk.FirstName)
+                        .AsNoTracking()
+                        .ToListAsync();
+
+                var senderInvoices = await _context.Invoices
+                                           .Where(i => i.SenderStorageName == name)
+                                           .Include(i => i.ListEntries)
+                                           .AsNoTracking()
+                                           .ToListAsync();
+                var receiverInvoices = await _context.Invoices
+                                            .Where(i => i.ReceiverStorageName == name)
+                                            .Include(i => i.ListEntries)
+                                            .AsNoTracking()
+                                            .ToListAsync();
+
+                viewModel.RelatedInvoices = senderInvoices
+                                          .Union(receiverInvoices)
+                                          .DistinctBy(i => i.InvoiceId)
+                                          .OrderByDescending(i => i.Date)
+                                          .ThenByDescending(i => i.InvoiceId)
+                                          .ToList();
+
+
+                return View(viewModel); 
             }
             catch (Exception ex)
             {

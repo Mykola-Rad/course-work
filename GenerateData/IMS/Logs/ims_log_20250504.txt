@@ -297,3 +297,207 @@ System.InvalidOperationException: The view 'Index' was not found. The following 
 2025-05-04 13:31:15.290 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Delete/+38909888760 responded 302 in 12.1715 ms
 2025-05-04 13:31:18.617 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 24.1927 ms
 2025-05-04 13:33:04.330 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 186.9317 ms
+2025-05-04 13:45:17.104 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 13:45:17.167 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 13:45:17.260 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 13:45:17.263 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 13:45:17.265 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 13:45:18.324 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 287.4559 ms
+2025-05-04 13:45:18.366 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 200 in 22.2430 ms
+2025-05-04 13:45:18.498 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 200 in 130.0921 ms
+2025-05-04 13:45:23.854 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties responded 200 in 2723.9457 ms
+2025-05-04 13:45:27.411 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 13:45:27.829 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties/Details/Beier, Blanda and Collier responded 200 in 567.8695 ms
+2025-05-04 13:45:48.440 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /ProductUnits responded 200 in 162.9223 ms
+2025-05-04 13:45:50.009 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 207.1717 ms
+2025-05-04 13:45:51.377 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Product responded 200 in 413.2055 ms
+2025-05-04 13:45:52.230 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 99.5417 ms
+2025-05-04 13:45:54.025 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 13:45:54.180 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 210.8949 ms
+2025-05-04 13:45:58.505 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Details/+380293940819 responded 200 in 79.1482 ms
+2025-05-04 13:46:01.136 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 26.9474 ms
+2025-05-04 13:46:03.821 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Create responded 200 in 125.9902 ms
+2025-05-04 13:46:03.920 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 1.0419 ms
+2025-05-04 13:46:03.925 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 1.3099 ms
+2025-05-04 13:46:14.018 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP POST /StorageKeepers/Create responded 302 in 255.4140 ms
+2025-05-04 13:46:14.057 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 25.1844 ms
+2025-05-04 13:46:21.810 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Edit/+380328740796 responded 200 in 96.4804 ms
+2025-05-04 13:46:25.338 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP POST /StorageKeepers/Edit/+380328740796 responded 302 in 48.2852 ms
+2025-05-04 13:46:25.406 +03:00 [ERR] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers responded 500 in 52.1382 ms
+System.InvalidOperationException: The partial view '_StatusMessagePartial' was not found. The following locations were searched:
+/Views/StorageKeeper/_StatusMessagePartial.cshtml
+/Views/Shared/_StatusMessagePartial.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.HtmlHelper.RenderPartialCoreAsync(String partialViewName, Object model, ViewDataDictionary viewData, TextWriter writer)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.HtmlHelper.PartialAsync(String partialViewName, Object model, ViewDataDictionary viewData)
+   at AspNetCoreGeneratedDocument.Views_StorageKeeper_Index.ExecuteAsync() in D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS\Views\StorageKeeper\Index.cshtml:line 5
+   at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderPageCoreAsync(IRazorPage page, ViewContext context)
+   at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderPageAsync(IRazorPage page, ViewContext context, Boolean invokeViewStarts)
+   at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderAsync(ViewContext context)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ViewContext viewContext, String contentType, Nullable`1 statusCode)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ViewContext viewContext, String contentType, Nullable`1 statusCode)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ActionContext actionContext, IView view, ViewDataDictionary viewData, ITempDataDictionary tempData, String contentType, Nullable`1 statusCode)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+2025-05-04 13:46:25.469 +03:00 [ERR] (Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddleware) An unhandled exception has occurred while executing the request.
+System.InvalidOperationException: The partial view '_StatusMessagePartial' was not found. The following locations were searched:
+/Views/StorageKeeper/_StatusMessagePartial.cshtml
+/Views/Shared/_StatusMessagePartial.cshtml
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.HtmlHelper.RenderPartialCoreAsync(String partialViewName, Object model, ViewDataDictionary viewData, TextWriter writer)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.HtmlHelper.PartialAsync(String partialViewName, Object model, ViewDataDictionary viewData)
+   at AspNetCoreGeneratedDocument.Views_StorageKeeper_Index.ExecuteAsync() in D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS\Views\StorageKeeper\Index.cshtml:line 5
+   at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderPageCoreAsync(IRazorPage page, ViewContext context)
+   at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderPageAsync(IRazorPage page, ViewContext context, Boolean invokeViewStarts)
+   at Microsoft.AspNetCore.Mvc.Razor.RazorView.RenderAsync(ViewContext context)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ViewContext viewContext, String contentType, Nullable`1 statusCode)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ViewContext viewContext, String contentType, Nullable`1 statusCode)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewExecutor.ExecuteAsync(ActionContext actionContext, IView view, ViewDataDictionary viewData, ITempDataDictionary tempData, String contentType, Nullable`1 statusCode)
+   at Microsoft.AspNetCore.Mvc.ViewFeatures.ViewResultExecutor.ExecuteAsync(ActionContext context, ViewResult result)
+   at Microsoft.AspNetCore.Mvc.ViewResult.ExecuteResultAsync(ActionContext context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResultFilterAsync>g__Awaited|30_0[TFilter,TFilterAsync](ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResultExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.ResultNext[TFilter,TFilterAsync](State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.InvokeResultFilters()
+--- End of stack trace from previous location ---
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeNextResourceFilter>g__Awaited|25_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Rethrow(ResourceExecutedContextSealed context)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeFilterPipelineAsync>g__Awaited|20_0(ResourceInvoker invoker, Task lastTask, State next, Scope scope, Object state, Boolean isCompleted)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Mvc.Infrastructure.ResourceInvoker.<InvokeAsync>g__Awaited|17_0(ResourceInvoker invoker, Task task, IDisposable scope)
+   at Microsoft.AspNetCore.Authorization.AuthorizationMiddleware.Invoke(HttpContext context)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware.Invoke(HttpContext context)
+   at Serilog.AspNetCore.RequestLoggingMiddleware.Invoke(HttpContext httpContext)
+   at Microsoft.AspNetCore.Diagnostics.DeveloperExceptionPageMiddlewareImpl.Invoke(HttpContext context)
+2025-05-04 13:46:54.188 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 13:46:54.249 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 13:46:54.361 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 13:46:54.364 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 13:46:54.371 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 13:46:57.946 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers responded 200 in 3295.3948 ms
+2025-05-04 13:46:57.973 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 4.2128 ms
+2025-05-04 13:46:57.981 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 0.9315 ms
+2025-05-04 13:47:21.591 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers/Create responded 200 in 216.6833 ms
+2025-05-04 13:47:27.700 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /StorageKeepers responded 200 in 653.9077 ms
+2025-05-04 13:47:39.834 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 250.1380 ms
+2025-05-04 13:47:42.111 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 13:47:42.379 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 412.0129 ms
+2025-05-04 13:47:47.916 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Catalog/Counterparties responded 404 in 1.0004 ms
+2025-05-04 13:47:49.776 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Catalog/Counterparties responded 404 in 0.5429 ms
+2025-05-04 13:47:54.565 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties responded 200 in 334.5407 ms
+2025-05-04 13:47:54.668 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 0.7103 ms
+2025-05-04 13:47:54.674 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 0.4316 ms
+2025-05-04 13:47:56.746 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 13:47:57.081 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties/Details/Auer, Greenholt and Waelcha responded 200 in 391.6088 ms
+2025-05-04 13:55:21.219 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 13:55:21.282 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 13:55:21.377 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 13:55:21.383 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 13:55:21.386 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 13:55:22.349 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 241.2176 ms
+2025-05-04 13:55:22.381 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 2.0813 ms
+2025-05-04 13:55:22.381 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 5.3871 ms
+2025-05-04 14:17:24.182 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 2175.0305 ms
+2025-05-04 14:17:24.232 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 0.4267 ms
+2025-05-04 14:17:24.238 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 0.4887 ms
+2025-05-04 14:17:27.622 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 14:17:27.896 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 526.2210 ms
+2025-05-04 14:17:36.014 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Invoice/Details/847 responded 404 in 0.5966 ms
+2025-05-04 14:17:41.076 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties responded 200 in 425.3663 ms
+2025-05-04 14:17:43.064 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 14:17:43.296 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties/Details/Auer, Greenholt and Waelcha responded 200 in 269.6979 ms
+2025-05-04 14:17:45.972 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Invoice/Details/847 responded 404 in 0.6319 ms
+2025-05-04 14:17:48.424 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties/Details/Auer, Greenholt and Waelcha responded 200 in 28.8522 ms
+2025-05-04 14:33:50.260 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 14:33:50.318 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 14:33:50.420 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 14:33:50.422 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 14:33:50.423 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 14:33:52.863 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 14:33:53.821 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties/Details/Auer, Greenholt and Waelcha responded 200 in 2964.2246 ms
+2025-05-04 14:33:53.861 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 3.4694 ms
+2025-05-04 14:33:53.875 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 0.5711 ms
+2025-05-04 15:07:12.010 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 38.8064 ms
+2025-05-04 15:07:12.068 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 0.3282 ms
+2025-05-04 15:07:12.076 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 0.7306 ms
+2025-05-04 15:07:14.324 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 328.5133 ms
+2025-05-04 15:07:16.474 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 15:07:17.299 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 973.0289 ms
+2025-05-04 15:07:29.517 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Invoice/Create responded 404 in 0.6493 ms
+2025-05-04 15:07:31.889 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 469.0704 ms
+2025-05-04 15:08:12.408 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 15:08:12.471 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 15:08:12.583 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 15:08:12.585 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 15:08:12.587 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 15:08:14.853 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 15:08:16.448 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 3655.2090 ms
+2025-05-04 15:09:07.006 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 375.8121 ms
+2025-05-04 15:09:10.323 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 1096.5275 ms
+2025-05-04 15:09:16.334 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties responded 200 in 377.9311 ms
+2025-05-04 15:11:04.534 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 15:11:04.595 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 15:11:04.688 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 15:11:04.691 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 15:11:04.693 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 15:11:08.103 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties responded 200 in 2873.0743 ms
+2025-05-04 15:11:14.088 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties responded 200 in 366.7864 ms
+2025-05-04 15:11:15.919 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 15:11:16.303 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties/Details/Auer, Greenholt and Waelcha responded 200 in 588.1046 ms
+2025-05-04 15:11:17.641 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Counterparties responded 200 in 188.4348 ms
+2025-05-04 15:11:18.832 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 238.0559 ms
+2025-05-04 15:11:20.039 +03:00 [WRN] (Microsoft.EntityFrameworkCore.Query) Compiling a query which loads related collections for more than one collection navigation, either via 'Include' or through projection, but no 'QuerySplittingBehavior' has been configured. By default, Entity Framework will use 'QuerySplittingBehavior.SingleQuery', which can potentially result in slow query performance. See https://go.microsoft.com/fwlink/?linkid=2134277 for more information. To identify the query that's triggering this warning call 'ConfigureWarnings(w => w.Throw(RelationalEventId.MultipleCollectionIncludeWarning))'.
+2025-05-04 15:11:40.734 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 200 in 20767.3354 ms
+2025-05-04 15:16:58.446 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 15:16:58.506 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 15:16:58.593 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 15:16:58.595 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 15:16:58.597 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 15:16:59.087 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage/Details responded 404 in 64.6909 ms
+2025-05-04 15:17:31.206 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 15:17:31.277 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 15:17:31.374 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 15:17:31.376 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 15:17:31.378 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 15:17:32.048 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 302 in 61.6628 ms
+2025-05-04 15:17:32.454 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Account/Login responded 200 in 378.0613 ms
+2025-05-04 15:17:32.482 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/dist/css/bootstrap.min.css responded 304 in 3.5373 ms
+2025-05-04 15:17:32.488 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /css/site.css responded 304 in 0.6054 ms
+2025-05-04 15:17:32.490 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/jquery/dist/jquery.min.js responded 304 in 0.3172 ms
+2025-05-04 15:17:32.493 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/dist/js/bootstrap.bundle.min.js responded 304 in 0.2023 ms
+2025-05-04 15:17:32.493 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/jquery-validation/dist/jquery.validate.min.js responded 304 in 0.3086 ms
+2025-05-04 15:17:32.493 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /js/site.js responded 304 in 0.1645 ms
+2025-05-04 15:17:32.493 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.min.js responded 304 in 0.1758 ms
+2025-05-04 15:17:47.510 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 15:17:47.599 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 15:17:47.709 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 15:17:47.713 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 15:17:47.716 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 15:18:15.101 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: https://localhost:7278
+2025-05-04 15:18:15.166 +03:00 [INF] (Microsoft.Hosting.Lifetime) Now listening on: http://localhost:5133
+2025-05-04 15:18:15.255 +03:00 [INF] (Microsoft.Hosting.Lifetime) Application started. Press Ctrl+C to shut down.
+2025-05-04 15:18:15.258 +03:00 [INF] (Microsoft.Hosting.Lifetime) Hosting environment: Development
+2025-05-04 15:18:15.261 +03:00 [INF] (Microsoft.Hosting.Lifetime) Content root path: D:\Універ\3 курс\6 семестр\Курсова БД\GenerateData\IMS
+2025-05-04 15:18:16.070 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET / responded 200 in 291.7019 ms
+2025-05-04 15:18:16.109 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/css/bootstrap.min.css responded 304 in 3.3902 ms
+2025-05-04 15:18:16.117 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /lib/bootstrap/js/bootstrap.bundle.min.js responded 304 in 1.5266 ms
+2025-05-04 15:18:21.304 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 2511.8116 ms
+2025-05-04 15:18:23.673 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Details/Storage #1 responded 200 in 676.1877 ms
+2025-05-04 15:18:33.645 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 302.0381 ms
+2025-05-04 15:18:38.613 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Details/Storage #1 responded 200 in 75.3636 ms
+2025-05-04 15:18:44.723 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Invoice/Details/847 responded 404 in 1.2614 ms
+2025-05-04 15:18:46.701 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Details/Storage #1 responded 200 in 43.2747 ms
+2025-05-04 15:21:38.103 +03:00 [INF] (Serilog.AspNetCore.RequestLoggingMiddleware) HTTP GET /Storage responded 200 in 97.8763 ms
