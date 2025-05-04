@@ -59,16 +59,20 @@
         @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {
             <li class="nav-item nav-section-header">
+                Персонал 
+            </li>
+            <li class="nav-item ms-2">
+                <a class="nav-link" asp-controller="StorageKeeper" asp-action="Index">Комірники</a>
+            </li>
+        }
+
+        @if (User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item nav-section-header">
                 Адміністрування
             </li>
             <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Admin" asp-action="Users">Персонал/Користувачі</a> 
-            </li>
-        }
-        @if (User.IsInRole(UserRole.owner.ToString()))
-        {
-            <li class="nav-item ms-2">
-                <a class="nav-link" asp-controller="Admin" asp-action="Settings">Налаштування системи</a>
+                <a class="nav-link" asp-controller="Admin" asp-action="Users">Облікові записи</a>
             </li>
         }
 
