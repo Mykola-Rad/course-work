@@ -5,6 +5,7 @@ using IMS.Data;
 using IMS.Models;
 using IMS.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Npgsql;
 
 namespace IMS.Controllers
 {
@@ -673,28 +674,26 @@ namespace IMS.Controllers
                 return RedirectToAction(nameof(Index));
             }
 
-            if (invoice.Status != InvoiceStatus.processing)
-            {
-                TempData["ErrorMessage"] = $"Неможливо завершити накладну №{id}, оскільки її статус '{invoice.Status}', а не '{InvoiceStatus.processing}'.";
-                return RedirectToAction(nameof(Details), new { id = id });
-            }
-
             try
             {
-                invoice.Status = InvoiceStatus.processed; 
-                _context.Invoices.Update(invoice);
-                await _context.SaveChangesAsync(); 
+                await _context.Database.ExecuteSqlInterpolatedAsync($"SELECT public.process_invoice({id});");
 
-                _logger.LogInformation("Invoice {InvoiceId} COMPLETED by user {User}", id, User.Identity?.Name ?? "Unknown");
-                TempData["SuccessMessage"] = $"Накладну №{id} успішно завершено. Статус: {invoice.Status}. Залишки оновлено (БД).";
+                TempData["SuccessMessage"] = $"Накладну №{id} успішно завершено. Залишки оновлено.";
+                _logger.LogInformation("Invoice {InvoiceId} completed via SP by user {User}", id, User.Identity?.Name ?? "System");
+
             }
-            catch (Exception ex)
+            catch (PostgresException pgEx) 
             {
-                _logger.LogError(ex, "Помилка завершення накладної {InvoiceId}", id);
-                TempData["ErrorMessage"] = "Не вдалося завершити накладну.";
+                _logger.LogError(pgEx, "PostgreSQL error completing invoice {InvoiceId} via SP. SQLState: {SqlState}. Message: {ErrorMessage}", id, pgEx.SqlState, pgEx.MessageText);
+                TempData["ErrorMessage"] = $"Помилка завершення накладної №{id}: {pgEx.MessageText}";
+            }
+            catch (Exception ex) 
+            {
+                _logger.LogError(ex, "General error completing invoice {InvoiceId} via SP", id);
+                TempData["ErrorMessage"] = "Не вдалося завершити накладну через системну помилку.";
             }
 
-            return RedirectToAction(nameof(Details), new { id = id }); 
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
         private async Task PopulateInvoiceDropdowns(InvoiceViewModel viewModel)
