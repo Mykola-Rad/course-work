@@ -1,0 +1,170 @@
+﻿@model IMS.Models.Invoice
+ @using IMS.Models
+
+@{
+    ViewData["Title"] = $"Накладна №{Model.InvoiceId} від {Model.Date.ToString("dd.MM.yyyy")}";
+    Layout = "_Layout";
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    bool canProcess = User.IsInRole(UserRole.storage_keeper.ToString()) || canManage;
+}
+
+<h1>@ViewData["Title"]</h1>
+<span class="badge fs-5 @(Model.Status == InvoiceStatus.processed ? "text-bg-success" : (Model.Status == InvoiceStatus.cancelled ? "text-bg-danger" : (Model.Status == InvoiceStatus.processing ? "text-bg-info" : "text-bg-secondary")))">
+    @Model.Status
+</span>
+<span class="badge fs-5 text-bg-light border text-dark ms-2">@Model.Type</span>
+
+<div class="row mt-3 mb-3">
+    <div class="col-md-6">
+        <h4>Основні дані</h4>
+        <dl class="row">
+            <dt class="col-sm-4">Номер</dt>
+            <dd class="col-sm-8">@Model.InvoiceId</dd>
+            <dt class="col-sm-4">Дата</dt>
+            <dd class="col-sm-8">@Model.Date.ToString("dd.MM.yyyy")</dd>
+            <dt class="col-sm-4">Контрагент</dt>
+            <dd class="col-sm-8">
+                @if (!string.IsNullOrEmpty(Model.CounterpartyName))
+                {
+                    <a asp-controller="Counterparty" asp-action="Details" asp-route-name="@Model.CounterpartyName">@Model.CounterpartyName</a>
+                }
+                else
+                {
+                    <span class="text-muted">-</span>
+                }
+            </dd>
+        </dl>
+    </div>
+    <div class="col-md-6">
+        <h4>Деталі Відправлення/Отримання</h4>
+        <dl class="row">
+            <dt class="col-sm-4">Склад-Відправник</dt>
+            <dd class="col-sm-8">
+                @if (!string.IsNullOrEmpty(Model.SenderStorageName))
+                {
+                    <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.SenderStorageName">@Model.SenderStorageName</a>
+                }
+                else
+                {
+                    <span class="text-muted">-</span>
+                }
+            </dd>
+            <dt class="col-sm-4">Комірник-Відправник</dt>
+            <dd class="col-sm-8">
+                @if (!string.IsNullOrEmpty(Model.SenderKeeperPhone))
+                {
+                    <a asp-controller="StorageKeeper" asp-action="Details" asp-route-phoneNumber="@Model.SenderKeeperPhone">@Model.SenderKeeperPhone</a>
+                }
+                else
+                {
+                    <span class="text-muted">-</span>
+                }
+            </dd>
+            <dt class="col-sm-4">Склад-Одержувач</dt>
+            <dd class="col-sm-8">
+                @if (!string.IsNullOrEmpty(Model.ReceiverStorageName))
+                {
+                    <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.ReceiverStorageName">@Model.ReceiverStorageName</a>
+                }
+                else
+                {
+                    <span class="text-muted">-</span>
+                }
+            </dd>
+            <dt class="col-sm-4">Комірник-Одержувач</dt>
+            <dd class="col-sm-8">
+                @if (!string.IsNullOrEmpty(Model.ReceiverKeeperPhone))
+                {
+                    <a asp-controller="StorageKeeper" asp-action="Details" asp-route-phoneNumber="@Model.ReceiverKeeperPhone">@Model.ReceiverKeeperPhone</a>
+                }
+                else
+                {
+                    <span class="text-muted">-</span>
+                }
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<h4>Позиції накладної</h4>
+<table class="table table-bordered table-sm">
+    <thead class="table-light">
+        <tr>
+            <th>Товар</th>
+            <th class="text-end">Кількість</th>
+            <th>Од. вим.</th>
+            <th class="text-end">Ціна</th>
+            <th class="text-end">Сума</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.ListEntries.Any())
+        {
+            @foreach (var entry in Model.ListEntries)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Product" asp-action="Details" asp-route-productName="@entry.ProductName">
+                            @(entry.ProductNameNavigation?.ProductName ?? entry.ProductName)
+                        </a>
+                    </td>
+                    <td class="text-end">@entry.Count.ToString("N2")</td>
+                    <td>@(entry.ProductNameNavigation?.UnitCodeNavigation?.UnitName ?? "Н/Д")</td>
+                    <td class="text-end">@entry.Price.ToString("C2")</td>
+                    <td class="text-end">@((entry.Count * entry.Price).ToString("C2"))</td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="5" class="text-center text-muted">Позиції відсутні.</td></tr>
+        }
+    </tbody>
+    @if (Model.Type == InvoiceType.supply || Model.Type == InvoiceType.release)
+    {
+        <tfoot class="table-light">
+            <tr>
+                <th colspan="4" class="text-end">Загальна сума:</th>
+                <th class="text-end">@ViewBag.TotalSum?.ToString("C2")</th>
+            </tr>
+        </tfoot>
+    }
+</table>
+
+<div class="mt-4 d-flex flex-wrap gap-2">
+    @if (canManage && Model.Status == InvoiceStatus.draft)
+    {
+        <a asp-action="Edit" asp-route-id="@Model.InvoiceId" class="btn btn-secondary">Редагувати</a>
+        <a asp-action="Delete" asp-route-id="@Model.InvoiceId" class="btn btn-danger">Видалити</a>
+    }
+
+    @if (canManage && Model.Status == InvoiceStatus.draft)
+    {
+        <form asp-action="ConfirmInvoice" asp-route-id="@Model.InvoiceId" method="post" onsubmit="return confirm('Підтвердити накладну №@Model.InvoiceId? Редагування стане неможливим.')">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-success">Підтвердити (До виконання)</button>
+        </form>
+    }
+
+    @if (canProcess && Model.Status == InvoiceStatus.processing)
+    {
+        <form asp-action="CompleteInvoice" asp-route-id="@Model.InvoiceId" method="post" onsubmit="return confirm('Завершити обробку накладної №@Model.InvoiceId? Це оновить залишки!')">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-primary">Завершити (Оновити залишки)</button>
+        </form>
+    }
+
+    @if (canManage && (Model.Status == InvoiceStatus.draft || Model.Status == InvoiceStatus.processing))
+    {
+        <form asp-action="CancelInvoice" asp-route-id="@Model.InvoiceId" method="post" onsubmit="return confirm('Скасувати накладну №@Model.InvoiceId?')">
+            @Html.AntiForgeryToken()
+            <button type="submit" class="btn btn-warning">Скасувати накладну</button>
+        </form>
+    }
+
+    <a asp-action="Index" class="btn btn-outline-secondary ms-auto">До списку Накладних</a>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }

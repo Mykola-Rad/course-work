@@ -1,0 +1,99 @@
+﻿@model List<IMS.Models.Invoice>
+ @using IMS.Models
+
+@{
+    ViewData["Title"] = "Накладні";
+    Layout = "_Layout";
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@if (canManage)
+{
+    <p><a asp-action="Create" class="btn btn-primary">Створити нову накладну</a></p>
+}
+
+<nav class="mt-3">
+    <div class="nav nav-tabs" id="invoice-type-tab" role="tablist">
+        <button class="nav-link active" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-all" aria-selected="true">Всі</button>
+        <button class="nav-link" id="nav-supply-tab" data-bs-toggle="tab" data-bs-target="#nav-supply" type="button" role="tab" aria-controls="nav-supply" aria-selected="false">Постачання</button>
+        <button class="nav-link" id="nav-release-tab" data-bs-toggle="tab" data-bs-target="#nav-release" type="button" role="tab" aria-controls="nav-release" aria-selected="false">Видача</button>
+        <button class="nav-link" id="nav-transfer-tab" data-bs-toggle="tab" data-bs-target="#nav-transfer" type="button" role="tab" aria-controls="nav-transfer" aria-selected="false">Переміщення</button>
+    </div>
+</nav>
+
+<div class="tab-content pt-3" id="invoice-type-tabContent">
+
+    <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab" tabindex="0">
+        @if (Model.Any())
+        {
+            @await Html.PartialAsync("_InvoiceTablePartial", Model)
+        }
+        else
+        {
+            <p class="text-muted mt-3">Накладні відсутні.</p>
+        }
+    </div>
+
+    <div class="tab-pane fade" id="nav-supply" role="tabpanel" aria-labelledby="nav-supply-tab" tabindex="0">
+        @{
+            var supplyInvoices = Model.Where(i => i.Type == InvoiceType.supply).ToList();
+        }
+        @if (supplyInvoices.Any())
+        {
+            @await Html.PartialAsync("_InvoiceTablePartial", supplyInvoices)
+        }
+        else
+        {
+            <p class="text-muted mt-3">Накладні типу 'Постачання' відсутні.</p>
+        }
+    </div>
+
+    <div class="tab-pane fade" id="nav-release" role="tabpanel" aria-labelledby="nav-release-tab" tabindex="0">
+        @{
+            var releaseInvoices = Model.Where(i => i.Type == InvoiceType.release).ToList();
+        }
+        @if (releaseInvoices.Any())
+        {
+            @await Html.PartialAsync("_InvoiceTablePartial", releaseInvoices)
+        }
+        else
+        {
+            <p class="text-muted mt-3">Накладні типу 'Видача' відсутні.</p>
+        }
+    </div>
+
+    <div class="tab-pane fade" id="nav-transfer" role="tabpanel" aria-labelledby="nav-transfer-tab" tabindex="0">
+        @{
+            var transferInvoices = Model.Where(i => i.Type == InvoiceType.transfer).ToList();
+        }
+        @if (transferInvoices.Any())
+        {
+            @await Html.PartialAsync("_InvoiceTablePartial", transferInvoices)
+        }
+        else
+        {
+            <p class="text-muted mt-3">Накладні типу 'Переміщення' відсутні.</p>
+        }
+    </div>
+
+</div> 
+
+@section Scripts {
+    <script>
+        $(document).ready(function(){
+            var hash = window.location.hash;
+            if (hash) {
+                var triggerEl = document.querySelector('.nav-tabs button[data-bs-target="' + hash + '"]');
+                if (triggerEl) { new bootstrap.Tab(triggerEl).show(); }
+            }
+
+            $('.nav-tabs button[data-bs-toggle="tab"]').on('click', function (e) {
+                var newHash = this.getAttribute('data-bs-target');
+                 if (history.pushState) { history.pushState(null, null, newHash); }
+                 else { window.location.hash = newHash; }
+            });
+        });
+    </script>
+ }
