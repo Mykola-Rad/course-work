@@ -1,77 +1,97 @@
-﻿@model IEnumerable<IMS.Models.Counterparty>
+﻿@model X.PagedList.IPagedList<IMS.Models.Counterparty>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
 
 @{
-    ViewData["Title"] = "Контрагенти";
-    Layout = "_Layout";
+	ViewData["Title"] = "Контрагенти";
+	Layout = "_Layout";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Додати контрагента</a>
-</p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<a asp-action="Create" class="btn btn-primary">Додати контрагента</a>
 
-<table class="table table-sm table-hover">
-    <thead class="table-light">
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.First().Name)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().PhoneNumber)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().Email)
-            </th>
-            <th>
-                Ролі 
-            </th>
-            <th>Дії</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@Html.DisplayFor(modelItem => item.Name)</td>
-                <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
-                <td>@Html.DisplayFor(modelItem => item.Email)</td>
-                <td>
-                    @if (item.Roles != null && item.Roles.Any())
-                    {
-                        @foreach (var role in item.Roles.OrderBy(r => r.Name)) 
-                        {
-                            string badgeClass = "text-bg-secondary";
+	<button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+		<i class="bi bi-funnel"></i> Фільтри / Пошук
+	</button>
+</div>
 
-                            switch (role.Name?.ToLowerInvariant()) 
-                            {
-                                case "supplier":
-                                    badgeClass = "text-bg-primary"; 
-                                    break;
-                                case "customer": 
-                                    badgeClass = "text-bg-success"; 
-                                    break;
-                                default:
-                                    badgeClass = "text-bg-secondary";
-                                    break;
-                            }
+@await Html.PartialAsync("_CounterpartyTablePartial", Model,
+		new ViewDataDictionary(ViewData) {
+		{ "ShowRolesColumn", true },      
+        { "ShowActionColumn", true },     
+        { "ShowFullActions", true }      
+    })
 
-                            <span class="badge rounded-pill @badgeClass me-1">
-                                @role.Name
-                            </span>
-                        }
-                    }
-                    else
-                    {
-                        <span class="text-muted">-- Не призначено --</span>
-                    }
-                </td>
-                <td>
-                    <a asp-action="Details" asp-route-name="@item.Name" class="btn btn-sm btn-info">Деталі</a>
-                    <a asp-action="Edit" asp-route-name="@item.Name" class="btn btn-sm btn-outline-secondary">Редагувати</a> |
-                    <a asp-action="Delete" asp-route-name="@item.Name" class="btn btn-sm btn-outline-danger">Видалити</a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<div class="d-flex justify-content-center mt-3">
+	@Html.PagedListPager(Model, page => Url.Action("Index",
+			new
+			{
+				page = page,
+				filterName = ViewData["CurrentNameFilter"],    
+				filterPhone = ViewData["CurrentPhoneFilter"],
+				filterEmail = ViewData["CurrentEmailFilter"],
+				filterRoleId = ViewData["CurrentRoleFilter"]
+			}),
+			new PagedListRenderOptions
+	{ 
+		LiElementClasses = new[] { "page-item" },
+		PageClasses = new[] { "page-link" },
+		UlElementClasses = new[] { "pagination", "pagination-sm" },
+		DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+		DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+		DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+		DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+		ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+	})
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+	<div class="offcanvas-header border-bottom">
+		<h5 class="offcanvas-title" id="offcanvasFiltersLabel">Фільтри та Пошук Контрагентів</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<form asp-action="Index" method="get" id="counterpartyFilterForm">
+
+			<div class="mb-2 position-relative">
+				<label for="fName" class="form-label fw-semibold">Назва містить</label>
+				<input type="text" id="fName" name="filterName" value="@ViewData["CurrentNameFilter"]"
+					   class="form-control form-control-sm" autocomplete="off"
+					   data-autocomplete="true"
+					   data-autocomplete-url="@Url.Action("AutocompleteName", "Counterparty")"
+					   data-autocomplete-min-length="2"
+					   data-autocomplete-list-target="#counterpartyNameAutocompleteList" />
+				<ul id="counterpartyNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+			</div>
+			<div class="mb-2">
+				<label for="fPhone" class="form-label fw-semibold">Телефон містить</label>
+				<input type="text" id="fPhone" name="filterPhone" value="@ViewData["CurrentPhoneFilter"]" class="form-control form-control-sm" />
+			</div>
+			<div class="mb-2">
+				<label for="fEmail" class="form-label fw-semibold">Email містить</label>
+				<input type="text" id="fEmail" name="filterEmail" value="@ViewData["CurrentEmailFilter"]" class="form-control form-control-sm" />
+			</div>
+			<div class="mb-3">
+				<label for="fRole" class="form-label fw-semibold">Роль</label>
+				<select id="fRole" name="filterRoleId" asp-items="@ViewBag.RoleFilterList" class="form-select form-select-sm">
+					<option value="">-- Всі ролі --</option>
+				</select>
+			</div>
+
+			<div class="d-grid gap-2 mt-4">
+				<button type="submit" class="btn btn-primary">Застосувати</button>
+				<button type="button" class="btn btn-outline-secondary"
+						data-reset-form-target="#counterpartyFilterForm">
+					Скинути Все
+				</button> 
+			</div>
+		</form>
+	</div>
+</div>
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+ }

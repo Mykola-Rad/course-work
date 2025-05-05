@@ -1,110 +1,128 @@
 ﻿@model IMS.ViewModels.StorageKeeperDetailsViewModel
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
 
 @{
-    ViewData["Title"] = ViewData["Title"] ?? $"Деталі комірника: {Model.Keeper.PhoneNumber}";
+    ViewData["Title"] = ViewData["Title"];
     Layout = "_Layout";
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    var activeTab = ViewData["ActiveTab"] as string ?? "info";
 }
 
-<h1>@ViewData["Title"]</h1>
+<h1>@($"{Model.Keeper.FirstName} {Model.Keeper.LastName}") <small class="text-muted">(@Model.Keeper.PhoneNumber)</small></h1>
 
-<div>
-    <h4>Профіль комірника</h4>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.LastName)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.LastName)</dd>
+<nav class="mt-3">
+    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+        <button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Інформація</button>
 
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.FirstName)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.FirstName)</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.PhoneNumber)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.PhoneNumber)</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.Email)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.Email)</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.StorageNameNavigation)</dt>
-        <dd class="col-sm-9">
-            @if (Model.Keeper.StorageNameNavigation != null)
-            {
-                <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.Keeper.StorageName">
-                    @Model.Keeper.StorageNameNavigation.Name
-                </a>
-            }
-            else
-            {
-                <text>Н/Д</text>
-            }
-        </dd>
-
-        <dt class="col-sm-3">Прив'язаний логін</dt>
-        <dd class="col-sm-9">
-            @if (Model.Keeper.User != null)
-            {
-                <a asp-controller="Admin" asp-action="EditUser" asp-route-id="@Model.Keeper.UserId">
-                    @Model.Keeper.User.Username
-                </a>
-            }
-            else
-            {
-                <span class="text-muted">-- Немає --</span>
-            }
-        </dd>
-    </dl>
-</div>
-
-@if (Model.ShowInvoices)
-{
-    <div class="mt-4">
-        <h4>Накладні, пов'язані з комірником</h4>
-        <hr />
-        @if (Model.RelatedInvoices.Any())
+        @if (!Model.FromStorage)
         {
-            <table class="table table-sm table-hover">
-                <thead class="table-light">
-                    <tr>
-                        <th>ID</th>
-                        <th>Дата</th>
-                        <th>Тип</th>
-                        <th>Статус</th>
-                        <th></th> 
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var invoice in Model.RelatedInvoices)
-                    {
-                        <tr>
-                            <td>
-                                <a asp-controller="Invoice" asp-action="Details" asp-route-id="@invoice.InvoiceId">@invoice.InvoiceId</a>
-                            </td>
-                            <td>@invoice.Date.ToString("dd.MM.yyyy")</td>
-                            <td>@invoice.Type</td>
-                            <td>@invoice.Status</td>
-                            <td>
-                                <a asp-controller="Invoice" asp-action="Details" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-info">Деталі</a>
-                                @* Тут НЕ додаємо Edit/Delete для накладних *@
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
-        }
-        else
-        {
-            <p class="text-muted">З цим комірником ще немає пов'язаних накладних.</p>
+            <button class="nav-link @(activeTab == "invoices" ? "active" : "")" id="nav-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-invoices" type="button" role="tab" aria-controls="nav-invoices" aria-selected="@(activeTab == "invoices")">Накладні</button>
         }
     </div>
-}
+</nav>
 
-<div class="mt-4">
-    <a asp-action="Edit" asp-route-phoneNumber="@Model.Keeper.PhoneNumber" class="btn btn-secondary">Редагувати профіль</a> |
-    <a asp-action="Delete" asp-route-phoneNumber="@Model.Keeper.PhoneNumber" class="btn btn-danger">Видалити профіль</a> |
-    @if (!Model.ShowInvoices)
+<div class="tab-content pt-3" id="nav-tabContent">
+
+    <div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
+        <h4>Деталі комірника</h4>
+        <hr />
+        <dl class="row">
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.LastName)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.LastName)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.FirstName)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.FirstName)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.PhoneNumber)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.PhoneNumber)</dd>
+
+            <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Keeper.Email)</dt>
+            <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.Email)</dd>
+
+            <dt class="col-sm-3">Призначений склад</dt>
+            <dd class="col-sm-9">
+                @if (Model.Keeper.StorageNameNavigation != null)
+                {
+                    <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.Keeper.StorageName">
+                        @Model.Keeper.StorageNameNavigation.Name
+                    </a>
+                }
+                else
+                {
+                    <span class="text-muted">Н/Д</span>
+                }
+            </dd>
+
+            <dt class="col-sm-3">Прив'язаний логін</dt>
+            <dd class="col-sm-9">
+                @if (Model.Keeper.User != null)
+                {
+                    <a asp-controller="Admin" asp-action="EditUser" asp-route-id="@Model.Keeper.UserId">@Model.Keeper.User.Username</a>
+                }
+                else
+                {
+                    <span class="text-muted fst-italic">-- Немає --</span>
+                }
+            </dd>
+        </dl>
+        @if (canManage)
+        {
+            <a asp-action="Edit" asp-route-phoneNumber="@Model.Keeper.PhoneNumber" class="btn btn-secondary btn-sm mt-2">Редагувати комірника</a>
+        }
+    </div>
+
+    @if (!Model.FromStorage)
     {
-        <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.Keeper.StorageName">Назад до складу</a>
+        <div class="tab-pane fade @(activeTab == "invoices" ? "show active" : "")" id="nav-invoices" role="tabpanel" aria-labelledby="nav-invoices-tab" tabindex="0">
+            <h4>Накладні, пов'язані з комірником <span class="text-muted">(@Model.Keeper.PhoneNumber)</span></h4>
+            <hr />
+            @if (Model.RelatedInvoices != null && Model.RelatedInvoices.Any())
+            {
+                @await Html.PartialAsync("_InvoiceTablePartial", Model.RelatedInvoices)
+
+                <div class="d-flex justify-content-center mt-3">
+                    @Html.PagedListPager(Model.RelatedInvoices, page => Url.Action("Details",
+                             new
+                             {
+                                 phoneNumber = Model.Keeper.PhoneNumber,
+                                 iPage = page,
+                                 activeTab = "invoices",
+                                 fromStorage = Model.FromStorage
+                             }),
+                             new PagedListRenderOptions
+            {
+                LiElementClasses = new[] { "page-item" },
+                PageClasses = new[] { "page-link" },
+                UlElementClasses = new[] { "pagination", "pagination-sm" },
+                DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+            })
+                </div>
+            }
+            else
+            {
+                <p class="text-muted">Немає накладних, пов'язаних з цим комірником.</p>
+            }
+        </div>
+    }
+
+</div>
+<div class="mt-4">
+    @if (Model.FromStorage && !string.IsNullOrEmpty(Model.Keeper.StorageName))
+    {
+        <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.Keeper.StorageName" class="btn btn-outline-secondary">Назад до складу</a>
     }
     else
     {
         <a asp-action="Index" class="btn btn-outline-secondary">Назад до списку комірників</a>
     }
 </div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

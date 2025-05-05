@@ -53,7 +53,7 @@ namespace IMS.Controllers
                         var authProperties = new AuthenticationProperties
                         {
                             IsPersistent = model.RememberMe,
-                            // ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60)
+                            ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(60)
                         };
 
                         await HttpContext.SignInAsync(

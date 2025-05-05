@@ -1,98 +1,118 @@
-﻿@model IEnumerable<IMS.Models.StorageProduct>
- @using IMS.Models
+﻿@model X.PagedList.IPagedList<IMS.Models.StorageProduct>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
 
 @{
-	ViewData["Title"] = ViewData["Title"] ?? "Поточні залишки";
+	ViewData["Title"] = "Загальні залишки по товарах";
 	Layout = "_Layout";
-	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<table class="table table-sm table-hover">
+<div class="d-flex justify-content-between align-items-center mb-3">
+	<button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+		<i class="bi bi-funnel"></i> Фільтри / Пошук
+	</button>
+</div>
+
+<table class="table table-sm table-hover table-striped">
 	<thead class="table-light">
 		<tr>
-			<th>Товар</th>
-			<th>Кількість</th>
-			<th>Одиниця</th>
-			<th>Мін. залишок</th>
-			<th>Дії</th>
+			<th>@Html.DisplayNameFor(model => model.FirstOrDefault().ProductName)</th>
+			<th>@Html.DisplayNameFor(model => model.FirstOrDefault().Count)</th>
+			<th>@Html.DisplayNameFor(model => model.FirstOrDefault().MinimalCount)</th>
+			<th>Одиниця виміру</th>
 		</tr>
 	</thead>
 	<tbody>
 		@if (Model.Any())
 		{
-			@foreach (var item in Model)
+			@foreach (var item in Model) 
 			{
 				<tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
-					<td>@(item.ProductNameNavigation?.ProductName ?? item.ProductName)</td>
-					<td>@item.Count.ToString("N2")</td>
-					<td>@(item.ProductNameNavigation?.UnitCodeNavigation?.UnitName ?? "Н/Д")</td>
-
+					<td>@Html.DisplayFor(modelItem => item.ProductName)</td>
+					<td>@item.Count.ToString("N2")</td> 
 					<td class="min-count-td">
 						<span class="min-count-display">@item.MinimalCount.ToString("N2")</span>
 						<div class="min-count-edit input-group input-group-sm" style="display: none;">
-							<input type="number" step="any" min="0" class="form-control min-count-input"
-								   value="@item.MinimalCount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)">
-							<button class="btn btn-outline-success btn-sm min-count-save" type="button" title="Зберегти"><i class="bi bi-check-lg"></i></button>
-							<button class="btn btn-outline-secondary btn-sm min-count-cancel" type="button" title="Скасувати"><i class="bi bi-x-lg"></i></button>
+							<input type="text" class="form-control min-count-input" value="@item.MinimalCount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" />
+							<button class="btn btn-success min-count-save" type="button"><i class="bi bi-check-lg"></i></button>
+							<button class="btn btn-secondary min-count-cancel" type="button"><i class="bi bi-x-lg"></i></button>
 						</div>
-						<div class="text-danger small min-count-error mt-1" style="display: none;"></div>
+						<button class="btn btn-link btn-sm edit-min-inline-btn p-0 ms-1 align-baseline" type="button"><i class="bi bi-pencil-square"></i></button>
+						<div class="min-count-error text-danger small" style="display: none;"></div>
 					</td>
-					<td>
-						<button type="button" class="btn btn-sm btn-outline-primary edit-min-inline-btn"
-								title="Редагувати мінімальний залишок">
-							<i class="bi bi-pencil-fill"></i> Мін.
-						</button>
-					</td>
-
+					<td>@item.ProductNameNavigation?.UnitCodeNavigation?.UnitName</td>
 				</tr>
 			}
 		}
 		else
 		{
-			<tr>
-				<td colspan="@(canManage ? "5" : "4")" class="text-center text-muted">Залишки на вашому складі відсутні або склад не призначено.</td>
-			</tr>
+			<tr><td colspan="4" class="text-center text-muted">Товарів за вашим запитом не знайдено.</td></tr>
 		}
 	</tbody>
 </table>
 
-@if (canManage)
-{
-	@Html.AntiForgeryToken()
-}
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+	<div class="offcanvas-header border-bottom">
+		<h5 class="offcanvas-title" id="offcanvasFiltersLabel">Фільтри та Пошук Товарів</h5>
+		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+	</div>
+	<div class="offcanvas-body">
+		<form asp-action="Index" method="get" id="keeperFilterForm">
+			<div class="mb-3 position-relative">
+				<label for="searchStringInput" class="form-label fw-semibold">Пошук за назвою товару</label>
+				<input type="text" id="searchStringInput" name="searchString" value="@ViewData["CurrentSearch"]"
+					   class="form-control form-control-sm" autocomplete="off"
+					   data-autocomplete="true"
+					   data-autocomplete-url="@Url.Action("AutocompleteStockProductName", "StorageProduct")"
+					   data-autocomplete-min-length="2"
+					   data-autocomplete-list-target="#stockProductNameAutocompleteList" />
+				<ul id="stockProductNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+			</div>
+			<div class="mb-3">
+				<label for="unitFilterSelect" class="form-label fw-semibold">Фільтр за од. вим.</label>
+				<select id="unitFilterSelect" name="filterUnitName" asp-items="@ViewBag.UnitNameFilterList" class="form-select form-select-sm">
+					<option value="">-- Всі одиниці --</option>
+				</select>
+			</div>
+
+			<div class="d-grid gap-2 mt-4">
+				<button type="submit" class="btn btn-primary">Застосувати</button>
+				<button type="button" class="btn btn-outline-secondary"
+						data-reset-form-target="#keeperFilterForm">
+					Скинути Все
+				</button>
+			</div>
+		</form>
+	</div>
+</div>
+
+<div class="d-flex justify-content-center mt-3">
+	@Html.PagedListPager(Model, page => Url.Action("Index",
+			new
+			{
+				page = page,
+				searchString = ViewData["CurrentSearch"],        
+				filterUnitName = ViewData["CurrentUnitFilter"]
+			}),
+			new PagedListRenderOptions
+	{
+		LiElementClasses = new[] { "page-item" },
+		PageClasses = new[] { "page-link" },
+		UlElementClasses = new[] { "pagination", "pagination-sm" },
+		DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+		DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+		DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+		DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+		ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+	})
+</div>
+
+@Html.AntiForgeryToken()
 
 @section Scripts {
-	<script>
-		$(document).ready(function () {
-			var hash = window.location.hash;
-
-			if (hash) {
-				var triggerEl = document.querySelector('.nav-tabs button[data-bs-target="' + hash + '"]');
-
-				if (triggerEl) {
-					var tab = new bootstrap.Tab(triggerEl);
-					tab.show();
-				}
-			}
-
-			var tabTriggerList = [].slice.call(document.querySelectorAll('#nav-tab button'));
-			tabTriggerList.forEach(function (tabTriggerEl) {
-				var tab = new bootstrap.Tab(tabTriggerEl);
-
-				tabTriggerEl.addEventListener('click', function (event) {
-					var newHash = tabTriggerEl.getAttribute('data-bs-target');
-					if (history.pushState) {
-						 history.pushState(null, '', newHash);
-					} else {
-						 window.location.hash = newHash;
-					}
-				});
-			});
-
-		});
-	</script>
 	<script>
 		$(document).ready(function () {
 			$('table').on('click', '.edit-min-inline-btn', function () {

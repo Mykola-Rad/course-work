@@ -1,99 +1,165 @@
-﻿@model List<IMS.Models.Invoice>
- @using IMS.Models
+﻿@model X.PagedList.IPagedList<IMS.Models.Invoice>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
 
 @{
     ViewData["Title"] = "Накладні";
     Layout = "_Layout";
     bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    var currentInvoiceType = ViewData["CurrentInvoiceType"] as string;
 }
 
 <h1>@ViewData["Title"]</h1>
 
-@if (canManage)
-{
-    <p><a asp-action="Create" class="btn btn-primary">Створити нову накладну</a></p>
-}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    @if (canManage)
+    {
+        <a asp-action="Create" class="btn btn-primary">Створити нову накладну</a>
+    }
+    else
+    {
+        <span></span>
+    } 
+
+    <button class="btn btn-secondary btn-sm ms-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Фільтри
+    </button>
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Фільтри Накладних</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="invoiceFilterForm">
+            <input type="hidden" name="invoiceType" id="invoiceTypeFilterInput" value="@currentInvoiceType" />
+
+            <div class="mb-2">
+                <label for="fs" class="form-label fw-semibold">Статус</label>
+                <select id="fs" name="filterStatus" asp-items="@ViewBag.StatusFilterList" class="form-select form-select-sm">
+                    <option value="">-- Всі статуси --</option>
+                </select>
+            </div>
+
+            <div class="mb-2 position-relative">
+                <label for="fcp" class="form-label fw-semibold">Контрагент</label>
+                <input type="text" id="fcp" name="filterCounterpartyName" value="@ViewData["CurrentCounterpartyFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteCounterpartyName", "Invoice")"
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#invoiceCounterpartyAutocompleteList" />
+                <ul id="invoiceCounterpartyAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+
+            <div class="mb-2 position-relative">
+                <label for="fss" class="form-label fw-semibold">Склад-Відправник</label>
+                <input type="text" id="fss" name="filterSenderStorage" value="@ViewData["CurrentSenderStorageFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteStorageName", "Invoice")" 
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#invoiceSenderStorageAutocompleteList" />
+                <ul id="invoiceSenderStorageAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+
+            <div class="mb-2 position-relative">
+                <label for="frs" class="form-label fw-semibold">Склад-Одержувач</label>
+                <input type="text" id="frs" name="filterReceiverStorage" value="@ViewData["CurrentReceiverStorageFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteStorageName", "Invoice")" 
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#invoiceReceiverStorageAutocompleteList" />
+                <ul id="invoiceReceiverStorageAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+
+            <div class="mb-2">
+                <label for="df" class="form-label fw-semibold">Дата Від</label>
+                <input type="date" id="df" name="filterDateFrom" value="@ViewData["CurrentDateFromFilter"]" class="form-control form-control-sm" />
+            </div>
+            <div class="mb-3">
+                <label for="dt" class="form-label fw-semibold">Дата До</label>
+                <input type="date" id="dt" name="filterDateTo" value="@ViewData["CurrentDateToFilter"]" class="form-control form-control-sm" />
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Застосувати</button>
+                <button type="button" class="btn btn-outline-secondary"
+                        data-reset-form-target="#invoiceFilterForm">
+                    Скинути Все
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 <nav class="mt-3">
     <div class="nav nav-tabs" id="invoice-type-tab" role="tablist">
-        <button class="nav-link active" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-all" type="button" role="tab" aria-controls="nav-all" aria-selected="true">Всі</button>
-        <button class="nav-link" id="nav-supply-tab" data-bs-toggle="tab" data-bs-target="#nav-supply" type="button" role="tab" aria-controls="nav-supply" aria-selected="false">Постачання</button>
-        <button class="nav-link" id="nav-release-tab" data-bs-toggle="tab" data-bs-target="#nav-release" type="button" role="tab" aria-controls="nav-release" aria-selected="false">Видача</button>
-        <button class="nav-link" id="nav-transfer-tab" data-bs-toggle="tab" data-bs-target="#nav-transfer" type="button" role="tab" aria-controls="nav-transfer" aria-selected="false">Переміщення</button>
+        <button class="nav-link @(string.IsNullOrEmpty(currentInvoiceType) ? "active" : "")" id="nav-all-tab" data-bs-toggle="tab" data-bs-target="#nav-table-content" type="button" role="tab" aria-selected="@(string.IsNullOrEmpty(currentInvoiceType))" data-invoice-type="">Всі</button>
+        <button class="nav-link @(currentInvoiceType == nameof(InvoiceType.supply) ? "active" : "")" id="nav-supply-tab" data-bs-toggle="tab" data-bs-target="#nav-table-content" type="button" role="tab" aria-selected="@(currentInvoiceType == nameof(InvoiceType.supply))" data-invoice-type="@nameof(InvoiceType.supply)">Постачання</button>
+        <button class="nav-link @(currentInvoiceType == nameof(InvoiceType.release) ? "active" : "")" id="nav-release-tab" data-bs-toggle="tab" data-bs-target="#nav-table-content" type="button" role="tab" aria-selected="@(currentInvoiceType == nameof(InvoiceType.release))" data-invoice-type="@nameof(InvoiceType.release)">Видача</button>
+        <button class="nav-link @(currentInvoiceType == nameof(InvoiceType.transfer) ? "active" : "")" id="nav-transfer-tab" data-bs-toggle="tab" data-bs-target="#nav-table-content" type="button" role="tab" aria-selected="@(currentInvoiceType == nameof(InvoiceType.transfer))" data-invoice-type="@nameof(InvoiceType.transfer)">Переміщення</button>
     </div>
 </nav>
 
 <div class="tab-content pt-3" id="invoice-type-tabContent">
-
-    <div class="tab-pane fade show active" id="nav-all" role="tabpanel" aria-labelledby="nav-all-tab" tabindex="0">
+    <div class="tab-pane fade show active" id="nav-table-content" role="tabpanel" tabindex="0">
         @if (Model.Any())
         {
             @await Html.PartialAsync("_InvoiceTablePartial", Model)
         }
         else
         {
-            <p class="text-muted mt-3">Накладні відсутні.</p>
+            <p class="text-center text-muted mt-3">Накладні за вказаними критеріями відсутні.</p>
         }
     </div>
+</div>
 
-    <div class="tab-pane fade" id="nav-supply" role="tabpanel" aria-labelledby="nav-supply-tab" tabindex="0">
-        @{
-            var supplyInvoices = Model.Where(i => i.Type == InvoiceType.supply).ToList();
-        }
-        @if (supplyInvoices.Any())
-        {
-            @await Html.PartialAsync("_InvoiceTablePartial", supplyInvoices)
-        }
-        else
-        {
-            <p class="text-muted mt-3">Накладні типу 'Постачання' відсутні.</p>
-        }
-    </div>
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+            new
+            {
+                page = page,
+                invoiceType = currentInvoiceType, 
+                filterStatus = ViewData["CurrentStatusFilter"],
+                filterDateFrom = ViewData["CurrentDateFromFilter"],
+                filterDateTo = ViewData["CurrentDateToFilter"],
+                filterCounterpartyName = ViewData["CurrentCounterpartyFilter"],
+                filterSenderStorage = ViewData["CurrentSenderStorageFilter"],
+                filterReceiverStorage = ViewData["CurrentReceiverStorageFilter"]
+            }),
+            new PagedListRenderOptions
+    { 
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+    })
+</div>
 
-    <div class="tab-pane fade" id="nav-release" role="tabpanel" aria-labelledby="nav-release-tab" tabindex="0">
-        @{
-            var releaseInvoices = Model.Where(i => i.Type == InvoiceType.release).ToList();
-        }
-        @if (releaseInvoices.Any())
-        {
-            @await Html.PartialAsync("_InvoiceTablePartial", releaseInvoices)
-        }
-        else
-        {
-            <p class="text-muted mt-3">Накладні типу 'Видача' відсутні.</p>
-        }
-    </div>
-
-    <div class="tab-pane fade" id="nav-transfer" role="tabpanel" aria-labelledby="nav-transfer-tab" tabindex="0">
-        @{
-            var transferInvoices = Model.Where(i => i.Type == InvoiceType.transfer).ToList();
-        }
-        @if (transferInvoices.Any())
-        {
-            @await Html.PartialAsync("_InvoiceTablePartial", transferInvoices)
-        }
-        else
-        {
-            <p class="text-muted mt-3">Накладні типу 'Переміщення' відсутні.</p>
-        }
-    </div>
-
-</div> 
 
 @section Scripts {
+    <partial name="_ValidationScriptsPartial" />
     <script>
         $(document).ready(function(){
-            var hash = window.location.hash;
-            if (hash) {
-                var triggerEl = document.querySelector('.nav-tabs button[data-bs-target="' + hash + '"]');
-                if (triggerEl) { new bootstrap.Tab(triggerEl).show(); }
-            }
-
             $('.nav-tabs button[data-bs-toggle="tab"]').on('click', function (e) {
-                var newHash = this.getAttribute('data-bs-target');
-                 if (history.pushState) { history.pushState(null, null, newHash); }
-                 else { window.location.hash = newHash; }
+                var invoiceType = $(this).data('invoice-type');
+                $('#invoiceTypeFilterInput').val(invoiceType); 
+                 var form = $('#invoiceFilterForm');
+                 var actionUrl = form.attr('action');
+                 if (actionUrl) {
+                     actionUrl = actionUrl.split('?')[0]; 
+                     form.attr('action', actionUrl);
+                 }
+                form.submit(); 
             });
         });
     </script>
- }
+}

@@ -5,6 +5,9 @@ using IMS.Data;
 using IMS.Models;
 using Npgsql;
 using IMS.ViewModels;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using X.PagedList.EF;
+using X.PagedList;
 
 namespace IMS.Controllers
 {
@@ -14,6 +17,7 @@ namespace IMS.Controllers
     {
         private readonly AppDbContext _context; 
         private readonly ILogger<CounterpartyController> _logger;
+        private const int _pageSize = 10;
 
         public CounterpartyController(AppDbContext context, ILogger<CounterpartyController> logger) 
         {
@@ -23,22 +27,102 @@ namespace IMS.Controllers
 
         // GET: Counterparties
         [HttpGet("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+        string? filterName = null,
+        string? filterPhone = null,
+        string? filterEmail = null,
+        int? filterRoleId = null,
+        int page = 1)
         {
             ViewData["Title"] = "Контрагенти";
+
+            ViewData["CurrentNameFilter"] = filterName;
+            ViewData["CurrentPhoneFilter"] = filterPhone;
+            ViewData["CurrentEmailFilter"] = filterEmail;
+            ViewData["CurrentRoleFilter"] = filterRoleId;
+
+            int pageNumber = page;
+
             try
             {
-                var counterparties = await _context.Counterparties
-                                                    .Include(c => c.Roles)
-                                                   .OrderBy(c => c.Name)
-                                                   .ToListAsync();
-                return View(counterparties);
+                var counterpartiesQuery = _context.Counterparties
+                                                  .Include(c => c.Roles) 
+                                                  .AsNoTracking() 
+                                                  .AsQueryable();
+
+                if (!string.IsNullOrEmpty(filterName))
+                {
+                    counterpartiesQuery = counterpartiesQuery.Where(c => c.Name.ToLower().Contains(filterName.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterPhone))
+                {
+                    counterpartiesQuery = counterpartiesQuery.Where(c => c.PhoneNumber.Contains(filterPhone));
+                }
+                if (!string.IsNullOrEmpty(filterEmail))
+                {
+                    counterpartiesQuery = counterpartiesQuery.Where(c => c.Email != null && c.Email.ToLower().Contains(filterEmail.ToLower()));
+                }
+                if (filterRoleId.HasValue)
+                {
+                    counterpartiesQuery = counterpartiesQuery.Where(c => c.Roles.Any(r => r.RoleId == filterRoleId.Value));
+                }
+
+                await PopulateRolesFilterList(filterRoleId);
+
+                var sortedQuery = counterpartiesQuery.OrderBy(c => c.Name);
+
+                var pagedCounterparties = await sortedQuery.ToPagedListAsync(pageNumber, _pageSize);
+
+                return View(pagedCounterparties); 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Помилка при отриманні списку контрагентів");
+                _logger.LogError(ex, "Помилка при отриманні списку контрагентів з фільтрами");
                 TempData["ErrorMessage"] = "Не вдалося завантажити список контрагентів.";
-                return View(new List<Counterparty>());
+                await PopulateRolesFilterList(filterRoleId); 
+                                                            
+                var emptyPagedList = new PagedList<Counterparty>(Enumerable.Empty<Counterparty>(), pageNumber, _pageSize);
+                return View(emptyPagedList);
+            }
+        }
+
+        private async Task PopulateRolesFilterList(int? selectedRoleId)
+        {
+            try
+            {
+                var roles = await _context.CounterpartyRoles.OrderBy(r => r.Name).ToListAsync();
+                ViewBag.RoleFilterList = new SelectList(roles, "RoleId", "Name", selectedRoleId);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to populate CounterpartyRoles filter list.");
+                ViewBag.RoleFilterList = new SelectList(new List<CounterpartyRole>(), "RoleId", "Name");
+            }
+        }
+
+        [HttpGet("AutocompleteName")] 
+        public async Task<IActionResult> AutocompleteName(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Json(Enumerable.Empty<string>());
+            }
+            var lowerTerm = term.ToLower();
+            try
+            {
+                var matches = await _context.Counterparties
+                    .Where(c => c.Name.ToLower().Contains(lowerTerm))
+                    .OrderBy(c => c.Name)
+                    .Select(c => c.Name) 
+                    .Take(10)
+                    .ToListAsync();
+
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during counterparty name autocomplete for term {Term}", term);
+                return Json(Enumerable.Empty<string>());
             }
         }
 
@@ -347,20 +431,25 @@ namespace IMS.Controllers
 
         // GET: Counterparties/Details/НазваКонтрагента
         [HttpGet("Details/{name}")]
-        public async Task<IActionResult> Details(string name)
+        public async Task<IActionResult> Details(
+        string name,
+        string activeTab = "info",
+        int iPage = 1,
+        int spPage = 1,
+        int ppPage = 1
+        )
         {
             if (string.IsNullOrEmpty(name)) return BadRequest();
 
             ViewData["Title"] = $"Деталі: {name}";
+            ViewData["ActiveTab"] = activeTab;
 
             try
             {
                 var counterparty = await _context.Counterparties
-                                                .Include(c => c.Roles)
-                                                .Include(c => c.Invoices)
-                                                    .ThenInclude(i => i.ListEntries)
-                                                .AsNoTracking()
-                                                .FirstOrDefaultAsync(c => c.Name == name);
+                                                 .Include(c => c.Roles)
+                                                 .AsNoTracking()
+                                                 .FirstOrDefaultAsync(c => c.Name == name);
 
                 if (counterparty == null)
                 {
@@ -369,50 +458,61 @@ namespace IMS.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
+                bool isSupplier = counterparty.Roles.Any(r => r.Name?.ToLowerInvariant() == "supplier");
+                bool isCustomer = counterparty.Roles.Any(r => r.Name?.ToLowerInvariant() == "customer");
+
+                var invoicesQuery = _context.Invoices
+                                .Where(i => i.CounterpartyName == name)
+                                .Include(i => i.ReceiverStorageNameNavigation)
+                                .Include(i => i.SenderStorageNameNavigation)
+                                .Include(i => i.ListEntries) 
+                                .AsNoTracking()
+                                .OrderByDescending(i => i.Date).ThenByDescending(i => i.InvoiceId);
+                var pagedInvoices = await invoicesQuery.ToPagedListAsync(iPage, _pageSize);
+
+                IPagedList<Product>? pagedSuppliedProducts = null;
+                if (isSupplier)
+                {
+                    var suppliedProductNamesQuery = _context.ListEntries
+                        .Where(le => le.Invoice.CounterpartyName == name && le.Invoice.Type == InvoiceType.supply)
+                        .Select(le => le.ProductName)
+                        .Distinct(); 
+
+                    var productsQuery = _context.Products
+                        .Include(p => p.UnitCodeNavigation) 
+                        .Where(p => suppliedProductNamesQuery.Contains(p.ProductName)) 
+                        .OrderBy(p => p.ProductName);
+                    pagedSuppliedProducts = await productsQuery.ToPagedListAsync(spPage, _pageSize);
+                }
+
+                IPagedList<Product>? pagedPurchasedProducts = null;
+                if (isCustomer)
+                {
+                    var purchasedProductNamesQuery = _context.ListEntries
+                        .Where(le => le.Invoice.CounterpartyName == name && le.Invoice.Type == InvoiceType.release)
+                        .Select(le => le.ProductName)
+                        .Distinct();
+
+                    var productsQuery = _context.Products
+                         .Include(p => p.UnitCodeNavigation)
+                        .Where(p => purchasedProductNamesQuery.Contains(p.ProductName))
+                        .OrderBy(p => p.ProductName);
+                    pagedPurchasedProducts = await productsQuery.ToPagedListAsync(ppPage, _pageSize);
+                }
+
                 var viewModel = new CounterpartyDetailsViewModel
                 {
                     Counterparty = counterparty,
-                    IsSupplier = counterparty.Roles.Any(r => r.Name?.ToLowerInvariant() == "supplier"),
-                    IsCustomer = counterparty.Roles.Any(r => r.Name?.ToLowerInvariant() == "customer")
+                    IsSupplier = isSupplier,
+                    IsCustomer = isCustomer,
+                    RelatedInvoices = pagedInvoices,
+                    SuppliedProducts = pagedSuppliedProducts,
+                    PurchasedProducts = pagedPurchasedProducts,
+                    CurrentInvoicesPage = iPage,
+                    CurrentSuppliedProductsPage = spPage,
+                    CurrentPurchasedProductsPage = ppPage
                 };
 
-                if (viewModel.IsSupplier)
-                {
-                    var suppliedProductNames = counterparty.Invoices
-                        .Where(i => i.Type == InvoiceType.supply)
-                        .SelectMany(i => i.ListEntries)
-                        .Select(le => le.ProductName)
-                        .Distinct()
-                        .ToList();
-
-                    if (suppliedProductNames.Any())
-                    {
-                        viewModel.SuppliedProducts = await _context.Products
-                            .Include(p => p.UnitCodeNavigation)
-                            .Where(p => suppliedProductNames.Contains(p.ProductName))
-                            .OrderBy(p => p.ProductName)
-                            .ToListAsync();
-                    }
-                }
-                if (viewModel.IsCustomer)
-                {
-                    var purchasedProductNames = counterparty.Invoices
-                        .Where(i => i.Type == InvoiceType.release)
-                        .SelectMany(i => i.ListEntries)
-                        .Select(le => le.ProductName)
-                        .Distinct()
-                        .ToList();
-
-                    if (purchasedProductNames.Any())
-                    {
-                        viewModel.PurchasedProducts = await _context.Products
-                           .Include(p => p.UnitCodeNavigation)
-                           .Where(p => purchasedProductNames.Contains(p.ProductName))
-                           .OrderBy(p => p.ProductName)
-                           .ToListAsync();
-                    }
-                }
-            
                 return View(viewModel);
             }
             catch (Exception ex)

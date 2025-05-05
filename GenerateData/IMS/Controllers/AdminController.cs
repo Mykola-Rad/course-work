@@ -8,6 +8,8 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Extensions.Logging;
 using IMS.Data;
+using X.PagedList.EF;
+using X.PagedList;
 
 namespace IMS.Controllers
 {
@@ -15,7 +17,8 @@ namespace IMS.Controllers
     public class AdminController : Controller
     {
         private readonly AppDbContext _context; 
-        private readonly ILogger<AdminController> _logger; 
+        private readonly ILogger<AdminController> _logger;
+        private const int _pageSize = 10;
 
         public AdminController(AppDbContext context, ILogger<AdminController> logger) 
         {
@@ -24,14 +27,84 @@ namespace IMS.Controllers
         }
 
         // GET: Admin/Users
-        public async Task<IActionResult> Users()
+        public async Task<IActionResult> Users(string? searchString, string? filterRole, int page = 1) 
         {
-            var users = await _context.Users
-                                      .Include(u => u.StorageKeeper)
-                                      .OrderBy(u => u.Username)
-                                      .ToListAsync();
-            return View(users);
+            ViewData["Title"] = "Керування користувачами";
+            ViewData["CurrentNameFilter"] = searchString;
+            ViewData["CurrentRoleFilter"] = filterRole;
+
+            int pageNumber = page;
+
+            try
+            {
+                var usersQuery = _context.Users
+                                         .Include(u => u.StorageKeeper) 
+                                         .AsNoTracking() 
+                                         .AsQueryable();
+
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    usersQuery = usersQuery.Where(u => u.Username.ToLower().Contains(searchString.ToLower()));
+                }
+
+                if (!string.IsNullOrEmpty(filterRole))
+                {
+                    if (Enum.TryParse<UserRole>(filterRole, true, out UserRole roleToFilter))
+                    {
+                        usersQuery = usersQuery.Where(u => u.Role == roleToFilter);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Invalid role value provided for filtering: {FilterRole}", filterRole);
+                    }
+                }
+
+                PopulateRoleFilterList(filterRole);
+
+                usersQuery = usersQuery.OrderBy(u => u.Username);
+
+                var pagedUsers = await usersQuery.ToPagedListAsync(pageNumber, _pageSize);
+
+                return View(pagedUsers);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка при отриманні сторінкового списку користувачів з фільтрами");
+                TempData["ErrorMessage"] = "Не вдалося завантажити список користувачів.";
+                PopulateRoleFilterList(filterRole); 
+                return View(new List<User>());
+            }
         }
+
+        // GET: Admin/AutocompleteUsers?term=...
+        [HttpGet] 
+        public async Task<IActionResult> AutocompleteUsers(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                return Json(Enumerable.Empty<string>());
+            }
+
+            var lowerTerm = term.ToLower();
+
+            try
+            {
+                var matches = await _context.Users
+                    .Where(u => u.Username.ToLower().Contains(lowerTerm))
+                    .OrderBy(u => u.Username)
+                    .Select(u => u.Username) 
+                    .Take(10) 
+                    .ToListAsync();
+
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка автозаповнення для користувачів з терміном {Term}", term);
+                return Json(Enumerable.Empty<string>()); 
+            }
+        }
+
 
         // GET: Admin/CreateUser
         public async Task<IActionResult> CreateUser()
@@ -193,9 +266,8 @@ namespace IMS.Controllers
                             // Прив'язуємо нового (якщо вибрано)
                             if (!string.IsNullOrEmpty(newlySelectedKeeperPhone))
                             {
-                                // Знаходимо за номером телефону
                                 var keeperToLink = await _context.StorageKeepers.FindAsync(newlySelectedKeeperPhone);
-                                if (keeperToLink != null && keeperToLink.UserId == null) // Перевірка, чи вільний
+                                if (keeperToLink != null && keeperToLink.UserId == null)
                                 {
                                     keeperToLink.UserId = userToUpdate.UserId;
                                     _context.StorageKeepers.Update(keeperToLink);
@@ -203,7 +275,6 @@ namespace IMS.Controllers
                                 }
                                 else
                                 {
-                                    // Помилка: зайнятий або не існує
                                     await transaction.RollbackAsync();
                                     ModelState.AddModelError("SelectedStorageKeeperPhoneNumber", "Помилка: Обраний комірник вже прив'язаний або не існує.");
                                     model.AvailableKeepers = await GetAvailableKeepersListAsync(model.SelectedStorageKeeperPhoneNumber); // Перезавантажуємо список
@@ -211,7 +282,6 @@ namespace IMS.Controllers
                                 }
                             }
                         }
-                        // 2б. Якщо вибраний комірник не змінився - нічого не робимо
                     }
 
                     await transaction.CommitAsync();
@@ -229,7 +299,6 @@ namespace IMS.Controllers
                 }
             }
 
-            // Якщо модель не валідна, перезавантажуємо список
             model.AvailableKeepers = await GetAvailableKeepersListAsync(model.SelectedStorageKeeperPhoneNumber);
             return View(model);
         }
@@ -238,7 +307,6 @@ namespace IMS.Controllers
         // GET: Admin/DeleteUser/5 - логіка не змінюється
         public async Task<IActionResult> DeleteUser(int? id)
         {
-            // Логіка не змінилася значно, показуємо користувача
             if (id == null) return NotFound();
             var user = await _context.Users.FirstOrDefaultAsync(m => m.UserId == id);
             if (user == null) return NotFound();
@@ -257,16 +325,14 @@ namespace IMS.Controllers
             using var transaction = await _context.Database.BeginTransactionAsync();
             try
             {
-                // Відв'язуємо комірника, якщо він був
                 if (userToDelete.StorageKeeper != null)
                 {
                     userToDelete.StorageKeeper.UserId = null;
                     _context.StorageKeepers.Update(userToDelete.StorageKeeper);
-                    // Важливо: Не зберігаємо тут, щоб все було в одній транзакції
                 }
 
                 _context.Users.Remove(userToDelete);
-                await _context.SaveChangesAsync(); // Зберігаємо видалення User та оновлення Keeper
+                await _context.SaveChangesAsync(); 
 
                 await transaction.CommitAsync();
                 TempData["SuccessMessage"] = $"Користувача {userToDelete.Username} успішно видалено.";
@@ -281,18 +347,27 @@ namespace IMS.Controllers
             }
         }
 
+        private void PopulateRoleFilterList(string? selectedRole)
+        {
+            var roleList = Enum.GetValues(typeof(UserRole))
+                               .Cast<UserRole>()
+                               .Select(r => new SelectListItem
+                               {
+                                   Value = r.ToString(),
+                                   Text = r.ToString() 
+                               }).ToList();
+            ViewBag.RoleFilterList = new SelectList(roleList, "Value", "Text", selectedRole);
+        }
 
-        // Допоміжний метод для отримання списку - тепер використовує string ключ і текст
         private async Task<IEnumerable<SelectListItem>> GetAvailableKeepersListAsync(string? currentKeeperPhone = null)
         {
             var availableKeepers = await _context.StorageKeepers
-                // Вибираємо тих, хто вільний (UserId == null) АБО поточного прив'язаного
                 .Where(sk => sk.UserId == null || sk.PhoneNumber == currentKeeperPhone)
                 .OrderBy(sk => sk.LastName).ThenBy(sk => sk.FirstName)
                 .Select(sk => new SelectListItem
                 {
-                    Value = sk.PhoneNumber, // Значення - номер телефону
-                    Text = $"{sk.LastName} {sk.FirstName} ({sk.PhoneNumber})" // Текст - ПІБ + телефон для ясності
+                    Value = sk.PhoneNumber, 
+                    Text = $"{sk.LastName} {sk.FirstName} ({sk.PhoneNumber})" 
                 })
                 .ToListAsync();
 
