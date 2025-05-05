@@ -6,6 +6,8 @@ using IMS.Models;
 using IMS.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Npgsql;
+using X.PagedList.EF;
+using X.PagedList;
 
 namespace IMS.Controllers
 {
@@ -15,6 +17,7 @@ namespace IMS.Controllers
     {
         private readonly AppDbContext _context; 
         private readonly ILogger<InvoiceController> _logger;
+        private const int _pageSize = 10;
 
         public InvoiceController(AppDbContext context, ILogger<InvoiceController> logger) 
         {
@@ -24,29 +27,145 @@ namespace IMS.Controllers
 
         // GET: Invoices
         [HttpGet("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+            string? invoiceType = null,         
+            InvoiceStatus? filterStatus = null,
+            DateOnly? filterDateFrom = null,
+            DateOnly? filterDateTo = null,
+            string? filterCounterpartyName = null, 
+            string? filterSenderStorage = null,    
+            string? filterReceiverStorage = null,  
+            int page = 1)                       
         {
             ViewData["Title"] = "Накладні";
+
+            ViewData["CurrentInvoiceType"] = invoiceType;
+            ViewData["CurrentStatusFilter"] = filterStatus;
+            ViewData["CurrentDateFromFilter"] = filterDateFrom?.ToString("yyyy-MM-dd");
+            ViewData["CurrentDateToFilter"] = filterDateTo?.ToString("yyyy-MM-dd");
+            ViewData["CurrentCounterpartyFilter"] = filterCounterpartyName;
+            ViewData["CurrentSenderStorageFilter"] = filterSenderStorage;
+            ViewData["CurrentReceiverStorageFilter"] = filterReceiverStorage;
+
+            int pageNumber = page;
+
             try
             {
-                var invoices = await _context.Invoices
-                    .Include(i => i.CounterpartyNameNavigation) 
-                    .Include(i => i.SenderStorageNameNavigation)  
+                var invoicesQuery = _context.Invoices
+                    .Include(i => i.CounterpartyNameNavigation)
+                    .Include(i => i.SenderStorageNameNavigation)
                     .Include(i => i.ReceiverStorageNameNavigation)
-                    .OrderByDescending(i => i.Date)
-                    .ThenByDescending(i => i.InvoiceId)
                     .AsNoTracking()
-                    .ToListAsync();
+                    .AsQueryable();
 
-                return View(invoices);
+                if (!string.IsNullOrEmpty(invoiceType) && Enum.TryParse<InvoiceType>(invoiceType, true, out var typeToFilter))
+                {
+                    invoicesQuery = invoicesQuery.Where(i => i.Type == typeToFilter);
+                }
+                if (filterStatus.HasValue)
+                {
+                    invoicesQuery = invoicesQuery.Where(i => i.Status == filterStatus.Value);
+                }
+                if (filterDateFrom.HasValue)
+                {
+                    invoicesQuery = invoicesQuery.Where(i => i.Date >= filterDateFrom.Value);
+                }
+                if (filterDateTo.HasValue)
+                {
+                    invoicesQuery = invoicesQuery.Where(i => i.Date <= filterDateTo.Value);
+                }
+                if (!string.IsNullOrEmpty(filterCounterpartyName))
+                {
+                    invoicesQuery = invoicesQuery.Where(i => i.CounterpartyName != null && i.CounterpartyName.ToLower().Contains(filterCounterpartyName.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterSenderStorage))
+                {
+                    invoicesQuery = invoicesQuery.Where(i => i.SenderStorageName != null && i.SenderStorageName.ToLower().Contains(filterSenderStorage.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterReceiverStorage))
+                {
+                    invoicesQuery = invoicesQuery.Where(i => i.ReceiverStorageName != null && i.ReceiverStorageName.ToLower().Contains(filterReceiverStorage.ToLower()));
+                }
+
+                PopulateStatusFilterList(filterStatus);
+
+                var sortedQuery = invoicesQuery
+                    .OrderByDescending(i => i.Date)
+                    .ThenByDescending(i => i.InvoiceId);
+
+                var pagedInvoices = await sortedQuery.ToPagedListAsync(pageNumber, _pageSize);
+
+                return View(pagedInvoices); 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Помилка при отриманні списку накладних");
+                _logger.LogError(ex, "Помилка при отриманні списку накладних з фільтрами");
                 TempData["ErrorMessage"] = "Не вдалося завантажити список накладних.";
-                return View(new List<Invoice>());
+                PopulateStatusFilterList(filterStatus); 
+                var emptyPagedList = new PagedList<Invoice>(Enumerable.Empty<Invoice>(), pageNumber, _pageSize);
+                return View(emptyPagedList);
             }
         }
+
+        private void PopulateStatusFilterList(InvoiceStatus? filterStatus)
+        {
+            try
+            {
+                var statusList = Enum.GetValues(typeof(InvoiceStatus)).Cast<InvoiceStatus>()
+                                  .Select(s => new SelectListItem { Value = s.ToString(), Text = s.ToString() }).ToList();
+                ViewBag.StatusFilterList = new SelectList(statusList, "Value", "Text", filterStatus?.ToString());
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to populate Invoice Status filter list.");
+                ViewBag.StatusFilterList = new SelectList(new List<SelectListItem>());
+            }
+        }
+
+        [HttpGet("AutocompleteCounterpartyName")]
+        public async Task<IActionResult> AutocompleteCounterpartyName(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Json(Enumerable.Empty<string>());
+            var lowerTerm = term.ToLower();
+            try
+            {
+                var matches = await _context.Counterparties 
+                    .Where(c => c.Name.ToLower().Contains(lowerTerm))
+                    .OrderBy(c => c.Name)
+                    .Select(c => c.Name)
+                    .Take(10)
+                    .ToListAsync();
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during counterparty name autocomplete for term {Term}", term);
+                return Json(Enumerable.Empty<string>());
+            }
+        }
+
+        [HttpGet("AutocompleteStorageName")]
+        public async Task<IActionResult> AutocompleteStorageName(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Json(Enumerable.Empty<string>());
+            var lowerTerm = term.ToLower();
+            try
+            {
+                var matches = await _context.Storages
+                    .Where(s => s.Name.ToLower().Contains(lowerTerm))
+                    .OrderBy(s => s.Name)
+                    .Select(s => s.Name)
+                    .Take(10)
+                    .ToListAsync();
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during storage name autocomplete for term {Term}", term);
+                return Json(Enumerable.Empty<string>());
+            }
+        }
+
 
         // GET: Invoices/Details/5
         [HttpGet("Details/{id:int}")] 

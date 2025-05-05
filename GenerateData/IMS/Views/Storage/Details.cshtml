@@ -1,33 +1,35 @@
-﻿ @model IMS.ViewModels.StorageDetailsViewModel
- @using IMS.Models
+﻿@model IMS.ViewModels.StorageDetailsViewModel
+@using IMS.Models
+@using X.PagedList.Mvc.Core;
+@using X.PagedList; 
 
 @{
 	ViewData["Title"] = $"Деталі: {Model.Storage.Name}";
 	Layout = "_Layout";
 	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+	var activeTab = ViewData["ActiveTab"] as string ?? "info";
 }
 
 <h1>Склад: @Model.Storage.Name</h1>
 
 <nav class="mt-3">
 	<div class="nav nav-tabs" id="nav-tab" role="tablist">
-		<button class="nav-link active" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="true">Інформація</button>
+		<button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Інформація</button>
+		@if (canManage || User.IsInRole(UserRole.storage_keeper.ToString()))
+		{
+			<button class="nav-link @(activeTab == "stock" ? "active" : "")" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="@(activeTab == "stock")">Залишки товарів</button>
+		}
 		@if (canManage)
 		{
-			<button class="nav-link" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="false">Залишки товарів</button>
-			<button class="nav-link" id="nav-keepers-tab" data-bs-toggle="tab" data-bs-target="#nav-keepers" type="button" role="tab" aria-controls="nav-keepers" aria-selected="false">Призначені комірники</button>
-			<button class="nav-link" id="nav-storage-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-storage-invoices" type="button" role="tab" aria-controls="nav-storage-invoices" aria-selected="false">Накладні</button>
-		}
-		else if (User.IsInRole(UserRole.storage_keeper.ToString()))
-		{
-			<button class="nav-link" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="false">Залишки товарів</button>
+			<button class="nav-link @(activeTab == "keepers" ? "active" : "")" id="nav-keepers-tab" data-bs-toggle="tab" data-bs-target="#nav-keepers" type="button" role="tab" aria-controls="nav-keepers" aria-selected="@(activeTab == "keepers")">Призначені комірники</button>
+			<button class="nav-link @(activeTab == "invoices" ? "active" : "")" id="nav-storage-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-storage-invoices" type="button" role="tab" aria-controls="nav-storage-invoices" aria-selected="@(activeTab == "invoices")">Накладні</button>
 		}
 	</div>
 </nav>
 
 <div class="tab-content pt-3" id="nav-tabContent">
 
-	<div class="tab-pane fade show active" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
+	<div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
 		<h4>Адреса та деталі</h4>
 		<hr />
 		<dl class="row">
@@ -50,7 +52,7 @@
 		}
 	</div>
 
-	<div class="tab-pane fade" id="nav-stock" role="tabpanel" aria-labelledby="nav-stock-tab" tabindex="0">
+	<div class="tab-pane fade @(activeTab == "stock" ? "show active" : "")" id="nav-stock" role="tabpanel" aria-labelledby="nav-stock-tab" tabindex="0">
 		<div class="d-flex justify-content-between align-items-center mb-2">
 			<h4>Товари на складі</h4>
 			@if (User.IsInRole(UserRole.owner.ToString()))
@@ -61,7 +63,7 @@
 			}
 		</div>
 		<hr />
-		@if (Model.Storage.StorageProducts?.Any() ?? false)
+		@if (Model.StorageProducts?.Any() ?? false)
 		{
 			<table class="table table-sm table-hover">
 				<thead class="table-light">
@@ -77,7 +79,7 @@
 					</tr>
 				</thead>
 				<tbody>
-					@foreach (var item in Model.Storage.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
+					@foreach (var item in Model.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
 					{
 						<tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
 							<td>@item.ProductNameNavigation?.ProductName</td>
@@ -123,6 +125,28 @@
 					}
 				</tbody>
 			</table>
+			<div class="d-flex justify-content-center mt-3">
+				@Html.PagedListPager(Model.StorageProducts, page => Url.Action("Details",
+								new
+								{
+									name = Model.Storage.Name,          
+									pPage = page,                       
+									kPage = Model.CurrentKeepersPage,   
+									iPage = Model.CurrentInvoicesPage,
+									activeTab = "stock"
+								}),
+								new PagedListRenderOptions
+			{
+				LiElementClasses = new[] { "page-item" },
+				PageClasses = new[] { "page-link" },
+				UlElementClasses = new[] { "pagination", "pagination-sm" },
+				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+			})
+			</div>
 
 			@Html.AntiForgeryToken()
 		}
@@ -134,13 +158,13 @@
 
 	@if (canManage)
 	{
-		<div class="tab-pane fade" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
+		<div class="tab-pane fade @(activeTab == "keepers" ? "show active" : "")" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
 			<div class="d-flex justify-content-between align-items-center mb-2">
 				<h4>Призначені комірники</h4>
 				<a asp-controller="StorageKeeper" asp-action="Create" asp-route-storageName="@Model.Storage.Name" class="btn btn-success btn-sm">Створити комірника</a>
 			</div>
 			<hr />
-			@if (Model.Storage.StorageKeepers?.Any() ?? false)
+			@if (Model.StorageKeepers?.Any() ?? false)
 			{
 				<table class="table table-sm table-hover">
 					<thead class="table-light">
@@ -153,7 +177,7 @@
 						</tr>
 					</thead>
 					<tbody>
-						@foreach (var keeper in Model.Storage.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
+						@foreach (var keeper in Model.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
 						{
 							<tr>
 								<td>@Html.DisplayFor(modelItem => keeper.LastName)</td>
@@ -174,6 +198,28 @@
 						}
 					</tbody>
 				</table>
+				<div class="d-flex justify-content-center mt-3">
+					@Html.PagedListPager(Model.StorageKeepers, page => Url.Action("Details",
+									new
+									{
+										name = Model.Storage.Name,         
+										pPage = Model.CurrentProductsPage,  
+										kPage = page,                       
+										iPage = Model.CurrentInvoicesPage  ,
+										activeTab = "keepers"
+									}),
+									new PagedListRenderOptions
+			{
+				LiElementClasses = new[] { "page-item" },
+				PageClasses = new[] { "page-link" },
+				UlElementClasses = new[] { "pagination", "pagination-sm" },
+				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+			})
+				</div>
 			}
 			else
 			{
@@ -181,7 +227,7 @@
 			}
 		</div>
 	}
-	<div class="tab-pane fade" id="nav-storage-invoices" role="tabpanel" aria-labelledby="nav-storage-invoices-tab" tabindex="0">
+	<div class="tab-pane fade @(activeTab == "invoices" ? "show active" : "")" id="nav-storage-invoices" role="tabpanel" aria-labelledby="nav-storage-invoices-tab" tabindex="0">
 		<div class="d-flex justify-content-between align-items-center mb-2">
 			<h4>Накладні, пов'язані зі складом</h4>
 			@if (canManage)
@@ -191,7 +237,6 @@
 				</div>
 			}
 		</div>
-		@* TODO: Додати фільтри за типом/статусом пізніше *@
 		<hr />
 		@if (Model.RelatedInvoices.Any())
 		{
@@ -245,6 +290,28 @@
 					}
 				</tbody>
 			</table>
+			<div class="d-flex justify-content-center mt-3">
+				@Html.PagedListPager(Model.RelatedInvoices, page => Url.Action("Details",
+								new
+								{
+									name = Model.Storage.Name,          
+									pPage = Model.CurrentProductsPage,  
+									kPage = Model.CurrentKeepersPage,   
+									iPage = page,
+									activeTab = "invoices"
+								}),
+								new PagedListRenderOptions
+			{
+				LiElementClasses = new[] { "page-item" },
+				PageClasses = new[] { "page-link" },
+				UlElementClasses = new[] { "pagination", "pagination-sm" },
+				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+			})
+			</div>
 		}
 		else
 		{
@@ -257,35 +324,6 @@
 </div>
 
 @section Scripts {
-	<script>
-		$(document).ready(function () {
-			var hash = window.location.hash;
-
-			if (hash) {
-				var triggerEl = document.querySelector('.nav-tabs button[data-bs-target="' + hash + '"]');
-
-				if (triggerEl) {
-					var tab = new bootstrap.Tab(triggerEl);
-					tab.show();
-				}
-			}
-
-			var tabTriggerList = [].slice.call(document.querySelectorAll('#nav-tab button'));
-			tabTriggerList.forEach(function (tabTriggerEl) {
-				var tab = new bootstrap.Tab(tabTriggerEl);
-
-				tabTriggerEl.addEventListener('click', function (event) {
-					var newHash = tabTriggerEl.getAttribute('data-bs-target');
-					if (history.pushState) {
-						 history.pushState(null, '', newHash);
-					} else {
-						 window.location.hash = newHash;
-					}
-				});
-			});
-
-		});
-	</script>
      <script>
          $(document).ready(function () {
              $('table').on('click', '.edit-min-inline-btn', function () {

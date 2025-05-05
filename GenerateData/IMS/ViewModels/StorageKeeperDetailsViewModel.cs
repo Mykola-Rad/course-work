@@ -1,13 +1,16 @@
 ﻿using IMS.Models;
+using X.PagedList;
 
 namespace IMS.ViewModels
 {
     public class StorageKeeperDetailsViewModel
     {
-        public StorageKeeper Keeper { get; set; } = null!;
+        public StorageKeeper Keeper { get; set; } 
 
-        public List<Invoice> RelatedInvoices { get; set; } = new List<Invoice>();
+        public IPagedList<Invoice>? RelatedInvoices { get; set; } 
 
-        public bool ShowInvoices { get; set; }
+        public int CurrentInvoicesPage { get; set; }
+
+        public bool FromStorage { get; set; }
     }
 }

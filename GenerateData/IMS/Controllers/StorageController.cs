@@ -5,6 +5,9 @@ using IMS.Data;
 using IMS.Models;
 using Npgsql;
 using IMS.ViewModels;
+using X.PagedList.EF;
+using X.PagedList;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace IMS.Controllers
 {
@@ -13,6 +16,7 @@ namespace IMS.Controllers
     {
         private readonly AppDbContext _context; 
         private readonly ILogger<StorageController> _logger;
+        private const int _pageSize = 10;
 
         public StorageController(AppDbContext context, ILogger<StorageController> logger)
         {
@@ -21,32 +25,157 @@ namespace IMS.Controllers
         }
 
         // GET: Storage
-        public async Task<IActionResult> Index()
+        [Authorize(Policy = "RequireManagerRole")]
+        public async Task<IActionResult> Index(
+        string? filterName = null,
+        string? filterCity = null,
+        string? filterStreet = null,
+        string? filterRegion = null,
+        int page = 1)
         {
             ViewData["Title"] = "Довідник складів";
+
+            ViewData["CurrentNameFilter"] = filterName;
+            ViewData["CurrentCityFilter"] = filterCity;
+            ViewData["CurrentStreetFilter"] = filterStreet;
+            ViewData["CurrentRegionFilter"] = filterRegion;
+
+            int pageNumber = page;
+
             try
             {
-                var storages = await _context.Storages
-                                            .OrderBy(s => s.Name)
-                                            .ToListAsync();
-                return View(storages);
+                var storagesQuery = _context.Storages
+                                            .AsNoTracking() 
+                                            .AsQueryable();
+
+                if (!string.IsNullOrEmpty(filterName))
+                {
+                    storagesQuery = storagesQuery.Where(s => s.Name.ToLower().Contains(filterName.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterCity))
+                {
+                    storagesQuery = storagesQuery.Where(s => s.City.ToLower().Contains(filterCity.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterStreet))
+                {
+                    storagesQuery = storagesQuery.Where(s => s.StreetName != null && s.StreetName.ToLower().Contains(filterStreet.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterRegion))
+                {
+                    storagesQuery = storagesQuery.Where(s => s.Region == filterRegion);
+                }
+
+                await PopulateFilterLists(filterRegion);
+
+                var sortedQuery = storagesQuery.OrderBy(s => s.Name);
+
+                var pagedStorages = await sortedQuery.ToPagedListAsync(pageNumber, _pageSize);
+
+                return View(pagedStorages); 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Помилка при отриманні списку складів");
+                _logger.LogError(ex, "Помилка при отриманні списку складів з фільтрами");
                 TempData["ErrorMessage"] = "Не вдалося завантажити список складів.";
-                return View(new List<Storage>());
+                await PopulateFilterLists(filterRegion);
+                var emptyPagedList = new PagedList<Storage>(Enumerable.Empty<Storage>(), pageNumber, _pageSize);
+                return View(emptyPagedList);
             }
+        }
+
+        private async Task PopulateFilterLists(string? selectedRegion)
+        {
+            try
+            {
+                var regions = await _context.Storages
+                                       .Where(s => !string.IsNullOrEmpty(s.Region)) 
+                                       .Select(s => s.Region) 
+                                       .Distinct()            
+                                       .OrderBy(r => r)       
+                                       .ToListAsync();
+                ViewBag.RegionFilterList = new SelectList(regions, selectedRegion);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to populate Region filter list.");
+                ViewBag.RegionFilterList = new SelectList(new List<string>()); 
+            }
+        }
+
+        [HttpGet("AutocompleteStorageName")]
+        public async Task<IActionResult> AutocompleteStorageName(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Json(Enumerable.Empty<string>());
+            var lowerTerm = term.ToLower();
+            try
+            {
+                var matches = await _context.Storages
+                    .Where(s => s.Name.ToLower().Contains(lowerTerm))
+                    .OrderBy(s => s.Name)
+                    .Select(s => s.Name)
+                    .Take(10) 
+                    .ToListAsync();
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during storage name autocomplete for term {Term}", term);
+                return Json(Enumerable.Empty<string>());
+            }
+        }
+
+        [HttpGet("AutocompleteCity")]
+        public async Task<IActionResult> AutocompleteCity(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Json(Enumerable.Empty<string>());
+            var lowerTerm = term.ToLower();
+            try
+            {
+                var matches = await _context.Storages
+                    .Where(s => s.City.ToLower().Contains(lowerTerm))
+                    .Select(s => s.City)
+                    .Distinct()
+                    .OrderBy(city => city)
+                    .Take(10)
+                    .ToListAsync();
+                return Json(matches);
+            }
+            catch (Exception ex) { _logger.LogError(ex, "AutocompleteCity error"); return Json(Enumerable.Empty<string>()); }
+        }
+
+        [HttpGet("AutocompleteStreet")]
+        public async Task<IActionResult> AutocompleteStreet(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Json(Enumerable.Empty<string>());
+            var lowerTerm = term.ToLower();
+            try
+            {
+                var matches = await _context.Storages
+                    .Where(s => s.StreetName != null && s.StreetName.ToLower().Contains(lowerTerm))
+                    .Select(s => s.StreetName)
+                    .Distinct()
+                    .OrderBy(street => street)
+                    .Take(10)
+                    .ToListAsync();
+                return Json(matches);
+            }
+            catch (Exception ex) { _logger.LogError(ex, "AutocompleteStreet error"); return Json(Enumerable.Empty<string>()); }
         }
 
         // GET: Storage/Details/НазваСкладу
         [HttpGet("Details/{name}")]
-        [Authorize(Policy = "RequireStorageKeeperRole")]
-        public async Task<IActionResult> Details(string name)
+        public async Task<IActionResult> Details(
+        string name,
+        string activeTab = "info",
+        int pPage = 1, 
+        int kPage = 1, 
+        int iPage = 1  
+        )
         {
             if (string.IsNullOrEmpty(name)) return BadRequest();
 
             ViewData["Title"] = $"Деталі складу: {name}";
+            ViewData["ActiveTab"] = activeTab;
 
             try
             {
@@ -61,48 +190,52 @@ namespace IMS.Controllers
                     return RedirectToAction(nameof(Index));
                 }
 
-                var viewModel = new StorageDetailsViewModel
-                {
-                    Storage = storage,
-                    RelatedInvoices = new List<Invoice>(),
-                };
+                var productsQuery = _context.StorageProducts
+                    .Where(sp => sp.StorageName == name)
+                    .Include(sp => sp.ProductNameNavigation)
+                        .ThenInclude(p => p.UnitCodeNavigation)
+                    .OrderBy(sp => sp.ProductName)
+                    .AsNoTracking();
+                var pagedProducts = await productsQuery.ToPagedListAsync(pPage, _pageSize);
+
+                var keepersQuery = _context.StorageKeepers
+                    .Where(sk => sk.StorageName == name)
+                    .Include(sk => sk.User)
+                    .OrderBy(sk => sk.LastName).ThenBy(sk => sk.FirstName)
+                    .AsNoTracking();
+                var pagedKeepers = await keepersQuery.ToPagedListAsync(kPage, _pageSize);
 
 
-                viewModel.Storage.StorageProducts = await _context.StorageProducts
-                        .Where(sp => sp.StorageName == name)
-                        .Include(sp => sp.ProductNameNavigation)
-                            .ThenInclude(p => p.UnitCodeNavigation)
-                        .OrderBy(sp => sp.ProductName)
-                        .AsNoTracking()
-                        .ToListAsync();
-
-                viewModel.Storage.StorageKeepers = await _context.StorageKeepers
-                        .Where(sk => sk.StorageName == name)
-                        .Include(sk => sk.User)
-                        .OrderBy(sk => sk.LastName).ThenBy(sk => sk.FirstName)
-                        .AsNoTracking()
-                        .ToListAsync();
-
-                var senderInvoices = await _context.Invoices
-                                           .Where(i => i.SenderStorageName == name)
-                                           .Include(i => i.ListEntries)
-                                           .AsNoTracking()
-                                           .ToListAsync();
-                var receiverInvoices = await _context.Invoices
+                var senderInvoiceIds = await _context.Invoices
+                                            .Where(i => i.SenderStorageName == name)
+                                            .Select(i => i.InvoiceId)
+                                            .ToListAsync();
+                var receiverInvoiceIds = await _context.Invoices
                                             .Where(i => i.ReceiverStorageName == name)
-                                            .Include(i => i.ListEntries)
-                                            .AsNoTracking()
+                                            .Select(i => i.InvoiceId)
                                             .ToListAsync();
 
-                viewModel.RelatedInvoices = senderInvoices
-                                          .Union(receiverInvoices)
-                                          .DistinctBy(i => i.InvoiceId)
-                                          .OrderByDescending(i => i.Date)
-                                          .ThenByDescending(i => i.InvoiceId)
-                                          .ToList();
+                var relatedInvoiceIds = senderInvoiceIds.Union(receiverInvoiceIds).Distinct().ToList();
 
+                var invoicesQuery = _context.Invoices
+                                    .Where(i => relatedInvoiceIds.Contains(i.InvoiceId))
+                                    .AsNoTracking()
+                                    .OrderByDescending(i => i.Date)
+                                    .ThenByDescending(i => i.InvoiceId);
+                var pagedInvoices = await invoicesQuery.ToPagedListAsync(iPage, _pageSize);
 
-                return View(viewModel); 
+                var viewModel = new StorageDetailsViewModel
+                {
+                    Storage = storage, 
+                    StorageProducts = pagedProducts,
+                    StorageKeepers = pagedKeepers,
+                    RelatedInvoices = pagedInvoices,
+                    CurrentProductsPage = pPage,
+                    CurrentKeepersPage = kPage,
+                    CurrentInvoicesPage = iPage
+                };
+
+                return View(viewModel);
             }
             catch (Exception ex)
             {
@@ -111,6 +244,7 @@ namespace IMS.Controllers
                 return RedirectToAction(nameof(Index));
             }
         }
+
 
         [Authorize(Policy = "RequireManagerRole")]
         public IActionResult Create()

@@ -1,5 +1,7 @@
-﻿@model IEnumerable<IMS.ViewModels.ProductStockSummaryViewModel>
-
+﻿@model X.PagedList.IPagedList<IMS.ViewModels.ProductStockSummaryViewModel>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
 @{
     ViewData["Title"] = "Загальні залишки по товарах";
     Layout = "_Layout";
@@ -7,21 +9,22 @@
 
 <h1>@ViewData["Title"]</h1>
 
-<p class="text-muted">Показано загальну кількість кожного товару на всіх складах.</p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <p class="text-muted mb-0">Показано загальну кількість кожного товару на всіх складах.</p>
+
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Фільтри / Пошук
+    </button>
+</div>
 
 <table class="table table-sm table-hover table-striped">
     <thead class="table-light">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.First().ProductName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().TotalCount)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().ProductUnitName)
-            </th>
-            <th>Деталі</th>
+            <th>Назва товару</th>
+            <th>Загальна кількість</th>
+            <th>Мінімальний залишок</th>
+            <th>Одиниця виміру</th>
+            <th>Деталі по складах</th>
         </tr>
     </thead>
     <tbody>
@@ -30,26 +33,81 @@
             @foreach (var item in Model)
             {
                 <tr>
+                    <td>@Html.DisplayFor(modelItem => item.ProductName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TotalCount)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TotalMinimal)</td>
+                    <td>@Html.DisplayFor(modelItem => item.ProductUnitName)</td>
                     <td>
-                            @Html.DisplayFor(modelItem => item.ProductName)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.TotalCount)
-                    </td>
-                    <td>
-                        @Html.DisplayFor(modelItem => item.ProductUnitName)
-                    </td>
-                    <td>
-                        <a asp-action="DetailsByProduct" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-info">Details</a>
+                        <a asp-action="DetailsByProduct" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-info">Розподіл</a> |
+                        <a asp-controller="Product" asp-action="Details" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-info">Деталі</a>
                     </td>
                 </tr>
             }
         }
         else
         {
-            <tr>
-                <td colspan="3" class="text-center text-muted">Залишки товарів відсутні.</td>
-            </tr>
+            <tr><td colspan="4" class="text-center text-muted">Товарів за вашим запитом не знайдено.</td></tr>
         }
     </tbody>
 </table>
+
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index", 
+            new
+            {
+                page = page,
+                searchString = ViewData["CurrentSearch"],        
+                filterUnitName = ViewData["CurrentUnitFilter"]
+            }),
+            new PagedListRenderOptions
+    { 
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+    })
+</div>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Фільтри та Пошук Товарів</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="managerFilterForm">
+            <div class="mb-3 position-relative">
+                <label for="searchStringInput" class="form-label fw-semibold">Пошук за назвою товару</label>
+                <input type="text" id="searchStringInput" name="searchString" value="@ViewData["CurrentSearch"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteStockProductName", "StorageProduct")" 
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#stockProductNameAutocompleteList" />
+                <ul id="stockProductNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+            <div class="mb-3">
+                <label for="unitFilterSelect" class="form-label fw-semibold">Фільтр за од. вим.</label>
+                <select id="unitFilterSelect" name="filterUnitName" asp-items="@ViewBag.UnitNameFilterList" class="form-select form-select-sm">
+                    <option value="">-- Всі одиниці --</option>
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Застосувати</button>
+                <button type="button" class="btn btn-outline-secondary"
+                        data-reset-form-target="#managerFilterForm">
+                    Скинути Все
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }

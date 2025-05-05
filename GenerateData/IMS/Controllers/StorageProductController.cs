@@ -5,8 +5,9 @@ using IMS.Data;
 using IMS.Models;
 using IMS.ViewModels;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using System.Security.Cryptography.X509Certificates;
 using System.Security.Claims;
+using X.PagedList;
+using X.PagedList.EF;
 
 namespace IMS.Controllers
 {
@@ -16,6 +17,7 @@ namespace IMS.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<StorageProductController> _logger;
+        private const int _pageSize = 10;
 
         public StorageProductController(AppDbContext context, ILogger<StorageProductController> logger) 
         {
@@ -26,8 +28,10 @@ namespace IMS.Controllers
         // GET: StorageProduct
         [HttpGet("")]
         [AllowAnonymous]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchString = null, string? filterUnitName = null, int page = 1)
         {
+            ViewData["CurrentSearch"] = searchString;
+            ViewData["CurrentUnitFilter"] = filterUnitName;
             try
             {
                 var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -35,11 +39,11 @@ namespace IMS.Controllers
 
                 if (isKeeper) 
                 {
-                    return await GetKeeperStockViewAsync(userIdString); 
+                    return await GetKeeperStockViewAsync(userIdString, searchString, filterUnitName, page);
                 }
                 else 
                 {
-                    return await GetManagerStockSummaryViewAsync(); 
+                    return await GetManagerStockSummaryViewAsync(searchString, filterUnitName, page);
                 }
             }
             catch (Exception ex)
@@ -105,63 +109,94 @@ namespace IMS.Controllers
             }
         }
 
-        private async Task<IActionResult> GetKeeperStockViewAsync(string? userIdString)
+        private async Task<IActionResult> GetKeeperStockViewAsync(string? userIdString, string? searchString, string? filterUnitName, int page) 
         {
             ViewData["Title"] = "Поточні залишки на вашому складі";
-            List<StorageProduct> keeperStockList = new List<StorageProduct>(); 
+            ViewData["CurrentSearch"] = searchString;
+            ViewData["CurrentUnitFilter"] = filterUnitName;
+
+            IPagedList<StorageProduct> pagedKeeperStockList;
 
             if (int.TryParse(userIdString, out int userId))
             {
                 var keeperStorageName = await _context.StorageKeepers
-                                                      .Where(sk => sk.UserId == userId)
-                                                      .Select(sk => sk.StorageName)
-                                                      .FirstOrDefaultAsync();
+                                                      .Where(sk => sk.UserId == userId).Select(sk => sk.StorageName).FirstOrDefaultAsync();
 
                 if (!string.IsNullOrEmpty(keeperStorageName))
                 {
                     ViewData["Title"] = $"Залишки на складі: {keeperStorageName}";
-                    keeperStockList = await _context.StorageProducts
+                    var query = _context.StorageProducts
                         .Where(sp => sp.StorageName == keeperStorageName)
                         .Include(sp => sp.ProductNameNavigation.UnitCodeNavigation)
-                        .OrderBy(sp => sp.ProductName)
-                        .AsNoTracking()
-                        .ToListAsync();
+                        .AsNoTracking();
+
+                    if (!string.IsNullOrEmpty(searchString))
+                    {
+                        query = query.Where(sp => sp.ProductName.ToLower().Contains(searchString.ToLower()));
+                    }
+
+                    if (!string.IsNullOrEmpty(filterUnitName))
+                    {
+                        query = query.Where(sp => sp.ProductNameNavigation.UnitCode == filterUnitName);
+                    }
+
+                    query = query.OrderBy(sp => sp.ProductName);
+
+                    pagedKeeperStockList = await query.ToPagedListAsync(page, _pageSize);
                 }
                 else
                 {
                     _logger.LogWarning("StorageKeeper with User ID {UserId} is not assigned to a storage.", userId);
-                    TempData["InfoMessage"] = "Вам не призначено склад для перегляду залишків."; 
+                    TempData["InfoMessage"] = "Вам не призначено склад для перегляду залишків.";
+                    pagedKeeperStockList = new PagedList<StorageProduct>(Enumerable.Empty<StorageProduct>(), page, _pageSize); 
                 }
             }
             else
             {
                 _logger.LogError("Could not parse User ID {UserIdString} for StorageKeeper filtering.", userIdString ?? "NULL");
                 TempData["ErrorMessage"] = "Помилка визначення користувача.";
+                pagedKeeperStockList = new PagedList<StorageProduct>(Enumerable.Empty<StorageProduct>(), page, _pageSize);
             }
-            return View("IndexKeeper", keeperStockList);
+
+            await PopulateUnitNameFilterList(filterUnitName);
+            return View("IndexKeeper", pagedKeeperStockList);
         }
 
-        private async Task<IActionResult> GetManagerStockSummaryViewAsync()
+        private async Task<IActionResult> GetManagerStockSummaryViewAsync(string? searchString, string? filterUnitName, int page)
         {
             ViewData["Title"] = "Загальні залишки по товарах";
 
-            var summaryList = await _context.StorageProducts
-                .Include(sp => sp.ProductNameNavigation.UnitCodeNavigation)
+            var query = _context.StorageProducts.Include(sp => sp.ProductNameNavigation.UnitCodeNavigation).AsNoTracking();
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(sp => sp.ProductName.ToLower().Contains(searchString.ToLower()));
+            }
+
+            if (!string.IsNullOrEmpty(filterUnitName))
+            {
+                query = query.Where(sp => sp.ProductNameNavigation.UnitCodeNavigation.UnitName == filterUnitName);
+            }
+
+            var summaryQuery = query
                 .GroupBy(sp => new {
                     sp.ProductName,
-                    UnitName = sp.ProductNameNavigation.UnitCodeNavigation.UnitName
+                    sp.ProductNameNavigation.UnitCodeNavigation.UnitName
                 })
                 .Select(g => new ProductStockSummaryViewModel
                 {
                     ProductName = g.Key.ProductName,
                     ProductUnitName = g.Key.UnitName,
-                    TotalCount = g.Sum(sp => sp.Count)
-                })
-                .OrderBy(s => s.ProductName)
-                .AsNoTracking()
-                .ToListAsync();
+                    TotalCount = g.Sum(sp => sp.Count),
+                    TotalMinimal = g.Sum(sp => sp.MinimalCount)
+                });
 
-            return View("IndexManager", summaryList);
+            var sortedSummaryQuery = summaryQuery.OrderBy(s => s.ProductName);
+
+            var pagedSummaryList = await sortedSummaryQuery.ToPagedListAsync(page, _pageSize);
+
+            await PopulateUnitNameFilterList(filterUnitName); 
+            return View("IndexManager", pagedSummaryList); 
         }
 
 
@@ -457,12 +492,11 @@ namespace IMS.Controllers
         [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> EditMinimalCountOnly(EditMinimalCountViewModel model)
         {
-            // --- Повертаємо Ручний Парсинг і Валідацію MinimalCount ---
             decimal parsedMinimalCount = 0;
             var minimalCountString = Request.Form["MinimalCount"].FirstOrDefault();
-            bool isParsed = decimal.TryParse(minimalCountString, // Рядок вже має містити крапку завдяки JS
+            bool isParsed = decimal.TryParse(minimalCountString, 
                                             System.Globalization.NumberStyles.Any,
-                                            System.Globalization.CultureInfo.InvariantCulture, // Очікуємо крапку
+                                            System.Globalization.CultureInfo.InvariantCulture, 
                                             out parsedMinimalCount);
 
             if (!isParsed || parsedMinimalCount < 0)
@@ -471,8 +505,8 @@ namespace IMS.Controllers
             }
             else
             {
-                model.MinimalCount = parsedMinimalCount; // Записуємо коректне значення
-                                                         // Видаляємо помилку від стандартного біндера, якщо вона була
+                model.MinimalCount = parsedMinimalCount; 
+                                                        
                 ModelState.Remove(nameof(model.MinimalCount));
             }
 
@@ -529,6 +563,63 @@ namespace IMS.Controllers
                                             .OrderBy(p => p.ProductName);
             viewModel.AvailableProducts = new SelectList(await availableProductsQuery.AsNoTracking().ToListAsync(), "ProductName", "ProductName", viewModel.SelectedProductName);
         }
+
+        private async Task PopulateUnitNameFilterList(string? selectedUnitName)
+        {
+            var unitNames = await _context.ProductUnits
+                                         .OrderBy(pu => pu.UnitName)
+                                         .Select(pu => pu.UnitName)
+                                         .Distinct()
+                                         .ToListAsync();
+            ViewBag.UnitNameFilterList = new SelectList(unitNames.Select(n => new { Value = n, Text = n }), "Value", "Text", selectedUnitName);
+        }
+
+        [HttpGet("AutocompleteStockProductName")]
+        public async Task<IActionResult> AutocompleteStockProductName(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Json(Enumerable.Empty<string>());
+            }
+            var lowerTerm = term.ToLower();
+
+            try
+            {
+                var query = _context.StorageProducts.AsQueryable();
+
+                if (User.IsInRole(UserRole.storage_keeper.ToString()) && int.TryParse(User.FindFirstValue(ClaimTypes.NameIdentifier), out int userId))
+                {
+                    var keeperStorageName = await _context.StorageKeepers
+                       .Where(sk => sk.UserId == userId)
+                       .Select(sk => sk.StorageName)
+                       .FirstOrDefaultAsync();
+                    if (!string.IsNullOrEmpty(keeperStorageName))
+                    {
+                        query = query.Where(sp => sp.StorageName == keeperStorageName);
+                    }
+                    else 
+                    {
+                        return Json(Enumerable.Empty<string>());
+                    }
+                }
+
+                var matches = await query
+                    .Where(sp => sp.ProductName.ToLower().Contains(lowerTerm))
+                    .Select(sp => sp.ProductName)
+                    .Distinct()
+                    .OrderBy(name => name)
+                    .Take(10)
+                    .ToListAsync();
+
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during stock product name autocomplete for term {Term}", term);
+                return Json(Enumerable.Empty<string>());
+            }
+        }
+
 
         private async Task PopulateAvailableStorages(AddStorageProductViewModel viewModel)
         {

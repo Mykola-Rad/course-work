@@ -5,6 +5,9 @@ using IMS.Data;
 using IMS.Models;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Npgsql;
+using X.PagedList.EF;
+using IMS.ViewModels;
+using X.PagedList;
 
 namespace IMS.Controllers
 {
@@ -12,7 +15,8 @@ namespace IMS.Controllers
     public class ProductController : Controller
     {
         private readonly AppDbContext _context; 
-        private readonly ILogger<ProductController> _logger; 
+        private readonly ILogger<ProductController> _logger;
+        private const int _pageSize = 10;
 
         public ProductController(AppDbContext context, ILogger<ProductController> logger) 
         {
@@ -21,51 +25,123 @@ namespace IMS.Controllers
         }
 
         // GET: Product або Product/Index
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchString, string? filterUnitCode, int page = 1) 
         {
+            ViewData["Title"] = "Довідник товарів";
+            ViewData["CurrentNameFilter"] = searchString;
+            ViewData["CurrentUnitFilter"] = filterUnitCode;
+
+            int pageNumber = page; 
+
             try
             {
-                var products = await _context.Products
-                                             .Include(p => p.UnitCodeNavigation)
-                                             .OrderBy(p => p.ProductName)
-                                             .ToListAsync();
+                var productsQuery = _context.Products
+                                            .Include(p => p.UnitCodeNavigation)
+                                            .AsNoTracking() 
+                                            .AsQueryable();
 
-                return View(products); 
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    productsQuery = productsQuery.Where(p => p.ProductName.ToLower().Contains(searchString.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterUnitCode))
+                {
+                    productsQuery = productsQuery.Where(p => p.UnitCode == filterUnitCode);
+                }
+
+                productsQuery = productsQuery.OrderBy(p => p.ProductName);
+
+                var pagedProducts = await productsQuery.ToPagedListAsync(pageNumber, _pageSize);
+
+                var units = await _context.ProductUnits.OrderBy(pu => pu.UnitName).ToListAsync();
+                ViewBag.UnitCodeFilterList = new SelectList(units, "UnitCode", "UnitName", filterUnitCode);
+
+                return View(pagedProducts);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Помилка при отриманні списку товарів");
                 TempData["ErrorMessage"] = "Не вдалося завантажити список товарів.";
+                ViewBag.UnitCodeFilterList = new SelectList(await _context.ProductUnits.OrderBy(pu => pu.UnitName).ToListAsync(), "UnitCode", "UnitName", filterUnitCode);
                 return View(new List<Product>()); 
             }
         }
 
         // GET: Product/Details/НазваТовару
-        public async Task<IActionResult> Details(string productName) 
+        public async Task<IActionResult> Details(
+        string productName,
+        string activeTab = "info", 
+        int cPage = 1,             
+        int sPage = 1             
+        )
         {
-            if (string.IsNullOrEmpty(productName))
-            {
-                return NotFound(); 
-            }
+            if (string.IsNullOrEmpty(productName)) return NotFound();
+
+            ViewData["ActiveTab"] = activeTab; 
 
             try
             {
                 var product = await _context.Products
-                                            .Include(p => p.UnitCodeNavigation)
-                                            .FirstOrDefaultAsync(p => p.ProductName == productName);
+                    .Include(p => p.UnitCodeNavigation)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(p => p.ProductName == productName);
 
                 if (product == null)
                 {
-                    return NotFound(); 
+                    _logger.LogWarning("Спроба перегляду деталей неіснуючого товару: {ProductName}", productName);
+                    TempData["ErrorMessage"] = $"Товар '{productName}' не знайдено.";
+                    return RedirectToAction(nameof(Index));
                 }
 
-                return View(product); 
+                ViewData["Title"] = $"Деталі товару: {product.ProductName}";
+
+                var viewModel = new ProductDetailsViewModel
+                {
+                    Product = product,
+                    CurrentCustomersPage = cPage,
+                    CurrentSuppliersPage = sPage,
+                    Customers = null,
+                    Suppliers = null
+                };
+
+                bool canSeeRelated = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+
+                if (canSeeRelated)
+                {
+                    var customerNamesQuery = _context.ListEntries
+                        .Where(le => le.ProductName == productName && le.Invoice.Type == InvoiceType.release && le.Invoice.CounterpartyName != null)
+                        .Select(le => le.Invoice.CounterpartyName)
+                        .Distinct();
+
+                    var customersQuery = _context.Counterparties
+                        .Where(cp => customerNamesQuery.Contains(cp.Name)) 
+                        .OrderBy(cp => cp.Name);
+                    viewModel.Customers = await customersQuery.ToPagedListAsync(cPage, _pageSize);
+
+
+                    var supplierNamesQuery = _context.ListEntries
+                         .Where(le => le.ProductName == productName && le.Invoice.Type == InvoiceType.supply && le.Invoice.CounterpartyName != null)
+                         .Select(le => le.Invoice.CounterpartyName)
+                         .Distinct();
+
+                    var suppliersQuery = _context.Counterparties
+                        .Where(cp => supplierNamesQuery.Contains(cp.Name))
+                        .OrderBy(cp => cp.Name);
+                    viewModel.Suppliers = await suppliersQuery.ToPagedListAsync(sPage, _pageSize);
+                }
+                else
+                {
+                    viewModel.Customers = new PagedList<Counterparty>(Enumerable.Empty<Counterparty>(), cPage, _pageSize);
+                    viewModel.Suppliers = new PagedList<Counterparty>(Enumerable.Empty<Counterparty>(), sPage, _pageSize);
+                }
+
+                return View(viewModel);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Помилка при отриманні деталей товару {ProductName}", productName);
                 TempData["ErrorMessage"] = "Не вдалося завантажити деталі товару.";
-                return RedirectToAction(nameof(Index)); 
+                return RedirectToAction(nameof(Index));
             }
         }
 
@@ -290,6 +366,22 @@ namespace IMS.Controllers
                 TempData["ErrorMessage"] = "Не вдалося видалити товар.";
                 return RedirectToAction(nameof(Index));
             }
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> Autocomplete(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+                return Json(Enumerable.Empty<string>());
+
+            var matches = await _context.Products
+                .Where(p => p.ProductName.ToLower().Contains(term.ToLower()))
+                .OrderBy(p => p.ProductName)
+                .Select(p => p.ProductName)
+                .Take(10)
+                .ToListAsync();
+
+            return Json(matches);
         }
 
         private async Task<bool> ProductExists(string productName)

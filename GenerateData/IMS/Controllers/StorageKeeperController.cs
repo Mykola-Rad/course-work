@@ -6,6 +6,8 @@ using Npgsql;
 using IMS.Data;
 using IMS.ViewModels;
 using IMS.Models;
+using X.PagedList.EF;
+using X.PagedList;
 
 namespace IMS.Controllers
 {
@@ -15,6 +17,7 @@ namespace IMS.Controllers
     {
         private readonly AppDbContext _context;
         private readonly ILogger<StorageKeeperController> _logger;
+        private const int _pageSize = 10;
 
         public StorageKeeperController(AppDbContext context, ILogger<StorageKeeperController> logger)
         {
@@ -24,26 +27,116 @@ namespace IMS.Controllers
 
         // GET: StorageKeepers/Index 
         [HttpGet("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(
+        string? filterFullName = null,
+        string? filterPhone = null,
+        string? filterEmail = null,
+        string? filterStorageName = null,
+        int page = 1)
         {
             ViewData["Title"] = "Керування комірниками";
+
+            ViewData["CurrentFullNameFilter"] = filterFullName; 
+            ViewData["CurrentPhoneFilter"] = filterPhone;
+            ViewData["CurrentEmailFilter"] = filterEmail;
+            ViewData["CurrentStorageFilter"] = filterStorageName;
+
+            int pageNumber = page;
+
             try
             {
-                var storageKeepers = await _context.StorageKeepers
-                                                   .Include(sk => sk.StorageNameNavigation)
-                                                   .Include(sk => sk.User) 
-                                                   .OrderBy(sk => sk.LastName).ThenBy(sk => sk.FirstName)
-                                                   .AsNoTracking() 
-                                                   .ToListAsync();
-                return View(storageKeepers);
+                var keepersQuery = _context.StorageKeepers
+                                           .Include(sk => sk.StorageNameNavigation)
+                                           .AsNoTracking() 
+                                           .AsQueryable();
+
+                if (!string.IsNullOrEmpty(filterFullName))
+                {
+                    string searchTerm = filterFullName.Trim();
+                    keepersQuery = keepersQuery.Where(sk =>
+                        EF.Functions.ToTsVector("simple", (sk.FirstName ?? "") + " " + (sk.LastName ?? ""))
+                        .Matches(EF.Functions.PlainToTsQuery("simple", searchTerm))
+                    );
+                }
+
+                if (!string.IsNullOrEmpty(filterPhone))
+                {
+                    keepersQuery = keepersQuery.Where(sk => sk.PhoneNumber.StartsWith(filterPhone));
+                }
+                if (!string.IsNullOrEmpty(filterEmail))
+                {
+                    keepersQuery = keepersQuery.Where(sk => sk.Email != null && sk.Email.ToLower().Contains(filterEmail.ToLower()));
+                }
+                if (!string.IsNullOrEmpty(filterStorageName))
+                {
+                    keepersQuery = keepersQuery.Where(sk => sk.StorageName == filterStorageName);
+                }
+
+                await PopulateStorageFilterList(filterStorageName);
+
+                var sortedQuery = keepersQuery.OrderBy(sk => sk.LastName).ThenBy(sk => sk.FirstName);
+
+                var pagedStorageKeepers = await sortedQuery.ToPagedListAsync(pageNumber, _pageSize);
+
+                return View(pagedStorageKeepers); 
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Помилка при отриманні списку комірників");
+                _logger.LogError(ex, "Помилка при отриманні списку комірників з фільтрами");
                 TempData["ErrorMessage"] = "Не вдалося завантажити список комірників.";
-                return View(new List<StorageKeeper>()); 
+                await PopulateStorageFilterList(filterStorageName);
+                var emptyPagedList = new PagedList<StorageKeeper>(Enumerable.Empty<StorageKeeper>(), pageNumber, _pageSize);
+                return View(emptyPagedList);
             }
         }
+
+        private async Task PopulateStorageFilterList(string? selectedStorageName)
+        {
+            try
+            {
+                var storageList = await _context.Storages.OrderBy(s => s.Name).Select(s => s.Name).ToListAsync();
+                ViewBag.StorageFilterList = new SelectList(storageList, selectedStorageName);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to populate Storage filter list.");
+                ViewBag.StorageFilterList = new SelectList(new List<string>()); 
+            }
+        }
+
+        [HttpGet("AutocompleteFullName")]
+        public async Task<IActionResult> AutocompleteFullName(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Json(Enumerable.Empty<string>());
+            }
+            var searchTerm = term.Trim();
+            try
+            {
+                var query = _context.StorageKeepers
+                    .Where(sk =>
+                        EF.Functions.ToTsVector("simple", (sk.FirstName ?? "") + " " + (sk.LastName ?? ""))
+                        .Matches(EF.Functions.PlainToTsQuery("simple", searchTerm))
+                    )
+
+                    .Select(sk => (sk.FirstName ?? "") + " " + (sk.LastName ?? ""))
+                    .Where(fullName => !string.IsNullOrWhiteSpace(fullName))
+                    .Distinct()
+                    .OrderBy(fullName => fullName)
+                    .Take(10);
+
+                var matches = await query.ToListAsync();
+
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during storage keeper FTS (on-the-fly) autocomplete for term {Term}", term);
+                return Json(Enumerable.Empty<string>());
+            }
+        }
+
 
         // GET: StorageKeepers/Create
         // GET: StorageKeepers/Create?storageName=НазваСкладу
@@ -349,45 +442,64 @@ namespace IMS.Controllers
         // GET: StorageKeepers/Details/0991234567
         // GET: StorageKeepers/Details/0991234567?fromStorage=true
         [HttpGet("Details/{phoneNumber}")]
-        public async Task<IActionResult> Details(string phoneNumber, [FromQuery] bool fromStorage = false) 
+        public async Task<IActionResult> Details(
+        string phoneNumber,
+        [FromQuery] bool fromStorage = false, 
+        string activeTab = "info",           
+        int iPage = 1                         
+        )
         {
             if (string.IsNullOrEmpty(phoneNumber)) return BadRequest();
 
-            ViewData["Title"] = $"Деталі комірника: {phoneNumber}";
-
+            ViewData["ActiveTab"] = activeTab; 
             try
             {
                 var storageKeeper = await _context.StorageKeepers
-                                                .Include(sk => sk.StorageNameNavigation)
-                                                .Include(sk => sk.User)
-                                                .AsNoTracking() 
-                                                .FirstOrDefaultAsync(sk => sk.PhoneNumber == phoneNumber);
+                    .Include(sk => sk.StorageNameNavigation)
+                    .Include(sk => sk.User)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync(sk => sk.PhoneNumber == phoneNumber);
 
                 if (storageKeeper == null)
                 {
                     TempData["ErrorMessage"] = $"Профіль комірника '{phoneNumber}' не знайдено.";
+                    if (fromStorage && !string.IsNullOrEmpty(storageKeeper?.StorageName))
+                    {
+                        return RedirectToAction(nameof(Index));
+                    }
                     return RedirectToAction(nameof(Index));
+                }
+
+                if (fromStorage)
+                {
+                    ViewData["Title"] = $"Деталі: {storageKeeper.FirstName} {storageKeeper.LastName} (зі складу {storageKeeper.StorageName})";
+                }
+                else
+                {
+                    ViewData["Title"] = $"Деталі: {storageKeeper.FirstName} {storageKeeper.LastName} ({phoneNumber})";
+                }
+
+                IPagedList<Invoice>? pagedInvoices = null; 
+                if (!fromStorage || activeTab == "invoices")
+                {
+                    var invoicesQuery = _context.Invoices
+                       .Where(i => i.SenderKeeperPhone == phoneNumber || i.ReceiverKeeperPhone == phoneNumber)
+                       .OrderByDescending(i => i.Date).ThenByDescending(i => i.InvoiceId)
+                       .AsNoTracking();
+                    pagedInvoices = await invoicesQuery.ToPagedListAsync(iPage, _pageSize);
+                }
+                else
+                {
+                    pagedInvoices = new PagedList<Invoice>(Enumerable.Empty<Invoice>(), iPage, _pageSize);
                 }
 
                 var viewModel = new StorageKeeperDetailsViewModel
                 {
                     Keeper = storageKeeper,
-                    ShowInvoices = !fromStorage 
+                    RelatedInvoices = pagedInvoices, 
+                    CurrentInvoicesPage = iPage,      
+                    FromStorage = fromStorage      
                 };
-
-                if (viewModel.ShowInvoices)
-                {
-                    ViewData["Title"] = $"Деталі: {storageKeeper.FirstName} {storageKeeper.LastName} ({phoneNumber})";
-                    viewModel.RelatedInvoices = await _context.Invoices
-                        .Where(i => i.SenderKeeperPhone == phoneNumber || i.ReceiverKeeperPhone == phoneNumber)
-                        .OrderByDescending(i => i.Date).ThenByDescending(i => i.InvoiceId)
-                        .AsNoTracking()
-                        .ToListAsync();
-                }
-                else
-                {
-                    ViewData["Title"] = $"Деталі: {storageKeeper.FirstName} {storageKeeper.LastName} (зі складу {storageKeeper.StorageName})"; // Інший заголовок для контексту
-                }
 
                 return View(viewModel);
             }

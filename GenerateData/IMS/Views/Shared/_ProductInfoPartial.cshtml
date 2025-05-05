@@ -1,0 +1,9 @@
+﻿ @model IMS.Models.Product
+<dl class="row">
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ProductName)</dt>
+    <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductName)</dd>
+    <dt class="col-sm-3">Одиниця виміру</dt>
+    <dd class="col-sm-9">@Model.UnitCodeNavigation?.UnitName (@Model.UnitCode)</dd>
+    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastPrice)</dt>
+    <dd class="col-sm-9">@Model.LastPrice.ToString("C2")</dd>
+</dl>

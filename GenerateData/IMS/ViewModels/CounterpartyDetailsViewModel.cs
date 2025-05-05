@@ -1,13 +1,20 @@
 ﻿using IMS.Models;
+using X.PagedList;
 
 namespace IMS.ViewModels
 {
     public class CounterpartyDetailsViewModel
     {
-        public Counterparty Counterparty { get; set; } = null!;
-        public List<Product> SuppliedProducts { get; set; } = new List<Product>();
-        public List<Product> PurchasedProducts { get; set; } = new List<Product>();
+        public Counterparty Counterparty { get; set; } 
+        public IPagedList<Invoice>? RelatedInvoices { get; set; }
+        public IPagedList<Product>? SuppliedProducts { get; set; } 
+        public IPagedList<Product>? PurchasedProducts { get; set; }
 
+        public int CurrentInvoicesPage { get; set; }
+        public int CurrentSuppliedProductsPage { get; set; }
+        public int CurrentPurchasedProductsPage { get; set; }
+
+        // Прапорці ролей для умовного рендерингу вкладок
         public bool IsSupplier { get; set; }
         public bool IsCustomer { get; set; }
     }

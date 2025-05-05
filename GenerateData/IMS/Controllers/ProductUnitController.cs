@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using IMS.Data;
 using IMS.Models;
 using Npgsql;
+using X.PagedList.EF;
 
 namespace IMS.Controllers
 {
@@ -13,6 +14,7 @@ namespace IMS.Controllers
     {
         private readonly AppDbContext _context; 
         private readonly ILogger<ProductUnitController> _logger;
+        private const int _pageSize = 10;
 
         public ProductUnitController(AppDbContext context, ILogger<ProductUnitController> logger) 
         {
@@ -22,21 +24,60 @@ namespace IMS.Controllers
 
         // GET: ProductUnits або ProductUnits/Index
         [HttpGet("")]
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string? searchString, int page = 1)
         {
             ViewData["Title"] = "Одиниці виміру";
+            ViewData["CurrentFilter"] = searchString;
+            int pageNumber = page;
             try
             {
-                var units = await _context.ProductUnits
-                                          .OrderBy(u => u.UnitName)
-                                          .ToListAsync();
-                return View(units);
+                var unitsQuery = _context.ProductUnits.AsQueryable();
+
+                if (!string.IsNullOrEmpty(searchString))
+                {
+                    string lowerSearch = searchString.ToLower();
+                    unitsQuery = unitsQuery.Where(u => u.UnitCode.ToLower().Contains(lowerSearch)
+                                                   || u.UnitName.ToLower().Contains(lowerSearch));
+                }
+
+                unitsQuery = unitsQuery.OrderBy(u => u.UnitName);
+
+                var pagedUnits = await unitsQuery.ToPagedListAsync(pageNumber, _pageSize);
+                return View(pagedUnits);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Помилка при отриманні списку одиниць виміру");
+                _logger.LogError(ex, "Помилка при отриманні списку одиниць виміру з пошуком");
                 TempData["ErrorMessage"] = "Не вдалося завантажити список одиниць виміру.";
                 return View(new List<ProductUnit>());
+            }
+        }
+
+        [HttpGet("Autocomplete")]
+        public async Task<IActionResult> Autocomplete(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term))
+            {
+                return Json(Enumerable.Empty<string>());
+            }
+
+            var lowerTerm = term.ToLower();
+
+            try
+            {
+                var matches = await _context.ProductUnits
+                    .Where(u => u.UnitCode.ToLower().Contains(lowerTerm) || u.UnitName.ToLower().Contains(lowerTerm))
+                    .OrderBy(u => u.UnitName)
+                    .Select(u => $"{u.UnitName} ({u.UnitCode})") 
+                    .Take(10) 
+                    .ToListAsync();
+
+                return Json(matches);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Помилка автозаповнення для одиниць виміру з терміном {Term}", term);
+                return Json(Enumerable.Empty<string>());
             }
         }
 

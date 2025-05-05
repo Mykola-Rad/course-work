@@ -1,43 +1,107 @@
-﻿@model IEnumerable<IMS.Models.ProductUnit>
+﻿@model X.PagedList.IPagedList<IMS.Models.ProductUnit>
+@using X.PagedList.Mvc.Core;
+@using X.PagedList;
 
 @{
     ViewData["Title"] = "Одиниці виміру";
     Layout = "_Layout";
+    bool canManage = User.IsInRole(IMS.Models.UserRole.manager.ToString()) || User.IsInRole(IMS.Models.UserRole.owner.ToString());
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<p>
-    <a asp-action="Create" class="btn btn-primary">Створити нову одиницю</a>
-</p>
+<div class="d-flex justify-content-between align-items-center mb-3">
+    @if (canManage)
+    {
+        <a asp-action="Create" class="btn btn-primary">Створити нову одиницю</a>
+    }
+    else
+    {
+        <span></span>
+    }
+
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Пошук
+    </button>
+</div>
 
 <table class="table table-sm table-hover">
     <thead class="table-light">
         <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.First().UnitCode)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.First().UnitName)
-            </th>
+            <th>@Html.DisplayNameFor(model => model.First().UnitCode)</th>
+            <th>@Html.DisplayNameFor(model => model.First().UnitName)</th>
             <th>Дії</th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model)
+        @if (Model.Any())
         {
-            <tr>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UnitCode)
-                </td>
-                <td>
-                    @Html.DisplayFor(modelItem => item.UnitName)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-secondary">Редагувати</a> |
-                    <a asp-action="Delete" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-danger">Видалити</a>
-                </td>
-            </tr>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@Html.DisplayFor(modelItem => item.UnitCode)</td>
+                    <td>@Html.DisplayFor(modelItem => item.UnitName)</td>
+                    <td>
+                        <a asp-action="Edit" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-secondary">Редагувати</a> |
+                        <a asp-action="Delete" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-danger">Видалити</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="3" class="text-center text-muted">Одиниць виміру за вашим запитом не знайдено.</td></tr>
         }
     </tbody>
 </table>
+
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Пошук Одиниць Виміру</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="productUnitFilterForm">
+            <div class="mb-3 position-relative">
+                <label for="searchInput" class="form-label fw-semibold">Пошук за кодом або назвою</label>
+                <input type="text" id="searchInput" name="searchString" value="@ViewData["CurrentFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("Autocomplete", "ProductUnit")" 
+                       data-autocomplete-min-length="1" 
+                       data-autocomplete-list-target="#unit-autocomplete-list" /> 
+
+                <ul id="unit-autocomplete-list" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Знайти</button>
+                <button type="button" class="btn btn-outline-secondary"
+                        data-reset-form-target="#productUnitFilterForm">
+                    Скинути Все
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+            new { page = page, searchString = ViewData["CurrentFilter"] }),
+            new PagedListRenderOptions
+    {
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" }, 
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" } 
+    })
+</div>
+
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+ }
