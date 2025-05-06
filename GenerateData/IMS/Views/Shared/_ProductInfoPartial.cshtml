@@ -1,9 +1,19 @@
-﻿ @model IMS.Models.Product
+﻿@model IMS.Models.Product
+@* Немає потреби в using IMS.Models тут, оскільки @model вже вказує на нього *@
+
 <dl class="row">
-    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.ProductName)</dt>
+    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.ProductName)</dt>
     <dd class="col-sm-9">@Html.DisplayFor(model => model.ProductName)</dd>
-    <dt class="col-sm-3">Одиниця виміру</dt>
-    <dd class="col-sm-9">@Model.UnitCodeNavigation?.UnitName (@Model.UnitCode)</dd>
-    <dt class="col-sm-3">@Html.DisplayNameFor(model => model.LastPrice)</dt>
+
+    <dt class="col-sm-3 fw-semibold">Unit of Measure</dt> @* Translated label *@
+    <dd class="col-sm-9">
+        @Model.UnitCodeNavigation?.UnitName @* Safe navigation in case UnitCodeNavigation is null *@
+        @if (!string.IsNullOrEmpty(Model.UnitCode))
+        {
+            <text>(@Model.UnitCode)</text>
+        }
+    </dd>
+
+    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.LastPrice)</dt>
     <dd class="col-sm-9">@Model.LastPrice.ToString("C2")</dd>
 </dl>

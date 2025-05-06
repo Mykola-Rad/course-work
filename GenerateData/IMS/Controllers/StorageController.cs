@@ -219,6 +219,7 @@ namespace IMS.Controllers
 
                 var invoicesQuery = _context.Invoices
                                     .Where(i => relatedInvoiceIds.Contains(i.InvoiceId))
+                                    .Include(i => i.ListEntries)
                                     .AsNoTracking()
                                     .OrderByDescending(i => i.Date)
                                     .ThenByDescending(i => i.InvoiceId);

@@ -11,7 +11,7 @@ using X.PagedList.EF;
 
 namespace IMS.Controllers
 {
-    [Authorize(Policy = "RequireManagerRole")]
+    [Authorize(Policy = "RequireStorageKeeperRole")]
     [Route("StorageProduct")]
     public class StorageProductController : Controller
     {
@@ -27,7 +27,6 @@ namespace IMS.Controllers
 
         // GET: StorageProduct
         [HttpGet("")]
-        [AllowAnonymous]
         public async Task<IActionResult> Index(
         string? searchString = null,
         string? filterUnitName = null,
@@ -546,7 +545,6 @@ namespace IMS.Controllers
 
         [HttpPost("EditMinimalCountOnly")]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> EditMinimalCountOnly(EditMinimalCountViewModel model)
         {
             decimal parsedMinimalCount = 0;

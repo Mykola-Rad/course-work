@@ -1,127 +1,184 @@
 ﻿@model IMS.ViewModels.InvoiceViewModel
- @using IMS.Models 
+@using IMS.Models
 
 @{
-    ViewData["Title"] = "Створення нової накладної";
+    ViewData["Title"] = "Create New Invoice";
     Layout = "_Layout";
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-9">
+            <div class="card shadow-sm">
+                <div class="card-header"><h1 class="mb-0 h4">@ViewData["Title"]</h1></div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post" id="invoiceForm">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="All" class="text-danger small mb-3"></div> 
 
-<form asp-action="Create" method="post" id="invoiceForm">
-    @Html.AntiForgeryToken()
-    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <h4>Main Details</h4>
+                        <hr>
+                        <div class="row g-3 mb-3 align-items-end">
+                            <div class="col-md-3">
+                                <label asp-for="Date" class="form-label fw-semibold"></label>
+                                <input asp-for="Date" class="form-control form-control-sm" value="@Model.Date.ToString("yyyy-MM-dd")" type="date" />
+                                <span asp-validation-for="Date" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="Type" class="form-label fw-semibold"></label>
+                                @* Select для типу залишається, він керує логікою *@
+                                <select asp-for="Type" asp-items="@Model.AvailableTypes" class="form-select form-select-sm" id="invoiceTypeSelect">
+                                </select>
+                                <span asp-validation-for="Type" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="Status" class="form-label fw-semibold"></label>
+                                <input asp-for="Status" class="form-control form-control-sm" value="@InvoiceStatus.draft" readonly />
+                            </div>
+                        </div>
 
-    <h4>Основні дані</h4>
-    <div class="row g-3 mb-3 align-items-end">
-        <div class="col-md-3">
-            <label asp-for="Date" class="form-label"></label>
-            <input asp-for="Date" class="form-control" value="@Model.Date.ToString("yyyy-MM-dd")" type="date" />
-            <span asp-validation-for="Date" class="text-danger"></span>
-        </div>
-        <div class="col-md-3">
-            <label asp-for="Type" class="form-label"></label>
-            <select asp-for="Type" asp-items="@Model.AvailableTypes" class="form-select" id="invoiceTypeSelect">
-            </select>
-            <span asp-validation-for="Type" class="text-danger"></span>
-        </div>
-        <div class="col-md-3">
-            <label asp-for="Status" class="form-label"></label>
-            <input asp-for="Status" class="form-control" value="@InvoiceStatus.draft" readonly /> 
-        </div>
-    </div>
+                        <h4>Parties, Storages, Keepers</h4>
+                        <hr>
+                        <div class="row g-3 mb-3">
+                            @* --- ЗМІНЕНО: Контрагент (Autocomplete) --- *@
+                            <div class="col-md-6 form-group position-relative" id="counterpartyDiv" style="display: none;">
+                                <label asp-for="CounterpartyName" class="form-label fw-semibold"></label>
+                                <input asp-for="CounterpartyName" type="text" class="form-control form-control-sm counterparty-autocomplete" autocomplete="off" placeholder="Start typing counterparty name..."
+                                       data-autocomplete="true"
+                                       data-autocomplete-url-base="@Url.Action("GetFilteredCounterparties", "Invoice")" @* Базовий URL, тип додамо в JS *@
+                                       data-autocomplete-min-length="2"
+                                       data-autocomplete-list-target="#createInvoiceCounterpartyAutocompleteList" />
+                                <ul id="createInvoiceCounterpartyAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+                                <span asp-validation-for="CounterpartyName" class="text-danger small"></span>
+                            </div>
 
-    <h4>Сторони, Склади, Виконавці</h4>
-    <div class="row g-3 mb-3">
-        <div class="col-md-6 form-group" id="counterpartyDiv" style="display: none;">
-            <label asp-for="CounterpartyName" class="form-label"></label>
-            <select asp-for="CounterpartyName" asp-items="@Model.AvailableCounterparties" class="form-select">
-                <option value="">-- Оберіть контрагента --</option>
-            </select>
-            <span asp-validation-for="CounterpartyName" class="text-danger"></span>
-        </div>
-        <div class="col-md-6 form-group" id="senderStorageDiv" style="display: none;">
-            <label asp-for="SenderStorageName" class="form-label"></label>
-            <select asp-for="SenderStorageName" asp-items="@Model.AvailableStorages" class="form-select">
-                <option value="">-- Оберіть склад --</option>
-            </select>
-            <span asp-validation-for="SenderStorageName" class="text-danger"></span>
-        </div>
-        <div class="col-md-6 form-group" id="receiverStorageDiv" style="display: none;">
-            <label asp-for="ReceiverStorageName" class="form-label"></label>
-            <select asp-for="ReceiverStorageName" asp-items="@Model.AvailableStorages" class="form-select">
-                <option value="">-- Оберіть склад --</option>
-            </select>
-            <span asp-validation-for="ReceiverStorageName" class="text-danger"></span>
-        </div>
-        <div class="col-md-6 form-group" id="senderKeeperDiv" style="display: none;">
-            <label asp-for="SenderKeeperPhone" class="form-label"></label>
-            <select asp-for="SenderKeeperPhone" asp-items="@Model.AvailableKeepers" class="form-select">
-                <option value="">-- Оберіть комірника --</option>
-            </select>
-            <span asp-validation-for="SenderKeeperPhone" class="text-danger"></span>
-        </div>
-        <div class="col-md-6 form-group" id="receiverKeeperDiv" style="display: none;">
-            <label asp-for="ReceiverKeeperPhone" class="form-label"></label>
-            <select asp-for="ReceiverKeeperPhone" asp-items="@Model.AvailableKeepers" class="form-select">
-                <option value="">-- Оберіть комірника --</option>
-            </select>
-            <span asp-validation-for="ReceiverKeeperPhone" class="text-danger"></span>
-        </div>
-    </div>
+                            @* --- ЗМІНЕНО: Склад-Відправник (Autocomplete) --- *@
+                            <div class="col-md-6 form-group position-relative" id="senderStorageDiv" style="display: none;">
+                                <label asp-for="SenderStorageName" class="form-label fw-semibold"></label>
+                                <input asp-for="SenderStorageName" type="text" id="senderStorageInput" class="form-control form-control-sm storage-autocomplete" autocomplete="off" placeholder="Start typing storage name..."
+                                       data-autocomplete="true"
+                                       data-autocomplete-url="@Url.Action("AutocompleteStorageName", "Invoice")"
+                                       data-autocomplete-min-length="2"
+                                       data-autocomplete-list-target="#createInvoiceSenderStorageAutocompleteList" />
+                                <ul id="createInvoiceSenderStorageAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+                                <span asp-validation-for="SenderStorageName" class="text-danger small"></span>
+                            </div>
 
-    <h4 class="mt-4">Товарні позиції</h4>
-    <table class="table table-sm table-bordered" id="listEntriesTable">
-        <thead class="table-light">
-            <tr>
-                <th>Товар</th>
-                <th style="width: 120px;">Кількість</th>
-                <th style="width: 100px;">Од. вим.</th>
-                <th style="width: 150px;">Ціна</th>
-                <th style="width: 150px;">Сума</th>
-                <th style="width: 50px;"></th> 
-            </tr>
-        </thead>
-        <tbody id="listEntriesBody">
-        </tbody>
-        <tfoot>
-            <tr>
-                <td colspan="6">
-                    <button type="button" id="addEntryButton" class="btn btn-sm btn-outline-success">
-                        <i class="bi bi-plus-circle"></i> Додати позицію
-                    </button>
-                </td>
-            </tr>
-        </tfoot>
-    </table>
-    <div id="listEntriesError" class="text-danger">@Html.ValidationMessage("ListEntries")</div>
+                            @* --- ЗМІНЕНО: Склад-Одержувач (Autocomplete) --- *@
+                            <div class="col-md-6 form-group position-relative" id="receiverStorageDiv" style="display: none;">
+                                <label asp-for="ReceiverStorageName" class="form-label fw-semibold"></label>
+                                <input asp-for="ReceiverStorageName" type="text" id="receiverStorageInput" class="form-control form-control-sm storage-autocomplete" autocomplete="off" placeholder="Start typing storage name..."
+                                       data-autocomplete="true"
+                                       data-autocomplete-url="@Url.Action("AutocompleteStorageName", "Invoice")"
+                                       data-autocomplete-min-length="2"
+                                       data-autocomplete-list-target="#createInvoiceReceiverStorageAutocompleteList" />
+                                <ul id="createInvoiceReceiverStorageAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+                                <span asp-validation-for="ReceiverStorageName" class="text-danger small"></span>
+                            </div>
+
+                            @* --- Залишено Select для Комірників (будуть заповнюватись через AJAX) --- *@
+                            <div class="col-md-6 form-group" id="senderKeeperDiv" style="display: none;">
+                                <label asp-for="SenderKeeperPhone" class="form-label fw-semibold"></label>
+                                <select asp-for="SenderKeeperPhone" class="form-select form-select-sm keeper-select" data-storage-source="#senderStorageInput">
+                                    @* Додано data-storage-source *@
+                                    <option value="">-- Select Keeper --</option>
+                                    @* Опції будуть додані через JS *@
+                                </select>
+                                <span asp-validation-for="SenderKeeperPhone" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 form-group" id="receiverKeeperDiv" style="display: none;">
+                                <label asp-for="ReceiverKeeperPhone" class="form-label fw-semibold"></label>
+                                <select asp-for="ReceiverKeeperPhone" class="form-select form-select-sm keeper-select" data-storage-source="#receiverStorageInput">
+                                    @* Додано data-storage-source *@
+                                    <option value="">-- Select Keeper --</option>
+                                    @* Опції будуть додані через JS *@
+                                </select>
+                                <span asp-validation-for="ReceiverKeeperPhone" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <h4 class="mt-4">Invoice Items</h4> @* Translated *@
+                        <hr>
+                        <div class="table-responsive">
+                            <table class="table table-sm table-bordered" id="listEntriesTable">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th> @* Translated *@
+                                        <th style="width: 120px;">Quantity</th> @* Translated *@
+                                        <th style="width: 100px;">Unit</th> @* Translated *@
+                                        <th style="width: 150px;">Price</th> @* Translated *@
+                                        <th style="width: 150px;">Total</th> @* Translated *@
+                                        <th style="width: 50px;"></th>
+                                    </tr>
+                                </thead>
+                                <tbody id="listEntriesBody">
+                                    @* Сюди динамічно додаються рядки з шаблону *@
+                                </tbody>
+                                <tfoot>
+                                    <tr>
+                                        <td colspan="6">
+                                            <button type="button" id="addEntryButton" class="btn btn-sm btn-outline-success">
+                                                <i class="bi bi-plus-circle"></i> Add Item @* Translated & Icon *@
+                                            </button>
+                                        </td>
+                                    </tr>
+                                    @* Можна додати рядок для загальної суми *@
+                                    @* <tr><td colspan="4" class="text-end fw-bold">Grand Total:</td><td id="grandTotal" class="text-end fw-bold">0.00</td><td></td></tr> *@
+                                </tfoot>
+                            </table>
+                        </div>
+                        <div id="listEntriesError" class="text-danger small">@Html.ValidationMessage("ListEntries")</div>
 
 
-    <div class="mb-3 mt-4">
-        <button type="submit" class="btn btn-primary">Зберегти Накладну</button>
-        <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
-    </div>
+                        <hr class="my-4">
 
-</form>
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Invoice @* Translated & Icon *@
+                            </button>
+                        </div>
+
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
+
 
 <table style="display:none;">
     <tr id="newEntryTemplate">
         <td>
-            <select name="ListEntries[#index#].ProductName" class="form-select product-select">
-                <option value="">-- Оберіть товар --</option>
-                @foreach (var item in (SelectList)Model.AvailableProducts)
-                {
-                    <option value="@item.Value">@item.Text</option>
-                }
-            </select>
+            <div class="position-relative entry-product-cell">
+                @* This div is key for positioning *@
+                <input type="hidden" name="ListEntries[#index#].ProductName" class="product-name-hidden" />
+                <input type="text"
+                       id="product_#index#"
+                       class="form-control form-control-sm product-autocomplete"
+                       placeholder="Start typing product..."
+                       name="ListEntries[#index#].ProductSearch" @* Keep name if server needs it, otherwise can remove *@
+                       data-autocomplete="true"
+                       data-autocomplete-url-base="@Url.Action("GetProductsForStorageJson", "Invoice")"
+                       data-autocomplete-storage-source="#senderStorageInput"
+                       data-autocomplete-min-length="2"
+                @* REMOVED: data-autocomplete-list-target attribute as we'll append to the cell *@
+                       />
+                @* REMOVED: <ul id="productAutocompleteList_#index#" ...></ul> *@
+            </div>
             <input type="hidden" name="ListEntries.Index" value="#index#" />
+            <span data-valmsg-for="ListEntries[#index#].ProductName" class="text-danger small product-name-error"></span>
         </td>
-        <td><input type="number" name="ListEntries[#index#].Count" class="form-control entry-count" step="any" min="0.01" value="1" /></td>
-        <td class="entry-unit">---</td> 
-        <td><input type="number" name="ListEntries[#index#].Price" class="form-control entry-price" step="any" min="0" value="0" /></td>
-        <td class="entry-total text-end">0.00</td>
-        <td><button type="button" class="btn btn-sm btn-outline-danger remove-entry-btn"><i class="bi bi-trash"></i></button></td>
+        <td class="entry-count-cell position-relative">
+            <input type="number" name="ListEntries[#index#].Count" class="form-control form-control-sm entry-count" step="any" min="0" />
+            <small class="available-stock text-muted d-block" style="display: none;">Av: <span>0</span></small> @* To show available stock *@
+        </td>
+        <td class="entry-unit small text-muted align-middle">--</td>
+        <td><input type="number" name="ListEntries[#index#].Price" class="form-control form-control-sm entry-price" step="any" min="0.00" value="0.00" /></td>
+        <td class="entry-total text-end align-middle">0.00</td>
+        <td class="align-middle"><button type="button" class="btn btn-sm btn-outline-danger remove-entry-btn" title="Remove item"><i class="bi bi-trash"></i></button></td>
     </tr>
 </table>
 
@@ -129,80 +186,583 @@
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
     <script>
-        $(document).ready(function () {
+            $(document).ready(function () {
+            // --- Початкові змінні ---
+            const $invoiceTypeSelect = $('#invoiceTypeSelect');
+            const $counterpartyDiv = $('#counterpartyDiv');
+            const $counterpartyInput = $('#CounterpartyName'); // Прямий доступ за ID
+            const $senderStorageDiv = $('#senderStorageDiv');
+            const $senderStorageInput = $('#senderStorageInput'); // Прямий доступ за ID
+            const $receiverStorageDiv = $('#receiverStorageDiv');
+            const $receiverStorageInput = $('#receiverStorageInput'); // Прямий доступ за ID
+            const $senderKeeperDiv = $('#senderKeeperDiv');
+            const $senderKeeperSelect = $senderKeeperDiv.find('select.keeper-select'); // Більш точний селектор
+            const $receiverKeeperDiv = $('#receiverKeeperDiv');
+            const $receiverKeeperSelect = $receiverKeeperDiv.find('select.keeper-select'); // Більш точний селектор
+            const $listEntriesBody = $('#listEntriesBody');
+            const $invoiceForm = $("#invoiceForm");
+
+            const typeEnum = { // Переконайтеся, що ці значення збігаються з value в <option> для Type
+                Supply: '@Html.Raw(nameof(InvoiceType.supply))',
+                Release: '@Html.Raw(nameof(InvoiceType.release))',
+                Transfer: '@Html.Raw(nameof(InvoiceType.transfer))'
+            };
+
+            // --- Функція оновлення полів залежно від типу інвойсу ---
             function toggleInvoiceFields() {
-                var invoiceType = $('#invoiceTypeSelect').val();
-                var typeEnum = { 
-                    Supply: '@InvoiceType.supply.ToString()',
-                    Release: '@InvoiceType.release.ToString()',
-                    Transfer: '@InvoiceType.transfer.ToString()'
-                };
-
-                var needsCounterparty = (invoiceType == typeEnum.Supply || invoiceType == typeEnum.Release);
-                var needsSenderStorage = (invoiceType == typeEnum.Release || invoiceType == typeEnum.Transfer);
-                var needsReceiverStorage = (invoiceType == typeEnum.Supply || invoiceType == typeEnum.Transfer);
+                var invoiceType = $invoiceTypeSelect.val();
+                var needsCounterparty = (invoiceType === typeEnum.Supply || invoiceType === typeEnum.Release);
+                var needsSenderStorage = (invoiceType === typeEnum.Release || invoiceType === typeEnum.Transfer);
+                var needsReceiverStorage = (invoiceType === typeEnum.Supply || invoiceType === typeEnum.Transfer);
+                var needsPriceAndTotal = needsCounterparty;
                 var needsSenderKeeper = needsSenderStorage;
-                var needsReceiverKeeper = needsReceiverStorage; 
-                var needsPrice = needsCounterparty; 
+                var needsReceiverKeeper = needsReceiverStorage;
 
-                $('#counterpartyDiv').toggle(needsCounterparty);
-                $('#senderStorageDiv').toggle(needsSenderStorage);
-                $('#receiverStorageDiv').toggle(needsReceiverStorage);
-                $('#senderKeeperDiv').toggle(needsSenderKeeper);
-                $('#receiverKeeperDiv').toggle(needsReceiverKeeper);
+                needsCounterparty ? $counterpartyDiv.slideDown() : $counterpartyDiv.slideUp();
+                needsSenderStorage ? $senderStorageDiv.slideDown() : $senderStorageDiv.slideUp();
+                needsReceiverStorage ? $receiverStorageDiv.slideDown() : $receiverStorageDiv.slideUp();
+                needsSenderKeeper ? $senderKeeperDiv.slideDown() : $senderKeeperDiv.slideUp();
+                needsReceiverKeeper ? $receiverKeeperDiv.slideDown() : $receiverKeeperDiv.slideUp();
 
-                 $('#listEntriesTable th:nth-child(4)').toggle(needsPrice); 
-                 $('#listEntriesTable th:nth-child(5)').toggle(needsPrice); 
-                 $('#listEntriesTable td:nth-child(4)').toggle(needsPrice); 
-                 $('#listEntriesTable td:nth-child(5)').toggle(needsPrice); 
+                if (!needsCounterparty) $counterpartyInput.val('');
+                if (!needsSenderStorage) { $senderStorageInput.val(''); $senderKeeperSelect.empty().append('<option value="">-- Select Keeper --</option>').val(''); }
+                if (!needsReceiverStorage) { $receiverStorageInput.val(''); $receiverKeeperSelect.empty().append('<option value="">-- Select Keeper --</option>').val(''); }
+                if (!needsSenderKeeper) $senderKeeperSelect.val('');
+                if (!needsReceiverKeeper) $receiverKeeperSelect.val('');
+
+                updateCounterpartyAutocompleteSource(invoiceType);
+
+                const priceColIndex = 4;
+                const totalColIndex = 5;
+                $('#listEntriesTable th:nth-child(' + priceColIndex + ')').toggle(needsPriceAndTotal);
+                $('#listEntriesTable th:nth-child(' + totalColIndex + ')').toggle(needsPriceAndTotal);
+                // Для tfoot, якщо ви додасте рядок GrandTotal, його теж треба буде ховати/показувати
+                // Наприклад: $('#listEntriesTable tfoot #grandTotalRow').toggle(needsPriceAndTotal);
+
+
+                $listEntriesBody.find('tr').each(function() {
+                    $(this).find('td:nth-child(' + priceColIndex + ')').toggle(needsPriceAndTotal);
+                    $(this).find('td:nth-child(' + totalColIndex + ')').toggle(needsPriceAndTotal);
+                    if (!needsPriceAndTotal) {
+                        $(this).find('.entry-price').val('0.00'); // Встановлюємо як рядок для консистентності
+                        updateRowTotal($(this));
+                    }
+                });
+
+                var visibleHeaderCount = $('#listEntriesTable thead th:visible').length;
+                $('#listEntriesTable tfoot td').attr('colspan', visibleHeaderCount); // Оновлюємо colspan для кнопки "Add Item"
+
+                updateAllProductAutocompleteSources();
             }
 
-            toggleInvoiceFields();
-            $('#invoiceTypeSelect').on('change', toggleInvoiceFields);
+            // --- Оновлення джерела для автозаповнення контрагента ---
+            function updateCounterpartyAutocompleteSource(invoiceType) {
+                console.log('Updating counterparty autocomplete source for invoice type:', invoiceType);
+                if (!$counterpartyInput.length || !$counterpartyInput.data('autocomplete')) {
+                    console.warn("Counterparty input not found or not an autocomplete field.");
+                    return;
+                }
+                var baseUrl = $counterpartyInput.data('autocomplete-url-base');
+                if (baseUrl) {
+                    var newUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'type=' + encodeURIComponent(invoiceType);
+                    if ($counterpartyInput.hasClass('ui-autocomplete-input')) {
+                        try { $counterpartyInput.autocomplete("destroy"); } catch (e) { console.warn("Error destroying counterparty autocomplete:", e); }
+                    }
+                    $counterpartyInput.data('autocomplete-url', newUrl);
+                    initializeSingleAutocomplete($counterpartyInput);
+                }
+            }
 
-            var entryIndex = 0; 
-            function updateEntryIndexes() {
-                $('#listEntriesBody tr').each(function(index, tr) {
-                    $(tr).find(':input').each(function() {
-                        var name = $(this).attr('name');
-                        if (name) {
-                            var newName = name.replace(/\[.*?\]/, '[' + index + ']');
-                            $(this).attr('name', newName);
+            // --- Оновлення джерел для всіх автозаповнень продуктів ---
+            function updateAllProductAutocompleteSources() {
+                console.log('Updating all product autocomplete sources');
+                var storageName = $senderStorageInput.val();
+
+                $listEntriesBody.find('.product-autocomplete').each(function() {
+                    var $input = $(this);
+                    if (!$input.data('autocomplete')) return; // Пропускаємо, якщо не поле автозаповнення
+
+                    var baseUrl = $input.data('autocomplete-url-base');
+                    if (baseUrl) {
+                        var newUrl = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'storageName=' + encodeURIComponent(storageName || "");
+                        if ($input.hasClass('ui-autocomplete-input')) {
+                            try { $input.autocomplete("destroy"); } catch (e) { console.warn("Error destroying product autocomplete for", $input.attr('name'), ":", e); }
+                        }
+                        $input.data('autocomplete-url', newUrl);
+                        initializeSingleAutocomplete($input);
+                    }
+                });
+            }
+
+            // --- Завантаження зберігачів для складу ---
+            function loadKeepersForStorage($storageInput, $keeperSelect) {
+                var storageName = $storageInput.val();
+                console.log('Loading keepers for storage:', storageName, 'for select:', $keeperSelect.attr('id') || $keeperSelect.attr('name'));
+                $keeperSelect.empty().append('<option value="">Loading...</option>').prop('disabled', true);
+
+                if (storageName) {
+                    $.ajax({
+                        url: '@Url.Action("GetKeepersForStorageJson", "Invoice")', // Переконайтеся, що цей URL правильний
+                        type: 'GET',
+                        data: { storageName: storageName },
+                        success: function (data) {
+                            $keeperSelect.empty().append('<option value="">-- Select Keeper --</option>');
+                            if (data && data.length > 0) {
+                                $.each(data, function (index, item) {
+                                    $keeperSelect.append($('<option>', { value: item.value, text: item.text }));
+                                });
+                            } else {
+                                // $keeperSelect.append('<option value="">-- No Keepers Found --</option>'); // Можна не додавати, дефолтна вже є
+                            }
+                            $keeperSelect.prop('disabled', false);
+                        },
+                        error: function (jqXHR, textStatus, errorThrown) {
+                            console.error("Error loading keepers for", storageName, ":", textStatus, errorThrown);
+                            $keeperSelect.empty().append('<option value="">-- Error Loading --</option>').prop('disabled', true);
                         }
                     });
-                     $(tr).find('input[name$=".Index"]').val(index);
-                });
-                entryIndex = $('#listEntriesBody tr').length; 
+                } else {
+                    $keeperSelect.empty().append('<option value="">-- Select Storage First --</option>').prop('disabled', true);
+                }
             }
 
-            $('#addEntryButton').on('click', function () {
-                var newRow = $('#newEntryTemplate').clone().removeAttr('id');
-                newRow.html(newRow.html().replace(/#index#/g, entryIndex));
-                $('#listEntriesBody').append(newRow);
-                entryIndex++; 
-                 updateEntryIndexes();
-                 $('#listEntriesError').text('');
+            $senderStorageInput.on('autocompleteselect change', function() {
+                loadKeepersForStorage($senderStorageInput, $senderKeeperSelect);
+                updateAllProductAutocompleteSources();
+            });
+            $receiverStorageInput.on('autocompleteselect change', function() {
+                loadKeepersForStorage($receiverStorageInput, $receiverKeeperSelect);
             });
 
-            $('#listEntriesBody').on('click', '.remove-entry-btn', function () {
+            // --- Оновлення індексів для динамічних рядків ---
+                    function updateEntryIndexes() {
+            console.log("Updating entry indexes START");
+            $('#listEntriesBody tr').each(function(trIndex, trElement) {
+                var $tr = $(trElement);
+
+                // The UL id update is no longer needed as it's removed from the template
+                // The product-autocomplete data-autocomplete-list-target update is also not needed
+                // if we append to the parent cell by default.
+
+                $tr.find(':input, span[data-valmsg-for]').each(function() {
+                    var $currentElement = $(this);
+                    var currentName = $currentElement.attr('name');
+                    var currentValMsgFor = $currentElement.attr('data-valmsg-for');
+                    var currentId = $currentElement.attr('id'); // Get current ID
+
+                    if (currentName) {
+                        $currentElement.attr('name', currentName.replace(/\[(.*?)\]/g, '[' + trIndex + ']'));
+                    }
+                    if (currentValMsgFor) {
+                        $currentElement.attr('data-valmsg-for', currentValMsgFor.replace(/\[(.*?)\]/g, '[' + trIndex + ']'));
+                    }
+                    if (currentId && currentId.includes('_#index#')) { // Check if ID has the placeholder
+                         $currentElement.attr('id', currentId.replace('#index#', trIndex));
+                    }
+                });
+                $tr.find('input[name$=".Index"]').val(trIndex); // Update hidden .Index field
+            });
+            rebindValidators(); // Rebind validators after updating names and IDs
+            console.log("Updating entry indexes END");
+        }
+
+            function rebindValidators() {
+                $invoiceForm.removeData("validator").removeData("unobtrusiveValidation");
+                $.validator.unobtrusive.parse($invoiceForm);
+                console.log("Validators re-bound");
+            }
+
+            $invoiceTypeSelect.on('change', toggleInvoiceFields);
+
+
+
+                $('#addEntryButton').on('click', function () {
+                    console.log("=============================================");
+                    console.log("Add entry button clicked - START DEBUG");
+                    console.log("=============================================");
+
+                    // 1. Отримуємо HTML шаблону
+                    var templateHtml = $('#newEntryTemplate').html();
+                    console.log("1. Template HTML original:", templateHtml);
+
+                    // 2. Визначаємо новий індекс
+                    var newIndex = $('#listEntriesBody tr').length;
+                    console.log("2. New index determined:", newIndex);
+
+                    // 3. Замінюємо плейсхолдери #index#
+                    var newRowHtml = templateHtml.replace(/#index#/g, newIndex);
+                    console.log("3. New Row HTML after replace:", newRowHtml); // ДУЖЕ ВАЖЛИВИЙ ЛОГ!
+
+                    // 4. Додаємо новий рядок в DOM
+                    var $newRow = $('<tr></tr>').html(newRowHtml).appendTo('#listEntriesBody');
+                    console.log("4. New row appended to DOM. newRow object:", $newRow);
+
+                    // --- DEBUGGER СЮДИ, ЩОБ ПЕРЕВІРИТИ СТАН DOM ПІСЛЯ ДОДАВАННЯ І ПЕРЕД UPDATEINDEXES ---
+                    // debugger; // Розкоментуйте, щоб зупинити тут
+
+                    // 5. Оновлюємо індекси для ВСІХ рядків
+                    console.log("5. Calling updateEntryIndexes...");
+                    updateEntryIndexes(); // Ця функція має ОНОВИТИ data-autocomplete-list-target на $newRow.find('.product-autocomplete')
+                    console.log("   updateEntryIndexes FINISHED.");
+
+                    // 6. Знаходимо інпут автозаповнення в новому рядку ПІСЛЯ updateEntryIndexes
+                    var $newAutocompleteInput = $newRow.find('.product-autocomplete');
+                    console.log("6. Found .product-autocomplete in new row:", $newAutocompleteInput);
+
+                    if ($newAutocompleteInput.length) {
+                        var productNameForLog = $newAutocompleteInput.attr('name');
+                        var productTargetForLog = $newAutocompleteInput.attr('data-autocomplete-list-target'); // Читаємо АТРИБУТ
+                        var productActualUL = $(productTargetForLog); // Перевіряємо, чи існує UL
+
+                        console.log("   Input Name:", productNameForLog);
+                        console.log("   Input data-autocomplete-list-target ATTR:", productTargetForLog); // Ключовий лог!
+                        console.log("   Does target UL (" + productTargetForLog + ") exist?", productActualUL.length > 0);
+                        if(productActualUL.length > 0) {
+                            console.log("   Target UL actual ID:", productActualUL.attr('id'));
+                        }
+
+
+                        // --- DEBUGGER СЮДИ, ЩОБ ПЕРЕВІРИТИ $newAutocompleteInput ПЕРЕД INITIALIZE ---
+                        // debugger; // Розкоментуйте, щоб зупинити тут
+
+                        console.log("7. Calling initializeSingleAutocomplete for:", productNameForLog);
+                        initializeSingleAutocomplete($newAutocompleteInput);
+                        console.log("   initializeSingleAutocomplete FINISHED for:", productNameForLog);
+
+                    } else {
+                        console.error("CRITICAL: Could not find .product-autocomplete in the new row even after updateEntryIndexes!");
+                    }
+
+                    // 8. Інші дії
+                    console.log("8. Calling toggleInvoiceFields...");
+                    toggleInvoiceFields();
+                    console.log("   toggleInvoiceFields FINISHED.");
+                    $('#listEntriesError').text('');
+                    console.log("=============================================");
+                    console.log("Add entry button clicked - END DEBUG");
+                    console.log("=============================================");
+                });
+
+            $listEntriesBody.on('input change', '.entry-count, .entry-price', function () {
+                updateRowTotal($(this).closest('tr'));
+            });
+
+            $listEntriesBody.on('click', '.remove-entry-btn', function () {
                 $(this).closest('tr').remove();
-                updateEntryIndexes(); 
+                updateEntryIndexes();
+                // updateGrandTotal(); // Якщо є загальна сума
             });
 
-            $('#listEntriesBody').on('input', '.entry-count, .entry-price', function () {
-                var tr = $(this).closest('tr');
-                var count = parseFloat(tr.find('.entry-count').val()?.replace(',', '.')) || 0;
-                var price = parseFloat(tr.find('.entry-price').val()?.replace(',', '.')) || 0;
-                var total = (count * price).toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-                tr.find('.entry-total').text(total);
+            function updateRowTotal($tableRow){
+                var countStr = $tableRow.find('.entry-count').val() || '0';
+                var priceStr = $tableRow.find('.entry-price').val() || '0';
+                var count = parseFloat(countStr.replace(',', '.')) || 0;
+                var price = parseFloat(priceStr.replace(',', '.')) || 0;
+                var total = (count * price);
+                $tableRow.find('.entry-total').text(total.toLocaleString('uk-UA', { minimumFractionDigits: 2, maximumFractionDigits: 2 }));
+                // updateGrandTotal(); // Якщо є загальна сума
+            }
+
+            var productDetailsCache = {};
+
+            $listEntriesBody.on('autocompleteselect change', '.product-autocomplete', function (event, ui) {
+                var $input = $(this);
+                var $currentRow = $input.closest('tr');
+                var selectedProductName = "";
+
+                if (event.type === 'autocompleteselect' && ui && ui.item) {
+                    selectedProductName = ui.item.value;
+                    // $input.val(ui.item.value); // Це робить select в initializeSingleAutocomplete
+                } else if (event.type === 'change') { // Коли фокус втрачено і значення змінилося
+                    selectedProductName = $input.val();
+                } else if (!ui && $input.val() === "") { // Якщо поле просто очистили вручну
+                     selectedProductName = "";
+                }
+
+
+                $currentRow.find('.product-name-hidden').val(selectedProductName);
+                $currentRow.find('.product-name-error').text(''); // Очищуємо помилку валідації продукту
+
+                if (selectedProductName) {
+                    getProductDetailsWithStock(selectedProductName, $currentRow);
+                } else {
+                    $currentRow.find('.entry-unit').text('--');
+                    $currentRow.find('.entry-price').val('0.00');
+                    $currentRow.find('.available-stock').hide().find('span').text('0');
+                    var $countInput = $currentRow.find('.entry-count');
+                    $countInput.removeData('available-stock');
+                    validateQuantityInput($countInput); // Перевалідувати кількість, так як сток зник
+                    updateRowTotal($currentRow);
+                }
+                // Немає return false, бо initializeSingleAutocomplete вже має select з return false
             });
 
-            // TODO: Додати логіку для автоматичного заповнення Од.вим. та, можливо, Ціни
-            // при виборі товару в .product-select (потребує AJAX або передачі даних у JS).
+            function getProductDetailsWithStock(productName, $tableRow) {
+                var $unitCell = $tableRow.find('.entry-unit');
+                var $priceInput = $tableRow.find('.entry-price');
+                var $stockDisplay = $tableRow.find('.available-stock');
+                var $countInput = $tableRow.find('.entry-count');
+                var $countError = $tableRow.find('.count-error');
+
+                var storageName = "";
+                var invoiceType = $invoiceTypeSelect.val();
+                if (invoiceType === typeEnum.Release || invoiceType === typeEnum.Transfer) {
+                    storageName = $senderStorageInput.val();
+                }
+
+                var cacheKey = productName + '|' + storageName;
+                if (productDetailsCache.hasOwnProperty(cacheKey)) { // Краще перевіряти через hasOwnProperty
+                    console.log("Using cached details for", cacheKey);
+                    applyProductDetails(productDetailsCache[cacheKey], $tableRow);
+                    return;
+                }
+
+                console.log("Fetching details for", cacheKey);
+                $unitCell.html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
+                $stockDisplay.hide();
+                $countError.text('');
+
+                $.ajax({
+                    url: '@Url.Action("GetProductDetailsWithStockJson", "Invoice")',
+                    type: 'GET',
+                    data: { productName: productName, storageName: storageName },
+                    success: function (data) {
+                        productDetailsCache[cacheKey] = data; // Кешуємо навіть якщо дані неповні, щоб не запитувати знову
+                        applyProductDetails(data, $tableRow);
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error("Error fetching product details for", productName, ":", textStatus, errorThrown);
+                        $unitCell.html('<span class="text-danger" title="Error loading product details">Err</span>');
+                        $priceInput.val('0.00');
+                        $stockDisplay.hide();
+                        updateRowTotal($tableRow);
+                        productDetailsCache[cacheKey] = null; // Позначаємо, що дані не вдалося завантажити
+                    }
+                });
+            }
+
+            function applyProductDetails(data, $tableRow) {
+                var $unitCell = $tableRow.find('.entry-unit');
+                var $priceInput = $tableRow.find('.entry-price');
+                var $stockDisplay = $tableRow.find('.available-stock');
+                var $stockSpan = $stockDisplay.find('span');
+                var $countInput = $tableRow.find('.entry-count');
+
+                if (data && data.unitName) {
+                    $unitCell.text(data.unitName);
+                    var price = parseFloat(data.lastPrice) || 0; // Використовуємо lastPrice завжди
+                    $priceInput.val(price.toFixed(2).replace('.', ',')); // TODO: краще форматування для локалі
+
+                    if (!$priceInput.is(':visible')) { // Якщо колонка ціни прихована, ставимо 0
+                         $priceInput.val('0.00');
+                    }
 
 
-            // Початкове оновлення індексів, якщо ви рендерите якісь рядки з сервера
+                    var invoiceType = $invoiceTypeSelect.val();
+                    if (invoiceType === typeEnum.Release || invoiceType === typeEnum.Transfer) {
+                        var stock = parseFloat(data.availableStock) || 0;
+                        $stockSpan.text(stock.toLocaleString('uk-UA', {maximumFractionDigits: 3}));
+                        $stockDisplay.show();
+                        $countInput.data('available-stock', stock);
+                    } else {
+                        $stockDisplay.hide();
+                        $countInput.removeData('available-stock');
+                    }
+                    validateQuantityInput($countInput); // Валідуємо після оновлення даних
+                    updateRowTotal($tableRow);
+                } else {
+                    console.warn("applyProductDetails called with invalid data:", data);
+                    $unitCell.html('<span class="text-danger" title="Product not found or details missing">N/A</span>');
+                    $priceInput.val('0.00');
+                    $stockDisplay.hide();
+                    $countInput.removeData('available-stock');
+                    validateQuantityInput($countInput);
+                    updateRowTotal($tableRow);
+                }
+            }
+
+            $listEntriesBody.on('input change', '.entry-count', function() {
+                validateQuantityInput($(this));
+            });
+
+            function validateQuantityInput($countInput) {
+                var $currentRow = $countInput.closest('tr');
+                var $errorSpan = $currentRow.find('.count-error');
+                var availableStock = $countInput.data('available-stock');
+                var invoiceType = $invoiceTypeSelect.val();
+                var enteredCount = parseFloat($countInput.val()?.replace(',', '.')) || 0;
+
+                $errorSpan.text('');
+                $countInput.removeClass('is-invalid');
+
+                if (enteredCount <= 0) {
+                    $errorSpan.text('Quantity must be > 0');
+                    $countInput.addClass('is-invalid');
+                    return; // Виходимо, якщо кількість не валідна
+                }
+
+                if ((invoiceType === typeEnum.Release || invoiceType === typeEnum.Transfer) && typeof availableStock !== 'undefined') {
+                    if (enteredCount > availableStock) {
+                        $errorSpan.text('Max: ' + availableStock.toLocaleString('uk-UA', {maximumFractionDigits: 3}));
+                        $countInput.addClass('is-invalid');
+                    }
+                }
+            }
+
+                   function initializeSingleAutocomplete($element) {
+            var elementId = $element.attr('id') || $element.attr('name') || 'unidentified-autocomplete-element';
+            console.log('Attempting to initialize autocomplete for:', elementId);
+
+            if (!$element || $element.length === 0 || !$element.data('autocomplete')) {
+                console.warn("Element not found or missing data-autocomplete for:", elementId);
+                return;
+            }
+
+            var baseUrl = $element.data('autocomplete-url-base');
+            var fullUrlFromData = $element.data('autocomplete-url'); // Used for storages, counterparty (after update)
+            var finalDataSourceUrl = fullUrlFromData || baseUrl; // Determine the URL to use
+
+            var minLength = parseInt($element.data('autocomplete-min-length'), 10) || 1;
+            var storageSourceSelector = $element.data('autocomplete-storage-source'); // For products
+
+            var appendTarget = null;
+            if ($element.hasClass('product-autocomplete')) {
+                appendTarget = $element.closest('.entry-product-cell');
+                if (!appendTarget.length) {
+                    console.warn("Could not find '.entry-product-cell' for product autocomplete:", elementId, ". Appending to body.");
+                    appendTarget = null; // Fallback to body
+                }
+            } else {
+                // For other autocompletes (Counterparty, Storage) that have a predefined UL
+                var listTargetSelector = $element.attr('data-autocomplete-list-target');
+                if (listTargetSelector) {
+                    var $listTarget = $(listTargetSelector);
+                    if ($listTarget.length) {
+                        appendTarget = $listTarget;
+                    } else {
+                        console.warn(`Autocomplete List Target UL NOT FOUND for [${elementId}] using selector [${listTargetSelector}]. Appending to body.`);
+                    }
+                }
+            }
+
+            if (!finalDataSourceUrl) {
+                console.warn("Autocomplete init failed: Data source URL is missing for:", elementId);
+                return;
+            }
+
+            if ($element.hasClass('ui-autocomplete-input')) {
+                console.log("Destroying existing autocomplete instance for:", elementId);
+                try { $element.autocomplete("destroy"); } catch (e) { console.warn("Error destroying autocomplete for " + elementId + ":", e); }
+            }
+
+            $element.autocomplete({
+                source: function(request, response) {
+                    var term = request.term;
+                    var urlToUse = finalDataSourceUrl;
+
+                    // Dynamically build URL if it's a base URL (mostly for products or initial counterparty)
+                    if (baseUrl && !fullUrlFromData) { // Indicates it's a base URL needing parameters
+                         if (storageSourceSelector) { // Product autocomplete
+                            var storageName = $(storageSourceSelector).val();
+                            urlToUse = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'storageName=' + encodeURIComponent(storageName || "") + '&term=' + encodeURIComponent(term);
+                        } else if (elementId === 'CounterpartyName' && $element.data('autocomplete-url-base')) { // Counterparty specifically using base
+                            var invoiceType = $invoiceTypeSelect.val();
+                             urlToUse = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'type=' + encodeURIComponent(invoiceType) + '&term=' + encodeURIComponent(term);
+                        } else { // General case for other autocompletes using url-base (e.g. initial storage)
+                            urlToUse = baseUrl + (baseUrl.includes('?') ? '&' : '?') + 'term=' + encodeURIComponent(term);
+                        }
+                    } else if (fullUrlFromData) { // URL is already complete (e.g., counterparty after type change, or storages directly)
+                         if (!urlToUse.toLowerCase().includes('term=')) { // Ensure term is added if not present
+                            urlToUse = urlToUse + (urlToUse.includes('?') ? '&' : '?') + 'term=' + encodeURIComponent(term);
+                        } else {
+                            // If term is already a placeholder, this logic might need to replace it.
+                            // For now, assuming jQuery or server handles it, or 'term' is the correct query param.
+                        }
+                    }
+                    // If finalDataSourceUrl was from data-autocomplete-url, it should already have type/storageName if needed from the update...Source functions.
+                    // We just add 'term'.
+
+                    console.log(`AJAX request for [${elementId}] to URL: ${urlToUse}`);
+                    $.getJSON(urlToUse)
+                        .done(function(data) {
+                            console.log(`Data received for [${elementId}]:`, (data ? data.length : 0), "items");
+                            response(data || []);
+                        })
+                        .fail(function(jqXHR, textStatus, errorThrown) {
+                            console.error(`AJAX Fail for [${elementId}]: Status: ${textStatus}, Error: ${errorThrown}, URL: ${urlToUse}`);
+                            response([]);
+                        });
+                },
+                minLength: minLength,
+                select: function(event, ui) {
+                    console.log(`Item selected for [${elementId}]:`, ui.item.value);
+                    $(this).val(ui.item.value);
+                    $(this).trigger('autocompleteselect', ui); // Trigger custom event for further processing
+                    return false; // Prevent default value-setting behavior
+                },
+                open: function() {
+                    var widget = $(this).autocomplete("widget");
+                    widget.css("z-index", 1150); // Ensure it's above other elements
+                    // You can add Bootstrap classes here if you want the dropdown to match Bootstrap's style
+                    // Example: widget.addClass('list-group'); and style li.ui-menu-item with list-group-item
+                },
+                appendTo: appendTarget // Append to the specified target (cell for products, predefined UL for others)
+            });
+            console.log("Autocomplete initialized for:", elementId, "appending to:", appendTarget ? (appendTarget.attr('id') || appendTarget.attr('class')) : 'body');
+        }
+
+            // --- Початкова ініціалізація ---
+            console.log("Document ready. Initial page setup starting...");
+
+            // 1. Ініціалізуємо поля на основі початкового типу інвойсу
+            // Це також викличе updateCounterpartyAutocompleteSource та updateAllProductAutocompleteSources,
+            // які в свою чергу викличуть initializeSingleAutocomplete для відповідних полів.
+            toggleInvoiceFields();
+
+            // 2. Оновлюємо індекси для будь-яких рядків, що могли бути завантажені з сервера (наприклад, при редагуванні)
             updateEntryIndexes();
+
+            // 3. Завантажуємо зберігачів для початкових значень складів (якщо вони є)
+            if ($senderStorageInput.val()) { loadKeepersForStorage($senderStorageInput, $senderKeeperSelect); }
+            if ($receiverStorageInput.val()) { loadKeepersForStorage($receiverStorageInput, $receiverKeeperSelect); }
+
+            // 4. Явна ініціалізація для всіх полів data-autocomplete="true", які ще не були ініціалізовані
+            // Це для полів, які не залежать від типу інвойсу або не є продуктами (наприклад, самі поля складів)
+                   // В кінці $(document).ready()
+                console.log("Explicitly initializing remaining autocompletes...");
+                $('input[data-autocomplete="true"]').filter(function() {
+                    // Ігнорувати інпути, які є нащадками #newEntryTemplate або таблиці, що її містить
+                    return $(this).closest('#newEntryTemplate').length === 0 && $(this).closest('table[style*="display:none"]').length === 0;
+                }).each(function() {
+                    var $input = $(this);
+                    var inputIdForLog = $input.attr('id') || $input.attr('name') || 'unidentified-in-loop';
+                    if (!$input.hasClass('ui-autocomplete-input')) {
+                        console.log("Initializing from loop for:", inputIdForLog);
+                        initializeSingleAutocomplete($input);
+                    } else {
+                        console.log("Field", inputIdForLog, "already has autocomplete (skipped in loop).");
+                    }
+                });
+
+            // 5. Обробка існуючих рядків товарів (якщо вони є при завантаженні, напр. сторінка редагування)
+            if ($listEntriesBody.find('tr').length > 0) {
+                console.log("Processing existing invoice items on page load...");
+                $listEntriesBody.find('tr').each(function() {
+                    var $row = $(this);
+                    var $productInput = $row.find('.product-autocomplete');
+                    var productNameInHiddenField = $row.find('.product-name-hidden').val();
+
+                    if (productNameInHiddenField && $productInput.length) {
+                        console.log("Found existing product:", productNameInHiddenField, "in row");
+                        $productInput.val(productNameInHiddenField); // Встановлюємо видиме значення
+                        getProductDetailsWithStock(productNameInHiddenField, $row);
+                    }
+                    updateRowTotal($row); // Оновлюємо суму для кожного існуючого рядка
+                });
+            }
+            // updateGrandTotal(); // Оновлюємо загальну суму, якщо є
+
+            console.log("Initial page setup complete.");
         });
     </script>
- }
+}

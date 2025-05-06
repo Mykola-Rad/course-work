@@ -1,411 +1,338 @@
 ﻿@model IMS.ViewModels.StorageDetailsViewModel
 @using IMS.Models
-@using X.PagedList.Mvc.Core;
-@using X.PagedList; 
+@using X.PagedList.Mvc.Core
+@using X.PagedList
 
 @{
-	ViewData["Title"] = $"Деталі: {Model.Storage.Name}";
-	Layout = "_Layout";
-	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
-	var activeTab = ViewData["ActiveTab"] as string ?? "info";
+    ViewData["Title"] = $"Details: {Model.Storage.Name}"; // Translated
+    Layout = "_Layout";
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    var activeTab = ViewData["ActiveTab"] as string ?? "info";
 }
 
-<h1>Склад: @Model.Storage.Name</h1>
+@* Обгортаємо все в Card *@
+<div class="card shadow-sm mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h1 class="mb-0 h4">Storage: @Model.Storage.Name</h1> @* Translated Title *@
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Storages List @* Translated & Icon *@
+        </a>
+    </div>
+    <div class="card-body">
+        <nav class="mb-3">
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Information</button> @* Translated *@
+                @if (canManage || User.IsInRole(UserRole.storage_keeper.ToString()))
+                {
+                    <button class="nav-link @(activeTab == "stock" ? "active" : "")" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="@(activeTab == "stock")">Stock Items</button> @* Translated *@
+                }
+                @if (canManage)
+                {
+                    <button class="nav-link @(activeTab == "keepers" ? "active" : "")" id="nav-keepers-tab" data-bs-toggle="tab" data-bs-target="#nav-keepers" type="button" role="tab" aria-controls="nav-keepers" aria-selected="@(activeTab == "keepers")">Assigned Keepers</button> @* Translated *@
+                    <button class="nav-link @(activeTab == "invoices" ? "active" : "")" id="nav-storage-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-storage-invoices" type="button" role="tab" aria-controls="nav-storage-invoices" aria-selected="@(activeTab == "invoices")">Related Invoices</button> @* Translated *@
+                }
+            </div>
+        </nav>
 
-<nav class="mt-3">
-	<div class="nav nav-tabs" id="nav-tab" role="tablist">
-		<button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Інформація</button>
-		@if (canManage || User.IsInRole(UserRole.storage_keeper.ToString()))
-		{
-			<button class="nav-link @(activeTab == "stock" ? "active" : "")" id="nav-stock-tab" data-bs-toggle="tab" data-bs-target="#nav-stock" type="button" role="tab" aria-controls="nav-stock" aria-selected="@(activeTab == "stock")">Залишки товарів</button>
-		}
-		@if (canManage)
-		{
-			<button class="nav-link @(activeTab == "keepers" ? "active" : "")" id="nav-keepers-tab" data-bs-toggle="tab" data-bs-target="#nav-keepers" type="button" role="tab" aria-controls="nav-keepers" aria-selected="@(activeTab == "keepers")">Призначені комірники</button>
-			<button class="nav-link @(activeTab == "invoices" ? "active" : "")" id="nav-storage-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-storage-invoices" type="button" role="tab" aria-controls="nav-storage-invoices" aria-selected="@(activeTab == "invoices")">Накладні</button>
-		}
-	</div>
-</nav>
+        <div class="tab-content pt-3" id="nav-tabContent">
 
-<div class="tab-content pt-3" id="nav-tabContent">
+            @* --- Панель "Інформація" --- *@
+            <div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
+                <h4>Address and Details</h4> @* Translated *@
+                <hr />
+                <dl class="row">
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Storage.Name)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.Name)</dd>
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Storage.City)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.City)</dd>
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Storage.StreetName)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.StreetName)</dd>
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Storage.HouseNumber)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.HouseNumber)</dd>
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Storage.Region)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.Region)</dd>
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Storage.PostalCode)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.PostalCode)</dd>
+                </dl>
+            </div>
 
-	<div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
-		<h4>Адреса та деталі</h4>
-		<hr />
-		<dl class="row">
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.Name)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.Name)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.City)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.City)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.StreetName)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.StreetName)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.HouseNumber)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.HouseNumber)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.Region)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.Region)</dd>
-			<dt class="col-sm-3">@Html.DisplayNameFor(model => model.Storage.PostalCode)</dt>
-			<dd class="col-sm-9">@Html.DisplayFor(model => model.Storage.PostalCode)</dd>
-		</dl>
-		@if (canManage)
-		{
-			<a asp-action="Edit" asp-route-name="@Model.Storage.Name" class="btn btn-secondary btn-sm mt-2">Редагувати інформацію про склад</a>
-		}
-	</div>
+            @* --- Панель "Залишки товарів" --- *@
+            @if (canManage || User.IsInRole(UserRole.storage_keeper.ToString()))
+            {
+                <div class="tab-pane fade @(activeTab == "stock" ? "show active" : "")" id="nav-stock" role="tabpanel" aria-labelledby="nav-stock-tab" tabindex="0">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4>Products in Stock</h4> @* Translated *@
+                        @if (User.IsInRole(UserRole.owner.ToString()))
+                        {
+                            <a asp-controller="StorageProduct" asp-action="Add" asp-route-storageName="@Model.Storage.Name" class="btn btn-primary btn-sm"> @* Змінив на btn-primary *@
+                                <i class="bi bi-plus-circle me-1"></i> Add Product to Stock @* Translated & Icon *@
+                            </a>
+                        }
+                    </div>
+                    <hr />
+                    @if (Model.StorageProducts?.Any() ?? false)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover table-bordered table-striped"> @* Додав класи *@
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Product</th> @* Translated *@
+                                        <th class="text-end">Quantity</th> @* Translated & Aligned *@
+                                        <th>Unit</th> @* Translated *@
+                                        <th class="text-end">Min. Stock</th> @* Translated & Aligned *@
+                                        @if (canManage) { <th>Actions</th> } @* Translated *@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var item in Model.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
+                                    {
+                                        <tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
+                                            <td>@item.ProductNameNavigation?.ProductName</td>
+                                            <td class="text-end">@item.Count.ToString("N2")</td> @* Форматування та вирівнювання *@
+                                            <td>@item.ProductNameNavigation?.UnitCodeNavigation?.UnitName</td>
+                                            <td class="min-count-td text-end"> @* Форматування та вирівнювання *@
+                                                <span class="min-count-display">@item.MinimalCount.ToString("N2")</span>
+                                                <div class="min-count-edit input-group input-group-sm" style="display: none;">
+                                                    <input type="number" step="any" min="0" class="form-control form-control-sm min-count-input" @* Додав form-control-sm *@
+                                                           value="@item.MinimalCount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)"
+                                                           aria-label="Minimal stock quantity"> @* Translated aria-label *@
+                                                    <button class="btn btn-outline-success btn-sm" type="button" title="Save"> @* Translated & Icon *@
+                                                        <i class="bi bi-check-lg"></i>
+                                                    </button>
+                                                    <button class="btn btn-outline-secondary btn-sm" type="button" title="Cancel"> @* Translated & Icon *@
+                                                        <i class="bi bi-x-lg"></i>
+                                                    </button>
+                                                </div>
+                                                <div class="text-danger small min-count-error mt-1" style="display: none;"></div>
+                                            </td>
+                                            @if (canManage)
+                                            {
+                                                <td>
+                                                    <button type="button" class="btn btn-sm btn-outline-primary edit-min-inline-btn" title="Edit minimal stock"> @* Translated & Icon *@
+                                                        <i class="bi bi-pencil-fill"></i> @* <span class="ms-1">Min.</span> *@
+                                                    </button>
+                                                    @if (User.IsInRole(UserRole.owner.ToString()))
+                                                    {
+                                                        <a asp-controller="StorageProduct" asp-action="Edit" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-warning ms-1" title="Adjust quantity/min. stock"> @* Translated & Icon *@
+                                                            <i class="bi bi-sliders"></i> @*<span class="d-none d-md-inline">Adjust</span>*@
+                                                        </a>
+                                                        <a asp-controller="StorageProduct" asp-action="Delete" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-danger ms-1" title="Remove product from stock"> @* Translated & Icon *@
+                                                            <i class="bi bi-trash"></i> @*<span class="d-none d-md-inline">Remove</span>*@
+                                                        </a>
+                                                    }
+                                                </td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        @* Пагінатор для StorageProducts *@
+                        <div class="d-flex justify-content-center mt-3">
+                            @Html.PagedListPager(Model.StorageProducts, page => Url.Action("Details", new { name = Model.Storage.Name, pPage = page, kPage = Model.CurrentKeepersPage, iPage = Model.CurrentInvoicesPage, activeTab = "stock" }), new PagedListRenderOptions
+               {
+                   LiElementClasses = new[] { "page-item" },
+                   PageClasses = new[] { "page-link" },
+                   UlElementClasses = new[] { "pagination", "pagination-sm" },
+                   DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                   ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+               })
+                        </div>
+                        @Html.AntiForgeryToken()
+                    }
+                    else
+                    { <p class="text-muted text-center mt-3">No products registered in this stock.</p> } @* Translated *@
+                </div>
+            }
 
-	<div class="tab-pane fade @(activeTab == "stock" ? "show active" : "")" id="nav-stock" role="tabpanel" aria-labelledby="nav-stock-tab" tabindex="0">
-		<div class="d-flex justify-content-between align-items-center mb-2">
-			<h4>Товари на складі</h4>
-			@if (User.IsInRole(UserRole.owner.ToString()))
-			{
-				<a asp-controller="StorageProduct" asp-action="Add" asp-route-storageName="@Model.Storage.Name" class="btn btn-success btn-sm">
-					<i class="bi bi-plus-circle"></i> Додати товар на склад
-				</a>
-			}
-		</div>
-		<hr />
-		@if (Model.StorageProducts?.Any() ?? false)
-		{
-			<table class="table table-sm table-hover">
-				<thead class="table-light">
-					<tr>
-						<th>Товар</th>
-						<th>Кількість</th>
-						<th>Одиниця</th>
-						<th>Мін. залишок</th>
-						@if (canManage)
-						{
-							<th>Дії</th>
-						}
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var item in Model.StorageProducts.OrderBy(sp => sp.ProductNameNavigation?.ProductName))
-					{
-						<tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
-							<td>@item.ProductNameNavigation?.ProductName</td>
-							<td>@item.Count</td>
-							<td>@item.ProductNameNavigation?.UnitCodeNavigation?.UnitName</td>
+            @* --- Панель "Призначені комірники" --- *@
+            @if (canManage)
+            {
+                <div class="tab-pane fade @(activeTab == "keepers" ? "show active" : "")" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4>Assigned Storage Keepers</h4> @* Translated *@
+                        <a asp-controller="StorageKeeper" asp-action="Create" asp-route-storageName="@Model.Storage.Name" class="btn btn-primary btn-sm"> @* Змінив на btn-primary *@
+                           <i class="bi bi-person-plus-fill me-1"></i> Create Keeper @* Translated & Icon *@
+                        </a>
+                    </div>
+                    <hr />
+                    @if (Model.StorageKeepers?.Any() ?? false)
+                    {
+                        <div class="table-responsive">
+                            <table class="table table-sm table-hover table-bordered table-striped"> @* Додав класи *@
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Last Name</th><th>First Name</th><th>Phone</th><th>Email</th><th>Actions</th> @* Translated *@
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var keeper in Model.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
+                                    {
+                                        <tr>
+                                            <td>@Html.DisplayFor(modelItem => keeper.LastName)</td>
+                                            <td>@Html.DisplayFor(modelItem => keeper.FirstName)</td>
+                                            <td>@Html.DisplayFor(modelItem => keeper.PhoneNumber)</td>
+                                            <td>@Html.DisplayFor(modelItem => keeper.Email)</td>
+                                            <td>
+                                                <a asp-controller="StorageKeeper" asp-action="Details" asp-route-phoneNumber="@keeper.PhoneNumber" asp-route-fromStorage="true" class="btn btn-sm btn-outline-info" title="Details"><i class="bi bi-info-circle"></i></a>
+                                                <a asp-controller="StorageKeeper" asp-action="Edit" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-outline-secondary btn-sm ms-1" title="Edit"><i class="bi bi-pencil-square"></i></a>
+                                                <a asp-controller="StorageKeeper" asp-action="Delete" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-outline-danger btn-sm ms-1" title="Delete"><i class="bi bi-trash"></i></a>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                        @* Пагінатор для StorageKeepers *@
+                        <div class="d-flex justify-content-center mt-3">
+                            @Html.PagedListPager(Model.StorageKeepers, page => Url.Action("Details", new { name = Model.Storage.Name, pPage = Model.CurrentProductsPage, kPage = page, iPage = Model.CurrentInvoicesPage, activeTab = "keepers" }), new PagedListRenderOptions
+               {
+                   LiElementClasses = new[] { "page-item" },
+                   PageClasses = new[] { "page-link" },
+                   UlElementClasses = new[] { "pagination", "pagination-sm" },
+                   DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                   ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+               })
+                        </div>
+                    }
+                    else { <p class="text-muted text-center mt-3">No keepers assigned to this stock.</p> } @* Translated *@
+                </div>
+            }
 
-							<td class="min-count-td">
-								<span class="min-count-display">
-									@item.MinimalCount.ToString("N2") 
-								</span>
-								
-								<div class="min-count-edit input-group input-group-sm" style="display: none;">
-									<input type="number" step="any" min="0" class="form-control min-count-input"
-										   value="@item.MinimalCount.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)" 
-										   aria-label="Мінімальний залишок">
-									<button class="btn btn-outline-success min-count-save" type="button" title="Зберегти">
-										<i class="bi bi-check-lg"></i> 
-									</button>
-									<button class="btn btn-outline-secondary min-count-cancel" type="button" title="Скасувати">
-										<i class="bi bi-x-lg"></i> 
-									</button>
-								</div>
-								<div class="text-danger small min-count-error mt-1" style="display: none;"></div> 
-							</td>
+             @* --- Панель "Накладні" --- *@
+            @if (canManage) @* Ця вкладка теж для менеджерів *@
+            {
+                <div class="tab-pane fade @(activeTab == "invoices" ? "show active" : "")" id="nav-storage-invoices" role="tabpanel" aria-labelledby="nav-storage-invoices-tab" tabindex="0">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h4>Invoices Related to Stock</h4> @* Translated *@
+                        <div>
+                            <a asp-controller="Invoice" asp-action="Create" asp-route-senderStorageName="@Model.Storage.Name" class="btn btn-sm btn-primary me-1"> @* Змінив на btn-primary *@
+                                <i class="bi bi-arrow-up-right-circle me-1"></i>New Outgoing @* Translated & Icon *@
+                            </a>
+                             <a asp-controller="Invoice" asp-action="Create" asp-route-receiverStorageName="@Model.Storage.Name" class="btn btn-sm btn-primary"> @* Змінив на btn-primary *@
+                                <i class="bi bi-arrow-down-left-circle me-1"></i>New Incoming @* Translated & Icon *@
+                            </a>
+                        </div>
+                    </div>
+                    <hr />
+                    @if (Model.RelatedInvoices != null && Model.RelatedInvoices.Any())
+                    {
+                         @* Використовуємо Partial для таблиці накладних *@
+                         @await Html.PartialAsync("_InvoiceTablePartial", Model.RelatedInvoices)
 
-							@if (canManage)
-							{
-								<td>
-									<button type="button" class="btn btn-sm btn-outline-primary edit-min-inline-btn"
-											title="Редагувати мінімальний залишок">
-										<i class="bi bi-pencil-fill"></i> Мін.
-									</button>
+                         @* Пагінатор для Накладних *@
+                        <div class="d-flex justify-content-center mt-3">
+                            @Html.PagedListPager(Model.RelatedInvoices, page => Url.Action("Details", new { name = Model.Storage.Name, pPage = Model.CurrentProductsPage, kPage = Model.CurrentKeepersPage, iPage = page, activeTab = "invoices" }), new PagedListRenderOptions
+               {
+                   LiElementClasses = new[] { "page-item" },
+                   PageClasses = new[] { "page-link" },
+                   UlElementClasses = new[] { "pagination", "pagination-sm" },
+                   DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                   DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                   ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+               })
+                        </div>
+                    }
+                    else { <p class="text-muted text-center mt-3">No invoices related to this stock.</p> } @* Translated *@
+                </div>
+            }
+        </div> @* Кінець tab-content *@
 
-									@if (User.IsInRole(UserRole.owner.ToString()))
-									{
-										<a asp-controller="StorageProduct" asp-action="Edit" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-warning" title="Ручне коригування кількості та мін. залишку">Кориг.</a>
-										<text> | </text>
-										<a asp-controller="StorageProduct" asp-action="Delete" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-danger" title="Видалити запис про товар зі складу">Видалити</a>
-									}
-								</td>
-							}
-						</tr>
-					}
-				</tbody>
-			</table>
-			<div class="d-flex justify-content-center mt-3">
-				@Html.PagedListPager(Model.StorageProducts, page => Url.Action("Details",
-								new
-								{
-									name = Model.Storage.Name,          
-									pPage = page,                       
-									kPage = Model.CurrentKeepersPage,   
-									iPage = Model.CurrentInvoicesPage,
-									activeTab = "stock"
-								}),
-								new PagedListRenderOptions
-			{
-				LiElementClasses = new[] { "page-item" },
-				PageClasses = new[] { "page-link" },
-				UlElementClasses = new[] { "pagination", "pagination-sm" },
-				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
-				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
-			})
-			</div>
+    </div> @* кінець card-body *@
+</div> @* кінець card *@
 
-			@Html.AntiForgeryToken()
-		}
-		else
-		{
-			<p class="text-muted">На цьому складі немає зареєстрованих залишків товарів.</p>
-		}
-	</div>
-
-	@if (canManage)
-	{
-		<div class="tab-pane fade @(activeTab == "keepers" ? "show active" : "")" id="nav-keepers" role="tabpanel" aria-labelledby="nav-keepers-tab" tabindex="0">
-			<div class="d-flex justify-content-between align-items-center mb-2">
-				<h4>Призначені комірники</h4>
-				<a asp-controller="StorageKeeper" asp-action="Create" asp-route-storageName="@Model.Storage.Name" class="btn btn-success btn-sm">Створити комірника</a>
-			</div>
-			<hr />
-			@if (Model.StorageKeepers?.Any() ?? false)
-			{
-				<table class="table table-sm table-hover">
-					<thead class="table-light">
-						<tr>
-							<th>Прізвище</th>
-							<th>Ім'я</th>
-							<th>Телефон</th>
-							<th>Email</th>
-							<th>Дії</th>
-						</tr>
-					</thead>
-					<tbody>
-						@foreach (var keeper in Model.StorageKeepers.OrderBy(k => k.LastName).ThenBy(k => k.FirstName))
-						{
-							<tr>
-								<td>@Html.DisplayFor(modelItem => keeper.LastName)</td>
-								<td>@Html.DisplayFor(modelItem => keeper.FirstName)</td>
-								<td>@Html.DisplayFor(modelItem => keeper.PhoneNumber)</td>
-								<td>@Html.DisplayFor(modelItem => keeper.Email)</td>
-								<td>
-									<a asp-controller="StorageKeeper" asp-action="Details"
-									   asp-route-phoneNumber="@keeper.PhoneNumber"
-									   asp-route-fromStorage="true"
-									   class="btn btn-sm btn-outline-info">Деталі</a>
-									<text> | </text>
-									<a asp-controller="StorageKeeper" asp-action="Edit" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-outline-secondary btn-sm">Редагувати</a>
-									<text> | </text>
-									<a asp-controller="StorageKeeper" asp-action="Delete" asp-route-phoneNumber="@keeper.PhoneNumber" class="btn btn-outline-danger btn-sm">Delete</a>
-								</td>
-							</tr>
-						}
-					</tbody>
-				</table>
-				<div class="d-flex justify-content-center mt-3">
-					@Html.PagedListPager(Model.StorageKeepers, page => Url.Action("Details",
-									new
-									{
-										name = Model.Storage.Name,         
-										pPage = Model.CurrentProductsPage,  
-										kPage = page,                       
-										iPage = Model.CurrentInvoicesPage  ,
-										activeTab = "keepers"
-									}),
-									new PagedListRenderOptions
-			{
-				LiElementClasses = new[] { "page-item" },
-				PageClasses = new[] { "page-link" },
-				UlElementClasses = new[] { "pagination", "pagination-sm" },
-				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
-				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
-			})
-				</div>
-			}
-			else
-			{
-				<p class="text-muted">До цього складу не призначено комірників.</p>
-			}
-		</div>
-	}
-	<div class="tab-pane fade @(activeTab == "invoices" ? "show active" : "")" id="nav-storage-invoices" role="tabpanel" aria-labelledby="nav-storage-invoices-tab" tabindex="0">
-		<div class="d-flex justify-content-between align-items-center mb-2">
-			<h4>Накладні, пов'язані зі складом</h4>
-			@if (canManage)
-			{
-				<div>
-					<a asp-controller="Invoice" asp-action="Create" asp-route-senderStorageName="@Model.Storage.Name" class="btn btn-sm btn-outline-success me-1">Створити Накладну</a>
-				</div>
-			}
-		</div>
-		<hr />
-		@if (Model.RelatedInvoices.Any())
-		{
-			<table class="table table-sm table-hover">
-				<thead class="table-light">
-					<tr>
-						<th>ID</th>
-						<th>Дата</th>
-						<th>Тип</th>
-						<th>Статус</th>
-						<th>Сума</th>
-						<th></th>
-					</tr>
-				</thead>
-				<tbody>
-					@foreach (var invoice in Model.RelatedInvoices.OrderByDescending(i => i.Date).ThenByDescending(i => i.InvoiceId))
-					{
-						<tr>
-							<td>
-								@invoice.InvoiceId
-							</td>
-							<td>@invoice.Date.ToString("dd.MM.yyyy")</td>
-							<td>@invoice.Type</td>
-							<td>@invoice.Status</td>
-							<td>
-							@if (invoice.Type == InvoiceType.supply || invoice.Type == InvoiceType.release)
-							{
-								@((invoice.ListEntries?.Sum(le => le.Count * le.Price) ?? 0).ToString("C2"))
-							}
-							else
-							{
-								<span class="text-muted">—</span> 
-							}
-							</td>
-							<td>
-								<a asp-controller="Invoice" asp-action="Details" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-info">Деталі</a>
-
-								@if (invoice.Status == InvoiceStatus.draft)
-								{
-									<text> | </text>
-									<a asp-controller="Invoice" asp-action="Edit" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-secondary">Редагувати</a>
-								}
-
-								@if (invoice.Status == InvoiceStatus.draft)
-								{
-									<text> | </text>
-									<a asp-controller="Invoice" asp-action="Delete" asp-route-id="@invoice.InvoiceId" class="btn btn-sm btn-outline-danger">Видалити</a>
-								}
-							</td>
-						</tr>
-					}
-				</tbody>
-			</table>
-			<div class="d-flex justify-content-center mt-3">
-				@Html.PagedListPager(Model.RelatedInvoices, page => Url.Action("Details",
-								new
-								{
-									name = Model.Storage.Name,          
-									pPage = Model.CurrentProductsPage,  
-									kPage = Model.CurrentKeepersPage,   
-									iPage = page,
-									activeTab = "invoices"
-								}),
-								new PagedListRenderOptions
-			{
-				LiElementClasses = new[] { "page-item" },
-				PageClasses = new[] { "page-link" },
-				UlElementClasses = new[] { "pagination", "pagination-sm" },
-				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
-				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
-			})
-			</div>
-		}
-		else
-		{
-			<p class="text-muted">Немає накладних, пов'язаних з цим складом.</p>
-		}
-	</div>
-</div>
-<div class="mt-4">
-	<a asp-action="Index" class="btn btn-outline-secondary">Назад до списку складів</a>
-</div>
 
 @section Scripts {
-     <script>
-         $(document).ready(function () {
-             $('table').on('click', '.edit-min-inline-btn', function () {
-                 var td = $(this).closest('tr').find('td.min-count-td'); 
-                 td.find('.min-count-display').hide(); 
-                 td.find('.min-count-edit').show(); 
-                 td.find('.min-count-input').focus().select(); 
-                 td.find('.min-count-error').hide().text('');
-             });
+    <script>
+        $(document).ready(function () {
+            $('table').on('click', '.edit-min-inline-btn', function () {
+                var td = $(this).closest('tr').find('td.min-count-td');
+                td.find('.min-count-display').hide();
+                td.find('.min-count-edit').show();
+                td.find('.min-count-input').focus().select();
+                td.find('.min-count-error').hide().text('');
+            });
 
-             $('table').on('click', '.min-count-cancel', function () {
-                 var td = $(this).closest('td.min-count-td');
-                 td.find('.min-count-edit').hide();
-                 td.find('.min-count-display').show();
-                 td.find('.min-count-error').hide().text(''); 
-             });
+            $('table').on('click', '.min-count-cancel', function () {
+                var td = $(this).closest('td.min-count-td');
+                td.find('.min-count-edit').hide();
+                td.find('.min-count-display').show();
+                td.find('.min-count-error').hide().text('');
+            });
 
-             $('table').on('click', '.min-count-save', function () {
-                 var saveButton = $(this);
-                 var td = saveButton.closest('td.min-count-td');
-                 var editDiv = td.find('.min-count-edit');
-                 var displaySpan = td.find('.min-count-display');
-                 var errorDiv = td.find('.min-count-error');
-                 var inputField = editDiv.find('.min-count-input');
-                 var tr = td.closest('tr'); 
+            $('table').on('click', '.min-count-save', function () {
+                var saveButton = $(this);
+                var td = saveButton.closest('td.min-count-td');
+                var editDiv = td.find('.min-count-edit');
+                var displaySpan = td.find('.min-count-display');
+                var errorDiv = td.find('.min-count-error');
+                var inputField = editDiv.find('.min-count-input');
+                var tr = td.closest('tr');
 
-                 var storageName = tr.data('storage-name');
-                 var productName = tr.data('product-name');
-				var newValue = inputField.val()?.replace(',', '.');
+                var storageName = tr.data('storage-name');
+                var productName = tr.data('product-name');
+               var newValue = inputField.val()?.replace(',', '.');
 
-                 errorDiv.hide().text(''); 
-                 if (newValue === '' || newValue === null || isNaN(parseFloat(newValue)) || parseFloat(newValue) < 0) {
-                      errorDiv.text('Введіть коректне невід\'ємне число.').show();
-                      return;
-                 }
+                errorDiv.hide().text('');
+                if (newValue === '' || newValue === null || isNaN(parseFloat(newValue)) || parseFloat(newValue) < 0) {
+                     errorDiv.text('Enter a valid non-negative number.').show();
+                     return;
+                }
 
-                 var token = $('input[name="__RequestVerificationToken"]').val();
-                 var postUrl = "@Url.Action("EditMinimalCountOnly", "StorageProduct")";
+                var token = $('input[name="__RequestVerificationToken"]').val();
+                var postUrl = "@Url.Action("EditMinimalCountOnly", "StorageProduct")";
 
-                 var dataToSend = {
-                     StorageName: storageName,
-                     ProductName: productName,
-                     MinimalCount: newValue, 
-                      __RequestVerificationToken: token 
-                 };
+                var dataToSend = {
+                    StorageName: storageName,
+                    ProductName: productName,
+                    MinimalCount: newValue,
+                     __RequestVerificationToken: token
+                };
 
-                 console.log("Sending AJAX Data:", dataToSend); 
+                console.log("Sending AJAX Data:", dataToSend);
 
-                 saveButton.prop('disabled', true);
+                saveButton.prop('disabled', true);
 
-                 $.ajax({
-                     url: postUrl,
-                     method: "POST",
-                     data: dataToSend, 
-                     success: function (response) {
-                         console.log("AJAX Success:", response); 
-                         if (response.success) {
-                              var formattedValue = parseFloat(response.newMinimalCount).toLocaleString('uk-UA', {
-                                  minimumFractionDigits: 2,
-                                  maximumFractionDigits: 2
-                              });
-                             displaySpan.text(formattedValue); 
-                             editDiv.hide(); 
-                             displaySpan.show(); 
-                         } else {
-                             var errorMessage = response.message || "Помилка збереження.";
-                              if(response.errors && response.errors.length > 0) {
-                                   errorMessage += ": " + response.errors.join("; ");
-                              }
-                             errorDiv.text(errorMessage).show();
-                         }
-                     },
-                     error: function (jqXHR, textStatus, errorThrown) {
-                         console.error("AJAX Error: " + textStatus + " - " + errorThrown);
-                         console.error("Server Response: ", jqXHR.responseText);
-                         errorDiv.text('Помилка зв\'язку з сервером.').show();
-                     },
-                     complete: function() {
-                         saveButton.prop('disabled', false);
-                     }
-                 });
-             });
-         });
-	</script>
+                $.ajax({
+                    url: postUrl,
+                    method: "POST",
+                    data: dataToSend,
+                    success: function (response) {
+                        console.log("AJAX Success:", response);
+                        if (response.success) {
+                             var formattedValue = parseFloat(response.newMinimalCount).toLocaleString('uk-UA', {
+                                 minimumFractionDigits: 2,
+                                 maximumFractionDigits: 2
+                             });
+                            displaySpan.text(formattedValue);
+                            editDiv.hide();
+                            displaySpan.show();
+                        } else {
+                            var errorMessage = response.message || "Помилка збереження.";
+                             if(response.errors && response.errors.length > 0) {
+                                  errorMessage += ": " + response.errors.join("; ");
+                             }
+                            errorDiv.text(errorMessage).show();
+                        }
+                    },
+                    error: function (jqXHR, textStatus, errorThrown) {
+                        console.error("AJAX Error: " + textStatus + " - " + errorThrown);
+                        console.error("Server Response: ", jqXHR.responseText);
+                        errorDiv.text('Помилка зв\'язку з сервером.').show();
+                    },
+                    complete: function() {
+                        saveButton.prop('disabled', false);
+                    }
+                });
+            });
+        });
+    </script>
  }

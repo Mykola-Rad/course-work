@@ -1,52 +1,79 @@
 ﻿@model IMS.Models.ProductUnit
+@using IMS.Models
 
 @{
-    ViewData["Title"] = $"Видалити: {Model.UnitName} ({Model.UnitCode})";
+    ViewData["Title"] = $"Delete Unit: {Model.UnitName} ({Model.UnitCode})"; // Translated
     Layout = "_Layout";
     bool canDelete = ViewBag.CanDelete ?? true;
+    var warningMessage = ViewBag.WarningMessage as string;
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-sm border-danger">
+                @* Картка з червоним акцентом *@
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-danger mb-3">Are you sure you want to delete this unit of measure?</h3> @* Translated *@
 
-<h3 class="text-danger">Ви впевнені, що хочете видалити цю одиницю виміру?</h3>
+                    @if (!canDelete && !string.IsNullOrEmpty(warningMessage))
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @warningMessage <br />
+                            First, change the unit of measure for the respective products. @* Translated *@
+                        </div>
+                    }
+                    else if (canDelete) // Показуємо, якщо попередження немає, але ще раз наголошуємо на незворотності
+                    {
+                        <p class="text-danger">This action is irreversible if the unit is not in use!</p> @* Translated *@
+                    }
 
-@if (!canDelete && ViewBag.WarningMessage != null)
-{
-    <div class="alert alert-warning" role="alert">
-        @ViewBag.WarningMessage <br />
-        Спочатку змініть одиницю виміру для відповідних товарів.
-    </div>
+
+                    <h5 class="mt-4">Unit Details:</h5> @* Translated *@
+                    <hr />
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.UnitCode)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.UnitCode)</dd>
+
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.UnitName)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.UnitName)</dd>
+                    </dl>
+
+                    <hr class="my-4">
+
+                    <form asp-action="Delete" method="post">
+                        @* Переконайтесь, що asp-action коректний (можливо DeleteConfirmed) *@
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="UnitCode" />
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            @if (canDelete)
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash3-fill me-1"></i>Delete Unit @* Translated & Icon *@
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger" disabled title="@(warningMessage ?? "Cannot delete unit due to dependencies.")">
+                                    @* Оновлений title *@
+                                    <i class="bi bi-trash3-fill me-1"></i>Delete Unit
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
 }
-
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.UnitCode)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.UnitCode)
-        </dd>
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.UnitName)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.UnitName)
-        </dd>
-    </dl>
-
-    <form asp-action="Delete" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="UnitCode" /> 
-
-        @if (canDelete)
-        {
-            <button type="submit" class="btn btn-danger">Видалити</button>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-danger" disabled title="@ViewBag.WarningMessage">Видалити</button>
-        }
-        | <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
-    </form>
-</div>

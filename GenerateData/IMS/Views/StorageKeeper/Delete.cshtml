@@ -1,62 +1,104 @@
 ﻿@model IMS.Models.StorageKeeper
+@using IMS.Models
 
- @{
-     ViewData["Title"] = $"Видалити комірника: {Model.FirstName} {Model.LastName} ({Model.PhoneNumber})";
-     Layout = "_Layout";
-     bool canDelete = ViewBag.CanDelete ?? true;
- }
+@{
+    ViewData["Title"] = $"Delete Keeper: {Model.FirstName} {Model.LastName} ({Model.PhoneNumber})"; // Translated
+    Layout = "_Layout";
+    bool canDelete = ViewBag.CanDelete ?? true;
+    var warningMessage = ViewBag.WarningMessage as string;
+}
 
- <h1>@ViewData["Title"]</h1>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-sm border-danger">
+                @* Картка з червоним акцентом *@
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-danger mb-3">Are you sure you want to delete this keeper's profile?</h3> @* Translated *@
 
- <h3 class="text-danger">Ви впевнені, що хочете видалити цей профіль комірника?</h3>
+                    @if (!canDelete && !string.IsNullOrEmpty(warningMessage))
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                            @warningMessage <br />
+                            Deletion is not possible while these dependencies exist. Please remove or reassign related records. @* Translated *@
+                        </div>
+                    }
+                    else if (canDelete)
+                    {
+                        <div class="alert alert-info" role="alert">
+                            @* Змінено на alert-info *@
+                            <i class="bi bi-info-circle-fill me-2"></i> This action will permanently delete the keeper's profile. @* Translated *@
+                        </div>
+                    }
 
- @if (!canDelete && ViewBag.WarningMessage != null)
- {
-     <div class="alert alert-warning" role="alert">
-         @ViewBag.WarningMessage <br />
-         Видалення неможливе, доки існують ці залежності.
-     </div>
- }
- else
- {
-      <p class="text-danger">Ця дія видалить профіль комірника остаточно!</p>
- }
+                    <h5 class="mt-4">Keeper Details:</h5> @* Translated *@
+                    <hr />
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.LastName)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.LastName)</dd>
 
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.FirstName)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.FirstName)</dd>
 
- <div>
-     <hr />
-     <dl class="row">
-         <dt class = "col-sm-3">@Html.DisplayNameFor(model => model.LastName)</dt>
-         <dd class = "col-sm-9">@Html.DisplayFor(model => model.LastName)</dd>
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.PhoneNumber)</dd>
 
-         <dt class = "col-sm-3">@Html.DisplayNameFor(model => model.FirstName)</dt>
-         <dd class = "col-sm-9">@Html.DisplayFor(model => model.FirstName)</dd>
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Email)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
 
-         <dt class = "col-sm-3">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
-         <dd class = "col-sm-9">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+                        <dt class="col-sm-4 fw-semibold">Assigned Storage</dt> @* Translated *@
+                        <dd class="col-sm-8">
+                            @if (Model.StorageNameNavigation != null)
+                            {
+                                <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.StorageName">
+                                    @Model.StorageNameNavigation.Name
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">N/A</span> @* Translated/Styled *@
+                            }
+                        </dd>
 
-         <dt class = "col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
-         <dd class = "col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
+                        <dt class="col-sm-4 fw-semibold">Linked Login</dt> @* Translated *@
+                        <dd class="col-sm-8">@(Model.User?.Username ?? "-- None --")</dd> @* Translated/Styled *@
+                    </dl>
 
-          <dt class = "col-sm-3">@Html.DisplayNameFor(model => model.StorageNameNavigation)</dt>
-         <dd class = "col-sm-9">@Html.DisplayFor(model => model.StorageNameNavigation.Name)</dd>
+                    <hr class="my-4">
 
-          <dt class = "col-sm-3">Прив'язаний логін</dt>
-          <dd class = "col-sm-9">@(Model.User?.Username ?? "-- Немає --")</dd>
-     </dl>
+                    <form asp-action="Delete" method="post">
+                        @* Перевірте asp-action *@
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="PhoneNumber" /> @* PK *@
 
-     <form asp-action="Delete" method="post">
-         @Html.AntiForgeryToken()
-         <input type="hidden" asp-for="PhoneNumber" />
+                        <div class="d-flex justify-content-end mt-3">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            @if (canDelete)
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-person-x-fill me-1"></i>Yes, Delete Profile @* Translated & Icon *@
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger" disabled title="@(warningMessage ?? "Cannot delete due to dependencies.")">
+                                    <i class="bi bi-person-x-fill me-1"></i>Delete Profile
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
 
-         @if (canDelete)
-         {
-              <button type="submit" class="btn btn-danger">Так, Видалити Профіль</button>
-         }
-         else
-         {
-              <button type="submit" class="btn btn-danger" disabled title="@ViewBag.WarningMessage">Видалити Профіль</button>
-         }
-           | <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
-     </form>
- </div>
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

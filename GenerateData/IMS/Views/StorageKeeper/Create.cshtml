@@ -1,67 +1,87 @@
 ﻿@model IMS.ViewModels.StorageKeeperViewModel
+@using IMS.Models
 
 @{
-    ViewData["Title"] = ViewData["Title"] ?? "Створити комірника";
+    ViewData["Title"] = ViewData["Title"] ?? "Create Storage Keeper"; // Translated, зберігаючи можливість встановити з контролера
     Layout = "_Layout";
     bool isStoragePreselected = !string.IsNullOrEmpty(Model.StorageName);
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    @* <hr /> -- Прибрано *@
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        @* Приховане поле для передачі контексту складу, якщо він був попередньо обраний *@
+                        @if (isStoragePreselected)
+                        {
+                            <input type="hidden" name="ContextStorageName" value="@Model.StorageName" />
+                        }
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Create" method="post">
-            @Html.AntiForgeryToken()
-            <input type="hidden" name="ContextStorageName" value="@ViewBag.ContextStorageName" />
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="PhoneNumber" class="form-control form-control-sm" placeholder="+380XXXXXXXXX" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            <div class="form-text small">Phone number is used as a unique identifier.</div> @* Translated & smaller text *@
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                            <input asp-for="FirstName" class="form-control form-control-sm" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="LastName" class="form-label fw-semibold"></label>
+                            <input asp-for="LastName" class="form-control form-control-sm" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Email" type="email" class="form-control form-control-sm" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="PhoneNumber" class="form-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" placeholder="+380XXXXXXXXX" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-                <div class="form-text">Телефон використовується як унікальний ідентифікатор.</div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="FirstName" class="form-label"></label>
-                <input asp-for="FirstName" class="form-control" />
-                <span asp-validation-for="FirstName" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="LastName" class="form-label"></label>
-                <input asp-for="LastName" class="form-control" />
-                <span asp-validation-for="LastName" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" type="email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="StorageName" class="form-label fw-semibold"></label>
+                            @if (isStoragePreselected)
+                            {
+                                // Якщо склад попередньо обрано, показуємо його як текст і передаємо у прихованому полі
+                                <input type="hidden" asp-for="StorageName" />
+                                <p class="form-control-plaintext form-control-sm ps-0"><strong>@Model.StorageName</strong></p> @* Стилізуємо як простий текст форми *@
+                            }
+                            else
+                            {
+                                // Інакше даємо можливість вибрати зі списку
+                                <select asp-for="StorageName" class="form-select form-select-sm" asp-items="@Model.AvailableStorages">
+                                    <option value="">-- Select Storage --</option> @* Translated *@
+                                </select>
+                                <span asp-validation-for="StorageName" class="text-danger small"></span>
+                            }
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="StorageName" class="form-label"></label>
-                @if (isStoragePreselected)
-                {
-                    <input type="hidden" asp-for="StorageName" />
-                    <p class="form-control-plaintext"><strong>@Model.StorageName</strong></p>
-                }
-                else
-                {
-                    <select asp-for="StorageName" class="form-select" asp-items="@Model.AvailableStorages">
-                        <option value="">-- Оберіть склад --</option>
-                    </select>
-                    <span asp-validation-for="StorageName" class="text-danger"></span>
-                }
-            </div>
+                        <hr class="my-4">
 
-            <div class="mb-3 mt-4">
-                <button type="submit" class="btn btn-primary">Створити профіль</button>
-                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
-            </div>
-        </form>
-    </div>
-</div>
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-person-plus-fill me-1"></i>Create Profile @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

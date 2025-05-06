@@ -3,7 +3,7 @@
 
 @if (User.Identity != null && User.Identity.IsAuthenticated)
 {
-    <nav class="nav flex-column">
+    <nav class="nav flex-column nav-main-scrollable">
 
         @if (User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
         {

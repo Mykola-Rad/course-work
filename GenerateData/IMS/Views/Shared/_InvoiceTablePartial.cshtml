@@ -1,5 +1,5 @@
 ﻿@model X.PagedList.IPagedList<IMS.Models.Invoice>
-@using X.PagedList;
+@using X.PagedList
 @using IMS.Models
 
 @{
@@ -11,18 +11,21 @@
     {
         currentInvoiceType = parsedType;
     }
+
     bool showAllColumns = !currentInvoiceType.HasValue;
     bool showSupplyCols = showAllColumns || currentInvoiceType == InvoiceType.supply;
     bool showReleaseCols = showAllColumns || currentInvoiceType == InvoiceType.release;
     bool showTransferCols = showAllColumns || currentInvoiceType == InvoiceType.transfer;
 
-    int colspan = 2; 
-    if (showAllColumns) colspan++;
-    colspan++; 
-    if (showSupplyCols || showReleaseCols) colspan++; 
-    if (showReleaseCols || showTransferCols) colspan++; 
-    if (showSupplyCols || showTransferCols) colspan++; 
-    colspan++; 
+    // Оновлюємо розрахунок colspan
+    int colspan = 2; // ID, Date
+    if (showAllColumns) colspan++; // Type
+    colspan++; // Status
+    if (showSupplyCols || showReleaseCols) colspan++; // Counterparty
+    if (showReleaseCols || showTransferCols) colspan++; // From Storage
+    if (showSupplyCols || showTransferCols) colspan++; // To Storage
+    colspan++; // НОВА КОЛОНКА Amount
+    colspan++; // Actions
 }
 
 <table class="table table-sm table-hover table-bordered table-striped mt-2">
@@ -47,7 +50,8 @@
             {
                 <th>To Storage</th>
             }
-            <th>Actions</th> 
+            <th class="text-end">Amount</th> @* НОВИЙ ЗАГОЛОВОК *@
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -61,8 +65,9 @@
                     @if (showAllColumns)
                     {
                         <td>
-                             @{
-                                string typeBadgeClass = item.Type switch {
+                            @{
+                                string typeBadgeClass = item.Type switch
+                                {
                                     InvoiceType.supply => "text-bg-primary",
                                     InvoiceType.release => "text-bg-success",
                                     InvoiceType.transfer => "text-bg-info",
@@ -73,14 +78,15 @@
                         </td>
                     }
                     <td>
-                         @{
-                            string statusBadgeClass = item.Status switch {
+                        @{
+                            string statusBadgeClass = item.Status switch
+                            {
                                 InvoiceStatus.draft => "text-bg-warning",
                                 InvoiceStatus.processed => "text-bg-success",
                                 InvoiceStatus.cancelled => "text-bg-danger",
                                 _ => "text-bg-secondary"
                             };
-                        }
+                            }
                         <span class="badge rounded-pill @statusBadgeClass">@item.Status</span>
                     </td>
                     @if (showSupplyCols || showReleaseCols)
@@ -99,19 +105,31 @@
                     {
                         <td>@(item.ReceiverStorageName ?? "-")</td>
                     }
+                    @* --- НОВА КОМІРКА ДЛЯ СУМИ --- *@
+                    <td class="text-end">
+                        @if (item.Type == InvoiceType.supply || item.Type == InvoiceType.release)
+                        {
+                            @* Переконайтесь, що ListEntries завантажені в контролері, що викликає цей Partial *@
+                            @((item.ListEntries?.Sum(le => le.Count * le.Price) ?? 0).ToString("C2"))
+                        }
+                        else
+                        {
+                            <span class="text-muted">—</span> @* Прочерк для Transfer або інших типів *@
+                        }
+                    </td>
+                    @* --- КІНЕЦЬ НОВОЇ КОМІРКИ --- *@
                     <td>
                         <a asp-controller="Invoice" asp-action="Details" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-info" title="Details">
                             <i class="bi bi-info-circle"></i>
                         </a>
                         @if (canManage && item.Status == InvoiceStatus.draft)
                         {
-                            <text> | </text>
-                            <a asp-controller="Invoice" asp-action="Edit" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-secondary" title="Edit">
-                                 <i class="bi bi-pencil-square"></i>
+                            // Важливо: Замінив <text> | </text> на відступи для кнопок-іконок
+                            <a asp-controller="Invoice" asp-action="Edit" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
                             </a>
-                            <text> | </text>
-                            <a asp-controller="Invoice" asp-action="Delete" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-danger" title="Delete">
-                                 <i class="bi bi-trash"></i>
+                            <a asp-controller="Invoice" asp-action="Delete" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-danger ms-1" title="Delete">
+                                <i class="bi bi-trash"></i>
                             </a>
                         }
                     </td>

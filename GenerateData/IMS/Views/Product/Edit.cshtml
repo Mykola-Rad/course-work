@@ -1,49 +1,81 @@
 ﻿@model IMS.Models.Product
+@using IMS.Models
 
 @{
-    ViewData["Title"] = "Редагувати товар";
+    ViewData["Title"] = "Edit Product"; // Translated
+    var originalName = ViewBag.OriginalProductName as string ?? Model.ProductName; // Keep this logic
     Layout = "_Layout";
-    var originalName = ViewBag.OriginalProductName ?? Model.ProductName;
 }
 
-<h1>@ViewData["Title"]</h1>
-<h4>Товар: @originalName</h4>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit" asp-route-productName="@originalName" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            @* Adjust column width as needed *@
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    @* Display original name being edited in the header *@
+                    <h1 class="mb-0 h4">@ViewData["Title"]: @originalName</h1>
+                </div>
+                <div class="card-body">
+                    @* <h4>Product: @originalName</h4> -- Removed, as title is now in card header *@
+                    @* <hr /> -- Removed *@
+                    <form asp-action="Edit" asp-route-productName="@originalName" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-            <div class="mb-3">
-                <label asp-for="ProductName" class="form-label"></label>
-                <input asp-for="ProductName" class="form-control" />
-                <span asp-validation-for="ProductName" class="text-danger"></span>
-                <div class="form-text text-warning">Увага: Ви редагуєте первинний ключ. Переконайтеся, що нова назва унікальна.</div>
-            </div>
+                        @* It's good practice to include a hidden field for the ID if ProductName is editable and is the PK,
+                           but your route uses productName. If ProductName is the actual key being posted back for lookup,
+                           then OriginalName might also be needed as a hidden field if 'productName' in route is for original,
+                           and asp-for="ProductName" is the new one. The hidden field for OriginalName might already
+                           be handled by your ViewModel or controller logic for Edit POST, but for clarity if using
+                           a different ID to post to, it would be here. Since the route uses `productName=@originalName`,
+                           it's implying the original name is used to find the record, and Model.ProductName is the potentially new value.
+                           The current setup `asp-route-productName="@originalName"` is correct for the form's action.
+                           If you need to pass the original name for comparison on POST and Model.ProductName is the new name,
+                           a hidden field for original name might be added if not already part of the Model.
+                           However, the prompt has `asp-for="ProductName"` as the input, so `Model.ProductName` will be the submitted value.
+                           The controller's Edit POST action receives `@originalName` via route and the new values via the model.
+                        *@
 
-            <div class="mb-3">
-                <label asp-for="UnitCode" class="form-label">Одиниця виміру</label>
-                <select asp-for="UnitCode" class="form-select" asp-items="ViewBag.UnitCode">
-                    <option value="">-- Оберіть одиницю --</option>
-                </select>
-                <span asp-validation-for="UnitCode" class="text-danger"></span>
-            </div>
 
-            <div class="mb-3">
-                <label asp-for="LastPrice" class="form-label"></label>
-                <input asp-for="LastPrice" type="number" step="any" min="0" class="form-control" />
-                <span asp-validation-for="LastPrice" class="text-danger"></span>
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="ProductName" class="form-label fw-semibold"></label>
+                            <input asp-for="ProductName" class="form-control form-control-sm" />
+                            <span asp-validation-for="ProductName" class="text-danger small"></span>
+                            <div class="form-text text-warning small"><i class="bi bi-exclamation-triangle me-1"></i>Warning: You are editing the primary identifier. Ensure the new name is unique.</div> @* Translated & Icon *@
+                        </div>
 
-            <div class="mb-3 mt-4">
-                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
-                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
-            </div>
-        </form>
-    </div>
-</div>
+                        <div class="mb-3">
+                            <label asp-for="UnitCode" class="form-label fw-semibold">Unit of Measure</label> @* Translated Label Text *@
+                            <select asp-for="UnitCode" class="form-select form-select-sm" asp-items="ViewBag.UnitCode">
+                                <option value="">-- Select Unit --</option> @* Translated *@
+                            </select>
+                            <span asp-validation-for="UnitCode" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="LastPrice" class="form-label fw-semibold"></label>
+                            <input asp-for="LastPrice" type="number" step="0.01" min="0" class="form-control form-control-sm" /> @* step="0.01" for currency *@
+                            <span asp-validation-for="LastPrice" class="text-danger small"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

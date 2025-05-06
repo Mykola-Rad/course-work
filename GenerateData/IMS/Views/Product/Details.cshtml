@@ -4,129 +4,146 @@
 @using X.PagedList
 
 @{
-	ViewData["Title"] = $"Деталі товару: {Model.Product.ProductName}";
-	Layout = "_Layout";
-	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
-	var activeTab = ViewData["ActiveTab"] as string ?? "info";
+    ViewData["Title"] = $"Product Details: {Model.Product.ProductName}"; // Translated
+    Layout = "_Layout";
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    var activeTab = ViewData["ActiveTab"] as string ?? "info";
 }
 
-<h1>@ViewData["Title"]</h1>
+@* Обгортаємо все в Card *@
+<div class="card shadow-sm mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+            <i class="bi bi-arrow-left me-1"></i>Back to Product List @* Translated & Icon *@
+        </a>
+    </div>
+    <div class="card-body">
+        @if (canManage)
+        {
+            @* --- Навігація по вкладках для Менеджера/Власника --- *@
+            <nav class="mb-3">
+                <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                    <button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Information</button> @* Translated *@
+                    <button class="nav-link @(activeTab == "customers" ? "active" : "")" id="nav-customers-tab" data-bs-toggle="tab" data-bs-target="#nav-customers" type="button" role="tab" aria-controls="nav-customers" aria-selected="@(activeTab == "customers")">Customers</button> @* Translated *@
+                    <button class="nav-link @(activeTab == "suppliers" ? "active" : "")" id="nav-suppliers-tab" data-bs-toggle="tab" data-bs-target="#nav-suppliers" type="button" role="tab" aria-controls="nav-suppliers" aria-selected="@(activeTab == "suppliers")">Suppliers</button> @* Translated *@
+                </div>
+            </nav>
 
-@if (canManage)
-{
-	<nav class="mt-3">
-		<div class="nav nav-tabs" id="nav-tab" role="tablist">
-			<button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Інформація</button>
-			<button class="nav-link @(activeTab == "customers" ? "active" : "")" id="nav-customers-tab" data-bs-toggle="tab" data-bs-target="#nav-customers" type="button" role="tab" aria-controls="nav-customers" aria-selected="@(activeTab == "customers")">Покупці</button>
-			<button class="nav-link @(activeTab == "suppliers" ? "active" : "")" id="nav-suppliers-tab" data-bs-toggle="tab" data-bs-target="#nav-suppliers" type="button" role="tab" aria-controls="nav-suppliers" aria-selected="@(activeTab == "suppliers")">Постачальники</button>
-		</div>
-	</nav>
+            @* --- Контент Вкладок --- *@
+            <div class="tab-content pt-3" id="nav-tabContent">
 
-	<div class="tab-content pt-3" id="nav-tabContent">
-		<div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
-			<h4>Основна інформація</h4>
-			<hr />
-			@await Html.PartialAsync("_ProductInfoPartial", Model.Product)
-			@if (canManage)
-			{
-				<a asp-action="Edit" asp-route-productName="@Model.Product.ProductName" class="btn btn-secondary">Редагувати</a> <text> | </text>
-			}
-		</div>
+                @* --- Панель "Інформація" --- *@
+                <div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
+                    <h4>Main Information</h4> @* Translated *@
+                    <hr />
+                    @* Використовуємо Partial для інформації про товар *@
+                    @await Html.PartialAsync("_ProductInfoPartial", Model.Product)
+                </div>
 
-		<div class="tab-pane fade @(activeTab == "customers" ? "show active" : "")" id="nav-customers" role="tabpanel" aria-labelledby="nav-customers-tab" tabindex="0">
-			<h4>Контрагенти, що купували цей товар</h4>
-			<hr />
-			@if (Model.Customers != null && Model.Customers.Any())
-			{
-				@await Html.PartialAsync("_CounterpartyTablePartial", Model.Customers,
-							new ViewDataDictionary(ViewData) {
-		{ "ShowRolesColumn", false },
-		{ "ShowActionColumn", true },
-		{ "ShowFullActions", false }
-		})
+                @* --- Панель "Покупці" --- *@
+                <div class="tab-pane fade @(activeTab == "customers" ? "show active" : "")" id="nav-customers" role="tabpanel" aria-labelledby="nav-customers-tab" tabindex="0">
+                    <h4>Counterparties Who Purchased This Product</h4> @* Translated *@
+                    <hr />
+                    @if (Model.Customers != null && Model.Customers.Any())
+                    {
+                        @await Html.PartialAsync("_CounterpartyTablePartial", Model.Customers,
+                                 new ViewDataDictionary(ViewData) {
+                { "ShowRolesColumn", false }, // Зазвичай тут ролі не настільки важливі
+                { "ShowActionColumn", true },
+                { "ShowFullActions", false }  // Тільки кнопка "Details" для контрагента
+                })
 
-				<div class="d-flex justify-content-center mt-3">
-					@Html.PagedListPager(Model.Customers, page => Url.Action("Details",
-									new
-									{
-										productName = Model.Product.ProductName,
-										cPage = page,
-										sPage = Model.CurrentSuppliersPage,
-										activeTab = "customers"
-									}),
-									new PagedListRenderOptions
-			{
-				LiElementClasses = new[] { "page-item" },
-				PageClasses = new[] { "page-link" },
-				UlElementClasses = new[] { "pagination", "pagination-sm" },
-				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
-				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
-			})
-				</div>
-			}
-			else
-			{
-				<p class="text-muted">Цей товар ще ніхто не купував.</p>
-			}
-		</div>
+                        <div class="d-flex justify-content-center mt-3">
+                            @Html.PagedListPager(Model.Customers, page => Url.Action("Details",
+                                     new
+                                     {
+                                         productName = Model.Product.ProductName,
+                                         cPage = page,
+                                         sPage = Model.CurrentSuppliersPage,
+                                         activeTab = "customers"
+                                     }),
+                                     new PagedListRenderOptions
+                    {
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" },
+                        UlElementClasses = new[] { "pagination", "pagination-sm" },
+                        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+                    })
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mt-3">This product has not been purchased by any counterparty yet.</p>
+                    } @* Translated *@
+                </div>
 
-		<div class="tab-pane fade @(activeTab == "suppliers" ? "show active" : "")" id="nav-suppliers" role="tabpanel" aria-labelledby="nav-suppliers-tab" tabindex="0">
-			<h4>Контрагенти, що постачали цей товар</h4>
-			<hr />
-			@if (Model.Suppliers != null && Model.Suppliers.Any())
-			{
-				@await Html.PartialAsync("_CounterpartyTablePartial", Model.Customers,
-							new ViewDataDictionary(ViewData) {
-		{ "ShowRolesColumn", false },
-		{ "ShowActionColumn", true },
-		{ "ShowFullActions", false }
-		})
+                @* --- Панель "Постачальники" --- *@
+                <div class="tab-pane fade @(activeTab == "suppliers" ? "show active" : "")" id="nav-suppliers" role="tabpanel" aria-labelledby="nav-suppliers-tab" tabindex="0">
+                    <h4>Counterparties Who Supplied This Product</h4> @* Translated *@
+                    <hr />
+                    @if (Model.Suppliers != null && Model.Suppliers.Any())
+                    {
+                        @* !!! ВИПРАВЛЕНО: Використовуємо Model.Suppliers !!! *@
+                        @await Html.PartialAsync("_CounterpartyTablePartial", Model.Suppliers,
+                                 new ViewDataDictionary(ViewData) {
+                { "ShowRolesColumn", false },
+                { "ShowActionColumn", true },
+                { "ShowFullActions", false }
+                })
 
-				<div class="d-flex justify-content-center mt-3">
-					@Html.PagedListPager(Model.Suppliers, page => Url.Action("Details",
-									new
-									{
-										productName = Model.Product.ProductName,
-										cPage = Model.CurrentCustomersPage,
-										sPage = page,
-										activeTab = "suppliers"
-									}),
-									new PagedListRenderOptions
-			{
-				LiElementClasses = new[] { "page-item" },
-				PageClasses = new[] { "page-link" },
-				UlElementClasses = new[] { "pagination", "pagination-sm" },
-				DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
-				DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
-				ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
-			})
-				</div>
-			}
-			else
-			{
-				<p class="text-muted">Немає даних про постачальників цього товару.</p>
-			}
-		</div>
+                        <div class="d-flex justify-content-center mt-3">
+                            @Html.PagedListPager(Model.Suppliers, page => Url.Action("Details",
+                                     new
+                                     {
+                                         productName = Model.Product.ProductName,
+                                         cPage = Model.CurrentCustomersPage,
+                                         sPage = page,
+                                         activeTab = "suppliers"
+                                     }),
+                                     new PagedListRenderOptions
+                    {
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" },
+                        UlElementClasses = new[] { "pagination", "pagination-sm" },
+                        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+                    })
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mt-3">No data available for suppliers of this product.</p>
+                    } @* Translated *@
+                </div>
 
-	</div>
+            </div> @* Кінець tab-content *@
+        }
+        else @* Якщо користувач НЕ canManage (наприклад, комірник) *@
+        {
+            <h4>Main Information</h4> @* Translated *@
+            <hr />
+            @await Html.PartialAsync("_ProductInfoPartial", Model.Product)
+            @* Для комірника не показуємо кнопку Редагувати товар *@
+        }
 
-}
-else
-{
-	<h4>Основна інформація</h4>
-	<hr />
-	@await Html.PartialAsync("_ProductInfoPartial", Model.Product)
-}
+        @* Кнопку "Назад" перенесено в заголовок картки *@
+        @* <div class="mt-4">
+            <a asp-action="Index" class="btn btn-outline-secondary">Назад до списку товарів</a>
+        </div> *@
 
-<div class="mt-4">
-	<a asp-action="Index" class="btn btn-outline-secondary">Назад до списку товарів</a>
-</div>
+    </div> @* кінець card-body *@
+</div> @* кінець card *@
+
 
 @section Scripts {
-	<partial name="_ValidationScriptsPartial" />
+    <partial name="_ValidationScriptsPartial" />
+@* Скрипти для вкладок не потрібні, сервер керує активною вкладкою *@
 }

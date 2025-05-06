@@ -8,19 +8,18 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Npgsql;
 using X.PagedList.EF;
 using X.PagedList;
-using System.Security.Claims;
 
 namespace IMS.Controllers
 {
     [Authorize(Policy = "RequireStorageKeeperRole")]
-    [Route("Invoices")] 
+    [Route("Invoices")]
     public class InvoiceController : Controller
     {
-        private readonly AppDbContext _context; 
+        private readonly AppDbContext _context;
         private readonly ILogger<InvoiceController> _logger;
         private const int _pageSize = 10;
 
-        public InvoiceController(AppDbContext context, ILogger<InvoiceController> logger) 
+        public InvoiceController(AppDbContext context, ILogger<InvoiceController> logger)
         {
             _context = context;
             _logger = logger;
@@ -29,14 +28,14 @@ namespace IMS.Controllers
         // GET: Invoices
         [HttpGet("")]
         public async Task<IActionResult> Index(
-            string? invoiceType = null,         
+            string? invoiceType = null,
             InvoiceStatus? filterStatus = null,
             DateOnly? filterDateFrom = null,
             DateOnly? filterDateTo = null,
-            string? filterCounterpartyName = null, 
-            string? filterSenderStorage = null,    
-            string? filterReceiverStorage = null,  
-            int page = 1)                       
+            string? filterCounterpartyName = null,
+            string? filterSenderStorage = null,
+            string? filterReceiverStorage = null,
+            int page = 1)
         {
             ViewData["Title"] = "Накладні";
 
@@ -53,42 +52,12 @@ namespace IMS.Controllers
             try
             {
                 var invoicesQuery = _context.Invoices
+                    .Include(i => i.ListEntries)
                     .Include(i => i.CounterpartyNameNavigation)
                     .Include(i => i.SenderStorageNameNavigation)
                     .Include(i => i.ReceiverStorageNameNavigation)
                     .AsNoTracking()
                     .AsQueryable();
-
-                if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole(UserRole.storage_keeper.ToString()))
-                {
-                    string? keeperPhoneNumber = null;
-                    var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier); // Отримуємо ID поточного користувача
-
-                    if (!string.IsNullOrEmpty(currentUserIdString) && int.TryParse(currentUserIdString, out int userId))
-                    {
-                        // Завантажуємо користувача разом з його пов'язаним StorageKeeper
-                        var currentUser = await _context.Users
-                                                   .AsNoTracking()
-                                                   .Include(u => u.StorageKeeper) // ВАЖЛИВО: включаємо StorageKeeper
-                                                   .FirstOrDefaultAsync(u => u.UserId == userId);
-
-                        keeperPhoneNumber = currentUser?.StorageKeeper?.PhoneNumber; // Безпечно отримуємо номер телефону
-                    }
-
-                    if (!string.IsNullOrEmpty(keeperPhoneNumber))
-                    {
-                        invoicesQuery = invoicesQuery.Where(i =>
-                            i.SenderKeeperPhone == keeperPhoneNumber ||
-                            i.ReceiverKeeperPhone == keeperPhoneNumber);
-                    }
-                    else
-                    {
-                        _logger.LogWarning("Користувач {UserName} (ID: {UserIdString}) має роль 'storage_keeper', але не вдалося знайти відповідного комірника або його номер телефону через навігаційну властивість.",
-                                            User.Identity?.Name, currentUserIdString);
-                        invoicesQuery = invoicesQuery.Where(i => false); // Не показувати жодних накладних
-                    }
-                }
-
 
                 if (!string.IsNullOrEmpty(invoiceType) && Enum.TryParse<InvoiceType>(invoiceType, true, out var typeToFilter))
                 {
@@ -127,13 +96,13 @@ namespace IMS.Controllers
 
                 var pagedInvoices = await sortedQuery.ToPagedListAsync(pageNumber, _pageSize);
 
-                return View(pagedInvoices); 
+                return View(pagedInvoices);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Помилка при отриманні списку накладних з фільтрами");
                 TempData["ErrorMessage"] = "Не вдалося завантажити список накладних.";
-                PopulateStatusFilterList(filterStatus); 
+                PopulateStatusFilterList(filterStatus);
                 var emptyPagedList = new PagedList<Invoice>(Enumerable.Empty<Invoice>(), pageNumber, _pageSize);
                 return View(emptyPagedList);
             }
@@ -161,7 +130,7 @@ namespace IMS.Controllers
             var lowerTerm = term.ToLower();
             try
             {
-                var matches = await _context.Counterparties 
+                var matches = await _context.Counterparties
                     .Where(c => c.Name.ToLower().Contains(lowerTerm))
                     .OrderBy(c => c.Name)
                     .Select(c => c.Name)
@@ -176,32 +145,88 @@ namespace IMS.Controllers
             }
         }
 
-        [HttpGet("AutocompleteStorageName")]
-        public async Task<IActionResult> AutocompleteStorageName(string term)
+        [HttpGet("GetProductsForStorageJson")]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetProductsForStorageJson(string storageName, string term)
         {
-            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Json(Enumerable.Empty<string>());
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2)
+            {
+                return Ok(Enumerable.Empty<string>());
+            }
             var lowerTerm = term.ToLower();
-            try
+
+            IQueryable<string> productNamesQuery;
+
+            if (string.IsNullOrWhiteSpace(storageName))
             {
-                var matches = await _context.Storages
-                    .Where(s => s.Name.ToLower().Contains(lowerTerm))
-                    .OrderBy(s => s.Name)
-                    .Select(s => s.Name)
-                    .Take(10)
-                    .ToListAsync();
-                return Json(matches);
+                // Якщо storageName не вказано, шукаємо серед УСІХ продуктів
+                // Припускаємо, що у вас є DbSet<Product> з полем Name
+                // Або інший спосіб отримати всі унікальні назви продуктів
+                Console.WriteLine($"Searching ALL products for term: {lowerTerm}"); // Додано лог для відладки
+                productNamesQuery = _context.Products // Або _context.ProductCatalogs, або інша ваша таблиця з усіма продуктами
+                                            .Select(p => p.ProductName) // Припускаємо, що поле називається Name
+                                            .Distinct(); // Щоб уникнути дублікатів, якщо у вас можуть бути однакові назви
             }
-            catch (Exception ex)
+            else
             {
-                _logger.LogError(ex, "Error during storage name autocomplete for term {Term}", term);
-                return Json(Enumerable.Empty<string>());
+                // Якщо storageName вказано, шукаємо товари, які Є на цьому складі і в наявності
+                Console.WriteLine($"Searching products in storage '{storageName}' for term: {lowerTerm}"); // Додано лог
+                productNamesQuery = _context.StorageProducts
+                                            .Where(sp => sp.StorageName == storageName && sp.Count > 0)
+                                            .Select(sp => sp.ProductName)
+                                            .Distinct(); // Додано Distinct на випадок, якщо продукт може бути на складі кількома записами
             }
+
+            // Застосовуємо пошук за терміном (term) до вибраного джерела продуктів
+            var matches = await productNamesQuery
+                                    .Where(pn => pn.ToLower().Contains(lowerTerm))
+                                    .OrderBy(pn => pn)
+                                    .Take(10) // Залишаємо обмеження на кількість результатів
+                                    .ToListAsync();
+
+            Console.WriteLine($"Found {matches.Count} matches."); // Додано лог
+            return Ok(matches);
         }
 
 
+        // Повертає деталі товару + залишок на складі
+        [HttpGet("GetProductDetailsWithStockJson")]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetProductDetailsWithStockJson(string productName, string storageName)
+        {
+            if (string.IsNullOrWhiteSpace(productName)) return Json(null);
+
+            try
+            {
+                var product = await _context.Products.AsNoTracking()
+                    .Include(p => p.UnitCodeNavigation)
+                    .FirstOrDefaultAsync(p => p.ProductName == productName);
+
+                if (product == null) return Json(null);
+
+                decimal availableStock = 0;
+                // Залишок беремо тільки якщо вказано склад (для release/transfer)
+                if (!string.IsNullOrWhiteSpace(storageName))
+                {
+                    availableStock = await _context.StorageProducts.AsNoTracking()
+                                            .Where(sp => sp.ProductName == productName && sp.StorageName == storageName)
+                                            .Select(sp => sp.Count)
+                                            .FirstOrDefaultAsync(); // Поверне 0, якщо запису немає
+                }
+
+                return Json(new
+                {
+                    unitName = product.UnitCodeNavigation?.UnitName ?? "N/A",
+                    lastPrice = product.LastPrice,
+                    availableStock = availableStock // Додаємо залишок
+                });
+            }
+            catch (Exception ex) { /* Log error */ return Json(null); }
+        }
+
         // GET: Invoices/Details/5
-        [HttpGet("Details/{id:int}")] 
-        [Authorize(Policy = "RequireStorageKeeperRole")] 
+        [HttpGet("Details/{id:int}")]
+        [Authorize(Policy = "RequireStorageKeeperRole")]
         public async Task<IActionResult> Details(int id)
         {
             ViewData["Title"] = $"Накладна №{id}";
@@ -241,10 +266,10 @@ namespace IMS.Controllers
                 }
 
                 invoice.ListEntries = await _context.ListEntries
-                    .Where(le => le.InvoiceId == id) 
+                    .Where(le => le.InvoiceId == id)
                     .Include(le => le.ProductNameNavigation)
                         .ThenInclude(p => p.UnitCodeNavigation)
-                    .OrderBy(le => le.ProductNameNavigation.ProductName) 
+                    .OrderBy(le => le.ProductNameNavigation.ProductName)
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -265,41 +290,97 @@ namespace IMS.Controllers
             }
         }
 
-        // GET: Invoices/Create
-        // GET: Invoices/Create?counterpartyName=...&senderStorageName=...&receiverStorageName=...
         [HttpGet("Create")]
         [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> Create(string? counterpartyName = null, string? senderStorageName = null, string? receiverStorageName = null)
         {
-            ViewData["Title"] = "Створення нової накладної";
+            ViewData["Title"] = "Create New Invoice";
 
+            // Завантажуємо ТІЛЬКИ те, що не залежить від вибору користувача на формі
             var viewModel = new InvoiceViewModel
             {
-                Date = DateOnly.FromDateTime(DateTime.Today), 
-                Status = InvoiceStatus.draft, 
-                                              
+                Date = DateOnly.FromDateTime(DateTime.Today),
+                Status = InvoiceStatus.draft,
+                AvailableTypes = new SelectList(Enum.GetValues(typeof(InvoiceType)).Cast<InvoiceType>()
+                                                .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() }).ToList(), "Value", "Text"),
+                // Списки контрагентів, складів, комірників, товарів тепер будуть завантажуватись динамічно
+                // Залишаємо початкові значення, якщо вони передані (напр. при переході зі сторінки складу)
                 CounterpartyName = counterpartyName,
                 SenderStorageName = senderStorageName,
                 ReceiverStorageName = receiverStorageName
             };
 
-            await PopulateInvoiceDropdowns(viewModel);
-
-            if (!string.IsNullOrEmpty(senderStorageName) && !string.IsNullOrEmpty(receiverStorageName))
-            {
-                viewModel.Type = InvoiceType.transfer;
-            }
-            else if (!string.IsNullOrEmpty(senderStorageName))
-            {
-                viewModel.Type = InvoiceType.release;
-            }
-            else if (!string.IsNullOrEmpty(receiverStorageName))
-            {
-                viewModel.Type = InvoiceType.supply;
-            }
-
+            // Встановлюємо початковий тип, якщо можливо
+            if (!string.IsNullOrEmpty(senderStorageName) && !string.IsNullOrEmpty(receiverStorageName)) { viewModel.Type = InvoiceType.transfer; }
+            else if (!string.IsNullOrEmpty(senderStorageName)) { viewModel.Type = InvoiceType.release; }
+            else if (!string.IsNullOrEmpty(receiverStorageName)) { viewModel.Type = InvoiceType.supply; }
 
             return View(viewModel);
+        }
+
+        [HttpGet("GetFilteredCounterparties")]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetFilteredCounterparties(InvoiceType type, string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Ok(Enumerable.Empty<string>());
+
+            var lowerTerm = term.ToLower();
+            IQueryable<Counterparty> query = _context.Counterparties.AsNoTracking();
+
+            if (type == InvoiceType.supply)
+            {
+                query = query.Where(c => c.Roles.Any(r => r.Name.ToLower() == "supplier"));
+            }
+            else if (type == InvoiceType.release)
+            {
+                query = query.Where(c => c.Roles.Any(r => r.Name.ToLower() == "customer"));
+            }
+            else
+            {
+                return Ok(Enumerable.Empty<string>());
+            }
+
+            var matches = await query.Where(c => c.Name.ToLower().Contains(lowerTerm))
+                                     .OrderBy(c => c.Name)
+                                     .Select(c => c.Name)
+                                     .Take(10)
+                                     .ToListAsync();
+            return Ok(matches);
+        }
+
+        [HttpGet("AutocompleteStorageName")]
+        [Produces("application/json")]
+        public async Task<IActionResult> AutocompleteStorageName(string term)
+        {
+            if (string.IsNullOrWhiteSpace(term) || term.Length < 2) return Ok(Enumerable.Empty<string>());
+            var lowerTerm = term.ToLower();
+            var matches = await _context.Storages.AsNoTracking()
+                                .Where(s => s.Name.ToLower().Contains(lowerTerm))
+                                .OrderBy(s => s.Name)
+                                .Select(s => s.Name)
+                                .Take(10)
+                                .ToListAsync();
+            return Ok(matches);
+        }
+
+        [HttpGet("GetKeepersForStorageJson")]
+        [Produces("application/json")]
+        public async Task<IActionResult> GetKeepersForStorageJson(string storageName)
+        {
+            if (string.IsNullOrWhiteSpace(storageName)) return Ok(new List<SelectListItem>());
+
+            var keepers = await _context.StorageKeepers.AsNoTracking()
+                                .Where(k => k.StorageName == storageName)
+                                .OrderBy(k => k.LastName).ThenBy(k => k.FirstName)
+                                .Select(k => new SelectListItem
+                                {
+                                    Value = k.PhoneNumber,
+                                    Text = $"{k.LastName} {k.FirstName} ({k.PhoneNumber})"
+                                })
+                                .ToListAsync();
+            // Додаємо опцію "Не вибрано" на початок
+            keepers.Insert(0, new SelectListItem("-- Not Selected --", ""));
+            return Ok(keepers);
         }
 
         // POST: Invoices/Create
@@ -325,7 +406,7 @@ namespace IMS.Controllers
             ModelState.Remove(nameof(model.AvailableKeepers));
             ModelState.Remove(nameof(model.AvailableProducts));
 
-            if (model.ListEntries == null || !model.ListEntries.Any(le => !le.IsMarkedForDeletion)) 
+            if (model.ListEntries == null || !model.ListEntries.Any(le => !le.IsMarkedForDeletion))
             {
                 ModelState.AddModelError("ListEntries", "Накладна має містити хоча б одну товарну позицію.");
                 ModelState.AddModelError("", "Додайте хоча б один товар до накладної.");
@@ -380,7 +461,7 @@ namespace IMS.Controllers
                 try
                 {
                     _context.Invoices.Add(invoice);
-                    await _context.SaveChangesAsync(); 
+                    await _context.SaveChangesAsync();
 
                     foreach (var entryVM in model.ListEntries.Where(le => !le.IsMarkedForDeletion))
                     {
@@ -389,7 +470,7 @@ namespace IMS.Controllers
                             InvoiceId = invoice.InvoiceId,
                             ProductName = entryVM.ProductName,
                             Count = entryVM.Count,
-                            Price = (model.Type == InvoiceType.supply || model.Type == InvoiceType.release) ? entryVM.Price : 0 
+                            Price = (model.Type == InvoiceType.supply || model.Type == InvoiceType.release) ? entryVM.Price : 0
                         };
                         _context.ListEntries.Add(listEntry);
                     }
@@ -399,7 +480,7 @@ namespace IMS.Controllers
                     await transaction.CommitAsync();
 
                     TempData["SuccessMessage"] = $"Накладну №{invoice.InvoiceId} успішно створено зі статусом '{invoice.Status}'.";
-                    return RedirectToAction(nameof(Details), new { id = invoice.InvoiceId }); 
+                    return RedirectToAction(nameof(Details), new { id = invoice.InvoiceId });
 
                 }
                 catch (Exception ex)
@@ -411,14 +492,15 @@ namespace IMS.Controllers
             }
 
             _logger.LogWarning("Створення накладної не вдалося через помилки валідації або збереження.");
-            await PopulateInvoiceDropdowns(model);
+            model.AvailableTypes = new SelectList(Enum.GetValues(typeof(InvoiceType)).Cast<InvoiceType>()
+                                        .Select(e => new SelectListItem { Value = e.ToString(), Text = e.ToString() }).ToList(), "Value", "Text", model.Type);
             ViewData["Title"] = "Створення нової накладної (Помилка)";
-            return View(model); 
+            return View(model);
         }
 
         // GET: Invoices/Edit/5
         [HttpGet("Edit/{id:int}")]
-        [Authorize(Policy = "RequireManagerRole")] 
+        [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> Edit(int id)
         {
             ViewData["Title"] = $"Редагувати Накладну №{id}";
@@ -427,7 +509,7 @@ namespace IMS.Controllers
             {
                 var invoice = await _context.Invoices
                     .Include(i => i.ListEntries)
-                        .ThenInclude(le => le.ProductNameNavigation) 
+                        .ThenInclude(le => le.ProductNameNavigation)
                             .ThenInclude(p => p.UnitCodeNavigation)
                     .FirstOrDefaultAsync(i => i.InvoiceId == id);
 
@@ -456,7 +538,7 @@ namespace IMS.Controllers
                     ReceiverKeeperPhone = invoice.ReceiverKeeperPhone,
                     ListEntries = invoice.ListEntries.Select(le => new InvoiceListEntryViewModel
                     {
-                        ProductName = le.ProductName, 
+                        ProductName = le.ProductName,
                         UnitName = le.ProductNameNavigation?.UnitCodeNavigation?.UnitName,
                         Count = le.Count,
                         Price = le.Price,
@@ -466,7 +548,7 @@ namespace IMS.Controllers
 
                 await PopulateInvoiceDropdowns(viewModel);
 
-                return View(viewModel); 
+                return View(viewModel);
             }
             catch (Exception ex)
             {
@@ -480,7 +562,7 @@ namespace IMS.Controllers
         [HttpPost("Edit/{id:int}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "RequireManagerRole")]
-        public async Task<IActionResult> Edit(int id, InvoiceViewModel model) 
+        public async Task<IActionResult> Edit(int id, InvoiceViewModel model)
         {
             if (id != model.InvoiceId)
             {
@@ -506,7 +588,7 @@ namespace IMS.Controllers
             ModelState.Remove(nameof(model.AvailableStorages));
             ModelState.Remove(nameof(model.AvailableKeepers));
             ModelState.Remove(nameof(model.AvailableProducts));
-            ModelState.Remove(nameof(model.ListEntries)); 
+            ModelState.Remove(nameof(model.ListEntries));
 
             var validListEntriesFromForm = model.ListEntries?.Where(le => !le.IsMarkedForDeletion).ToList() ?? new List<InvoiceListEntryViewModel>();
 
@@ -553,7 +635,7 @@ namespace IMS.Controllers
             if (ModelState.IsValid)
             {
                 var invoiceInDb = await _context.Invoices
-                                                .Include(i => i.ListEntries) 
+                                                .Include(i => i.ListEntries)
                                                 .FirstOrDefaultAsync(i => i.InvoiceId == id);
 
                 if (invoiceInDb == null) { return NotFound($"Накладну з ID {id} не знайдено."); }
@@ -579,7 +661,7 @@ namespace IMS.Controllers
                     var productNamesFromFormSet = validListEntriesFromForm
                                                 .Select(vm => vm.ProductName)
                                                 .ToHashSet();
-                    var existingEntriesFromDb = invoiceInDb.ListEntries.ToList(); 
+                    var existingEntriesFromDb = invoiceInDb.ListEntries.ToList();
 
                     var entriesToRemove = existingEntriesFromDb
                                             .Where(dbEntry => !productNamesFromFormSet.Contains(dbEntry.ProductName))
@@ -595,22 +677,22 @@ namespace IMS.Controllers
                         var existingEntry = existingEntriesFromDb
                                             .FirstOrDefault(dbEntry => dbEntry.ProductName == entryVM.ProductName);
 
-                        if (existingEntry != null) 
+                        if (existingEntry != null)
                         {
                             if (existingEntry.Count != entryVM.Count || existingEntry.Price != (needsPrice ? entryVM.Price : 0))
                             {
                                 existingEntry.Count = entryVM.Count;
                                 existingEntry.Price = needsPrice ? entryVM.Price : 0;
-                                _context.Entry(existingEntry).State = EntityState.Modified; 
+                                _context.Entry(existingEntry).State = EntityState.Modified;
                                 _logger.LogInformation("Invoice {InvoiceId}: Updating ListEntry for product {Product}. New Count: {Count}, New Price: {Price}", id, existingEntry.ProductName, existingEntry.Count, existingEntry.Price);
                             }
                         }
-                        else 
+                        else
                         {
                             var newEntry = new ListEntry
                             {
                                 InvoiceId = invoiceInDb.InvoiceId,
-                                ProductName = entryVM.ProductName, 
+                                ProductName = entryVM.ProductName,
                                 Count = entryVM.Count,
                                 Price = needsPrice ? entryVM.Price : 0
                             };
@@ -645,7 +727,7 @@ namespace IMS.Controllers
 
         // GET: Invoices/Delete/5
         [HttpGet("Delete/{id:int}")]
-        [Authorize(Policy = "RequireManagerRole")] 
+        [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> Delete(int id)
         {
             ViewData["Title"] = $"Видалення Накладної №{id}";
@@ -664,7 +746,7 @@ namespace IMS.Controllers
                 if (invoice.Status != InvoiceStatus.draft)
                 {
                     TempData["ErrorMessage"] = $"Неможливо видалити накладну №{id}, оскільки її статус '{invoice.Status}', а не '{InvoiceStatus.draft}'. Можливо, її варто Скасувати?";
-                    return RedirectToAction(nameof(Details), new { id = id }); 
+                    return RedirectToAction(nameof(Details), new { id = id });
                 }
 
                 return View(invoice);
@@ -678,15 +760,15 @@ namespace IMS.Controllers
         }
 
         // POST: Invoices/Delete/5
-        [HttpPost("Delete/{id:int}"), ActionName("Delete")] 
+        [HttpPost("Delete/{id:int}"), ActionName("Delete")]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireManagerRole")] 
+        [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             try
             {
                 var invoiceToDelete = await _context.Invoices
-                                                    .Include(i => i.ListEntries) 
+                                                    .Include(i => i.ListEntries)
                                                     .FirstOrDefaultAsync(i => i.InvoiceId == id);
 
                 if (invoiceToDelete == null)
@@ -713,7 +795,7 @@ namespace IMS.Controllers
 
                     await _context.SaveChangesAsync();
 
-                    await transaction.CommitAsync(); 
+                    await transaction.CommitAsync();
 
                     TempData["SuccessMessage"] = $"Чернетку накладної №{id} успішно видалено.";
                     _logger.LogInformation("Invoice {InvoiceId} (Draft) deleted by user {User}", id, User.Identity?.Name ?? "Unknown");
@@ -735,9 +817,9 @@ namespace IMS.Controllers
         }
 
         // POST: Invoices/Confirm/5
-        [HttpPost("Confirm/{id:int}")] 
+        [HttpPost("Confirm/{id:int}")]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireManagerRole")] 
+        [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> ConfirmInvoice(int id)
         {
             var invoice = await _context.Invoices.FindAsync(id);
@@ -757,8 +839,8 @@ namespace IMS.Controllers
             try
             {
                 invoice.Status = InvoiceStatus.processing;
-                _context.Invoices.Update(invoice); 
-                await _context.SaveChangesAsync(); 
+                _context.Invoices.Update(invoice);
+                await _context.SaveChangesAsync();
 
                 _logger.LogInformation("Invoice {InvoiceId} confirmed by user {User}", id, User.Identity?.Name ?? "Unknown");
                 TempData["SuccessMessage"] = $"Накладну №{id} успішно підтверджено. Статус: {invoice.Status}.";
@@ -769,12 +851,12 @@ namespace IMS.Controllers
                 TempData["ErrorMessage"] = "Не вдалося підтвердити накладну.";
             }
 
-            return RedirectToAction(nameof(Details), new { id = id }); 
+            return RedirectToAction(nameof(Details), new { id = id });
         }
 
 
         // POST: Invoices/Cancel/5
-        [HttpPost("Cancel/{id:int}")] 
+        [HttpPost("Cancel/{id:int}")]
         [ValidateAntiForgeryToken]
         [Authorize(Policy = "RequireManagerRole")]
         public async Task<IActionResult> CancelInvoice(int id)
@@ -799,7 +881,7 @@ namespace IMS.Controllers
                 _context.Invoices.Update(invoice);
                 await _context.SaveChangesAsync();
 
-                _logger.LogWarning("Invoice {InvoiceId} CANCELLED by user {User}. Previous status was {PreviousStatus}", id, User.Identity?.Name ?? "Unknown", invoice.Status); 
+                _logger.LogWarning("Invoice {InvoiceId} CANCELLED by user {User}. Previous status was {PreviousStatus}", id, User.Identity?.Name ?? "Unknown", invoice.Status);
                 TempData["SuccessMessage"] = $"Накладну №{id} успішно скасовано. Статус: {invoice.Status}.";
             }
             catch (Exception ex)
@@ -817,7 +899,7 @@ namespace IMS.Controllers
         [Authorize(Policy = "RequireStorageKeeperRole")]
         public async Task<IActionResult> CompleteInvoice(int id)
         {
-            var invoice = await _context.Invoices.FindAsync(id); 
+            var invoice = await _context.Invoices.FindAsync(id);
 
             if (invoice == null)
             {
@@ -833,12 +915,12 @@ namespace IMS.Controllers
                 _logger.LogInformation("Invoice {InvoiceId} completed via SP by user {User}", id, User.Identity?.Name ?? "System");
 
             }
-            catch (PostgresException pgEx) 
+            catch (PostgresException pgEx)
             {
                 _logger.LogError(pgEx, "PostgreSQL error completing invoice {InvoiceId} via SP. SQLState: {SqlState}. Message: {ErrorMessage}", id, pgEx.SqlState, pgEx.MessageText);
                 TempData["ErrorMessage"] = $"Помилка завершення накладної №{id}: {pgEx.MessageText}";
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
                 _logger.LogError(ex, "General error completing invoice {InvoiceId} via SP", id);
                 TempData["ErrorMessage"] = "Не вдалося завершити накладну через системну помилку.";
@@ -851,14 +933,14 @@ namespace IMS.Controllers
         {
             viewModel.AvailableTypes = new SelectList(Enum.GetValues(typeof(InvoiceType))
                                                        .Cast<InvoiceType>()
-                                                       .Select(e => new { Value = e.ToString(), Text = e.ToString() }), 
+                                                       .Select(e => new { Value = e.ToString(), Text = e.ToString() }),
                                                    "Value", "Text", viewModel.Type);
 
             var counterparties = await _context.Counterparties.OrderBy(c => c.Name).Select(c => new { c.Name }).ToListAsync();
             viewModel.AvailableCounterparties = new SelectList(counterparties, "Name", "Name", viewModel.CounterpartyName);
 
             var storages = await _context.Storages.OrderBy(s => s.Name).Select(s => new { s.Name }).ToListAsync();
-            viewModel.AvailableStorages = new SelectList(storages, "Name", "Name"); 
+            viewModel.AvailableStorages = new SelectList(storages, "Name", "Name");
 
             var keepers = await _context.StorageKeepers
                                         .OrderBy(k => k.LastName).ThenBy(k => k.FirstName)
