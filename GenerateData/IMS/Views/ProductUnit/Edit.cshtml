@@ -1,0 +1,63 @@
+﻿@model IMS.Models.ProductUnit
+@using IMS.Models
+
+@{
+    // Визначаємо оригінальний код для заголовку та маршруту
+    var originalUnitCode = ViewBag.OriginalUnitCode as string ?? Model.UnitCode;
+    ViewData["Title"] = $"Edit Unit: {originalUnitCode}"; // Translated
+    Layout = "_Layout";
+}
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            @* Налаштуйте ширину за потребою *@
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    @* <hr /> -- Прибрано, так як заголовок у card-header *@
+                    <form asp-action="Edit" asp-route-originalUnitCode="@originalUnitCode" method="post">
+                        @* Змінив asp-route-unitCode на asp-route-originalUnitCode для відповідності з контролером (якщо так у вас) *@
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        @* Можливо, варто додати приховане поле для originalUnitCode, якщо воно не передається через Model.UnitCode або потрібне окремо *@
+                        @* <input type="hidden" name="originalUnitCode" value="@originalUnitCode" /> *@
+
+
+                        <div class="mb-3">
+                            <label asp-for="UnitCode" class="form-label fw-semibold"></label>
+                            <input asp-for="UnitCode" class="form-control form-control-sm" />
+                            <span asp-validation-for="UnitCode" class="text-danger small"></span>
+                            <div class="form-text text-warning small"><i class="bi bi-exclamation-triangle me-1"></i>Warning: You are editing the primary key (Unit Code). Ensure the new code is unique.</div> @* Translated & Icon *@
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="UnitName" class="form-label fw-semibold"></label>
+                            <input asp-for="UnitName" class="form-control form-control-sm" />
+                            <span asp-validation-for="UnitName" class="text-danger small"></span>
+                        </div>
+
+                        <hr class="my-4"> @* Розділювач перед кнопками *@
+
+                        <div class="d-flex justify-content-end">
+                            @* Вирівнювання кнопок праворуч *@
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

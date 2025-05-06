@@ -1,0 +1,205 @@
+﻿@model IMS.ViewModels.CounterpartyDetailsViewModel
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+	ViewData["Title"] = $"Details: {Model.Counterparty.Name}";
+	Layout = "_Layout";
+	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+	bool isSupplier = Model.IsSupplier;
+	bool isCustomer = Model.IsCustomer;
+	var activeTab = ViewData["ActiveTab"] as string ?? "info";
+}
+
+<div class="card shadow-sm mt-3">
+	<div class="card-header d-flex justify-content-between align-items-center">
+		<h1 class="mb-0 h4">Counterparty: @Model.Counterparty.Name</h1>
+		<a asp-controller="Counterparty" asp-action="Index" class="btn btn-outline-secondary btn-sm">
+			<i class="bi bi-arrow-left me-1"></i>Back to List
+		</a>
+	</div>
+	<div class="card-body">
+
+		<nav class="mb-3">
+			<div class="nav nav-tabs" id="nav-tab" role="tablist">
+				<button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Information</button>
+				<button class="nav-link @(activeTab == "invoices" ? "active" : "")" id="nav-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-invoices" type="button" role="tab" aria-controls="nav-invoices" aria-selected="@(activeTab == "invoices")">Invoices</button>
+				@if (isSupplier)
+				{
+					<button class="nav-link @(activeTab == "supplied" ? "active" : "")" id="nav-supplied-tab" data-bs-toggle="tab" data-bs-target="#nav-supplied" type="button" role="tab" aria-controls="nav-supplied" aria-selected="@(activeTab == "supplied")">Supplied Products</button>
+				}
+				@if (isCustomer)
+				{
+					<button class="nav-link @(activeTab == "purchased" ? "active" : "")" id="nav-purchased-tab" data-bs-toggle="tab" data-bs-target="#nav-purchased" type="button" role="tab" aria-controls="nav-purchased" aria-selected="@(activeTab == "purchased")">Purchased Products</button>
+				}
+			</div>
+		</nav>
+
+		<div class="tab-content pt-3" id="nav-tabContent">
+
+			<div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
+				<h4>Details</h4>
+				<hr />
+				<dl class="row">
+					<dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Counterparty.Name)</dt>
+					<dd class="col-sm-9">@Html.DisplayFor(model => model.Counterparty.Name)</dd>
+
+					<dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Counterparty.PhoneNumber)</dt>
+					<dd class="col-sm-9">@Html.DisplayFor(model => model.Counterparty.PhoneNumber)</dd>
+
+					<dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Counterparty.Email)</dt>
+					<dd class="col-sm-9">@Html.DisplayFor(model => model.Counterparty.Email)</dd>
+
+					<dt class="col-sm-3 fw-semibold">Assigned Roles</dt>
+					<dd class="col-sm-9">
+						@if (Model.Counterparty.Roles != null && Model.Counterparty.Roles.Any())
+						{
+							@foreach (var role in Model.Counterparty.Roles.OrderBy(r => r.Name))
+							{
+								string badgeClass = "text-bg-secondary";
+								switch (role.Name?.ToLowerInvariant())
+								{
+									case "supplier": badgeClass = "text-bg-primary"; break;
+									case "customer":
+										badgeClass = "text-bg-success"; break;
+								}
+								<span class="badge rounded-pill @badgeClass me-1" style="font-size: 0.8em;">@role.Name</span>
+							}
+						}
+						else
+						{
+							<span class="text-muted fst-italic">-- None --</span>
+						}
+					</dd>
+				</dl>
+			</div>
+
+			<div class="tab-pane fade @(activeTab == "invoices" ? "show active" : "")" id="nav-invoices" role="tabpanel" aria-labelledby="nav-invoices-tab" tabindex="0">
+				<div class="d-flex justify-content-between align-items-center mb-2">
+					<h4>Invoice History</h4>
+					<a asp-controller="Invoice" asp-action="Create" asp-route-counterpartyName="@Model.Counterparty.Name" class="btn btn-primary btn-sm">
+						<i class="bi bi-plus-circle me-1"></i>Create Invoice
+					</a>
+				</div>
+				<hr />
+				@if (Model.RelatedInvoices?.Any() ?? false)
+				{
+					@await Html.PartialAsync("_InvoiceTablePartial", Model.RelatedInvoices)
+					<div class="d-flex justify-content-center mt-3">
+						@Html.PagedListPager(Model.RelatedInvoices, page => Url.Action("Details",
+												new
+												{
+													name = Model.Counterparty.Name,
+													iPage = page,
+													spPage = Model.CurrentSuppliedProductsPage,
+													ppPage = Model.CurrentPurchasedProductsPage,
+													activeTab = "invoices"
+												}),
+												new PagedListRenderOptions
+					{
+						LiElementClasses = new[] { "page-item" },
+						PageClasses = new[] { "page-link" },
+						UlElementClasses = new[] { "pagination", "pagination-sm" },
+						DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+						ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+					})
+					</div>
+				}
+				else
+				{
+					<p class="text-muted text-center mt-3">No related invoices found for this counterparty.</p>
+				}
+			</div>
+
+			@if (isSupplier)
+			{
+				<div class="tab-pane fade @(activeTab == "supplied" ? "show active" : "")" id="nav-supplied" role="tabpanel" aria-labelledby="nav-supplied-tab" tabindex="0">
+					<h4>Products Supplied by this Counterparty</h4>
+					<hr />
+					@if (Model.SuppliedProducts?.Any() ?? false)
+					{
+						@await Html.PartialAsync("_ProductTablePartial", Model.SuppliedProducts)
+
+						<div class="d-flex justify-content-center mt-3">
+							@Html.PagedListPager(Model.SuppliedProducts, page => Url.Action("Details",
+													new
+													{
+														name = Model.Counterparty.Name,
+														iPage = Model.CurrentInvoicesPage,
+														spPage = page,
+														ppPage = Model.CurrentPurchasedProductsPage,
+														activeTab = "supplied"
+
+													}),
+													new PagedListRenderOptions
+					{
+						LiElementClasses = new[] { "page-item" },
+						PageClasses = new[] { "page-link" },
+						UlElementClasses = new[] { "pagination", "pagination-sm" },
+						DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+						ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+					})
+						</div>
+					}
+					else
+					{
+						<p class="text-muted text-center mt-3">No data available for products supplied by this counterparty.</p>
+					}
+				</div>
+			}
+
+			@if (isCustomer)
+			{
+				<div class="tab-pane fade @(activeTab == "purchased" ? "show active" : "")" id="nav-purchased" role="tabpanel" aria-labelledby="nav-purchased-tab" tabindex="0">
+					<h4>Products Purchased by this Counterparty</h4>
+					<hr />
+					@if (Model.PurchasedProducts?.Any() ?? false)
+					{
+						@await Html.PartialAsync("_ProductTablePartial", Model.PurchasedProducts)
+
+						<div class="d-flex justify-content-center mt-3">
+							@Html.PagedListPager(Model.PurchasedProducts, page => Url.Action("Details",
+													new
+													{
+														name = Model.Counterparty.Name,
+														iPage = Model.CurrentInvoicesPage,
+														spPage = Model.CurrentSuppliedProductsPage,
+														ppPage = page,
+														activeTab = "purchased"
+													}),
+													new PagedListRenderOptions
+					{
+						LiElementClasses = new[] { "page-item" },
+						PageClasses = new[] { "page-link" },
+						UlElementClasses = new[] { "pagination", "pagination-sm" },
+						DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+						DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+						ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+					})
+						</div>
+					}
+					else
+					{
+						<p class="text-muted text-center mt-3">No data available for products purchased by this counterparty.</p>
+					}
+				</div>
+			}
+
+		</div>
+
+	</div>
+</div>
+
+
+@section Scripts {
+	<partial name="_ValidationScriptsPartial" />
+}

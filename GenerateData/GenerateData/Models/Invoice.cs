@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace GenerateData.Models;
+﻿namespace GenerateData.Models;
 
 public partial class Invoice
 {
@@ -17,9 +14,11 @@ public partial class Invoice
 
     public string? ReceiverStorageName { get; set; }
 
+    public string Type { get; set; } = null!;
+
     public DateOnly Date { get; set; }
 
-    public decimal TotalPrice { get; set; }
+    public string Status { get; set; } = null!;
 
     public virtual Counterparty? CounterpartyNameNavigation { get; set; }
 

@@ -1,0 +1,73 @@
+﻿@model IMS.Models.User
+@using IMS.Models
+
+@{
+    ViewData["Title"] = "Delete User";
+    Layout = "_Layout";
+}
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-danger mb-3">Are you sure you want to delete this user?</h3>
+
+                    <h4>User Details</h4> 
+                    <hr />
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Username)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Username)</dd>
+
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Role)</dt>
+                        <dd class="col-sm-8">
+                            @{
+                                string roleBadgeClass = Model.Role switch
+                                {
+                                    UserRole.owner => "text-bg-danger",
+                                    UserRole.manager => "text-bg-warning",
+                                    UserRole.storage_keeper => "text-bg-info",
+                                    _ => "text-bg-secondary"
+                                };
+                            }
+                            <span class="badge rounded-pill @roleBadgeClass">@Model.Role</span>
+                        </dd>
+
+                        <dt class="col-sm-4 fw-semibold">Attached Storage Keeper</dt>
+                        <dd class="col-sm-8">
+                            @if (Model.StorageKeeper != null)
+                            {
+                                <span>@Model.StorageKeeper.LastName @Model.StorageKeeper.FirstName (@Model.StorageKeeper.PhoneNumber)</span>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">-- None --</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <form asp-action="DeleteUser" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="UserId" />
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Users" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger">
+                                <i class="bi bi-trash me-1"></i>Delete
+                            </button>
+                        </div>
+                    </form>
+                </div> 
+            </div>
+        </div>
+    </div> 
+</div> 
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" /> 
+}

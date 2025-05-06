@@ -1,0 +1,165 @@
+﻿@model X.PagedList.IPagedList<IMS.Models.StorageProduct>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = "Low Stock Items"; // Translated
+    Layout = "_Layout";
+    var currentSearch = ViewData["CurrentSearch"] as string;
+    var currentUnitFilter = ViewData["CurrentUnitFilter"] as string;
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* Оновлена Панель Дій (вирівнювання праворуч) *@
+<div class="p-3 mb-3 bg-light border rounded-3 d-flex justify-content-end align-items-center">
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Filters / Search @* Translated *@
+    </button>
+    <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">
+        <i class="bi bi-arrow-left-circle me-1"></i>To Dashboard @* Translated & Icon *@
+    </a>
+</div>
+
+@* Додано table-striped та обгортку table-responsive *@
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Storage</th> @* Translated *@
+                <th>Product Name</th> @* Translated *@
+                <th class="text-end">Current Qty</th> @* Translated & Aligned *@
+                <th class="text-end">Min. Qty</th> @* Translated & Aligned *@
+                <th>Unit</th> @* Translated *@
+                <th>Actions</th> @* Translated *@
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    string trClass = "";
+                    var minimalCount = item.MinimalCount;
+                    var currentCount = item.Count;
+
+                    if (minimalCount > 0)
+                    {
+                        if (currentCount <= (minimalCount * 0.25M)) { trClass = "table-danger"; }
+                        else if (currentCount <= (minimalCount * 0.50M)) { trClass = "table-warning"; }
+                    }
+                    <tr class="@trClass">
+                        <td>
+                            <a asp-controller="Storage" asp-action="Details" asp-route-name="@item.StorageName">
+                                @item.StorageNameNavigation?.Name
+                            </a>
+                        </td>
+                        <td>
+                            <a asp-controller="Product" asp-action="Details" asp-route-productName="@item.ProductName">
+                                @item.ProductName
+                            </a>
+                        </td>
+                        <td class="text-end">@item.Count.ToString("N2")</td>
+                        <td class="text-end">@item.MinimalCount.ToString("N2")</td>
+                        <td>@item.ProductNameNavigation?.UnitCodeNavigation?.UnitName</td>
+                        <td>
+                            @* Оновлені кнопки дій з іконками *@
+                            <a asp-controller="StorageProduct" asp-action="Edit" asp-route-storageName="@item.StorageName" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-secondary" title="Adjust Stock / Min. Qty">@* Translated *@
+                                <i class="bi bi-sliders"></i> @*<span class="d-none d-md-inline">Adjust</span>*@
+                            </a>
+                            <a asp-controller="Invoice" asp-action="Create"
+                               asp-route-invoiceType="@nameof(InvoiceType.supply)" @* Змінено на nameof для безпеки типів *@
+                               asp-route-receiverStorageName="@item.StorageName" @* Пропонуємо поповнити цей склад *@
+                               asp-route-prefillProductName="@item.ProductName" @* Передаємо назву товару *@
+                               class="btn btn-sm btn-outline-success ms-1" title="Create Supply Invoice">
+                                @* Translated & Icon *@
+                                <i class="bi bi-cart-plus-fill"></i> @*<span class="d-none d-md-inline">Supply</span>*@
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="6" class="text-center text-muted">No low stock items found matching your filters.</td></tr> @* Translated & Colspan=6 *@
+            }
+        </tbody>
+    </table>
+</div>
+
+@* Пагінатор (без змін) *@
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+            new
+            {
+                page = page,
+                filterLowStock = true,
+                searchString = currentSearch,
+                filterUnitName = currentUnitFilter
+            }),
+            new PagedListRenderOptions
+    {
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+    })
+</div>
+
+
+@* Offcanvas для фільтрів (з перекладом) *@
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Low Stock Items Filters</h5> @* Translated *@
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="lowStockFilterForm">
+            <input type="hidden" name="filterLowStock" value="true" />
+
+            <div class="mb-3 position-relative">
+                <label for="searchStringInput" class="form-label fw-semibold">Search by Product Name</label> @* Translated *@
+                <input type="text" id="searchStringInput" name="searchString" value="@currentSearch"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteStockProductName", "StorageProduct")"
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#stockProductNameAutocompleteList" />
+                <ul id="stockProductNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+            <div class="mb-3">
+                <label for="unitFilterSelect" class="form-label fw-semibold">Filter by Unit</label> @* Translated *@
+                <select id="unitFilterSelect" name="filterUnitName" asp-items="@ViewBag.UnitNameFilterList" class="form-select form-select-sm">
+                    <option value="">-- All Units --</option> @* Translated *@
+                </select>
+            </div>
+            @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+            {
+                <div class="mb-3">
+                    <label for="filterStorageName" class="form-label fw-semibold">Storage</label>
+                    <select id="filterStorageName" name="filterStorageName" asp-items="ViewBag.StorageListForFilter" class="form-select form-select-sm">
+                        <option value="">-- All Storages --</option>
+                    </select>
+                </div>
+            }
+           
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Apply @* Translated & Icon *@
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-reset-form-target="#lowStockFilterForm">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset All @* Translated & Icon *@
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

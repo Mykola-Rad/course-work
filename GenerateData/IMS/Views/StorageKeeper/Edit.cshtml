@@ -1,0 +1,82 @@
+﻿@model IMS.ViewModels.StorageKeeperViewModel
+@using IMS.Models 
+
+@{
+    // Отримуємо оригінальний номер телефону для використання в заголовку та маршруті
+    var originalPhoneNumber = Model.OriginalPhoneNumber ?? Model.PhoneNumber;
+    ViewData["Title"] = $"Edit Keeper: {Model.FirstName} {Model.LastName} ({originalPhoneNumber})"; // Translated
+    Layout = "_Layout";
+}
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    @* <hr /> -- Прибрано *@
+                    <form asp-action="Edit" asp-route-originalPhoneNumber="@originalPhoneNumber" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        @* Приховане поле для передачі оригінального номера телефону,
+                           оскільки сам PhoneNumber може змінюватися і є ключем *@
+                        <input type="hidden" asp-for="OriginalPhoneNumber" value="@originalPhoneNumber" />
+
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="PhoneNumber" class="form-control form-control-sm" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                            <div class="form-text text-warning small">
+                                <i class="bi bi-exclamation-triangle me-1"></i>Warning: You are editing the primary key (Phone Number). Ensure the new number is unique and follows the format +XXXXXXXXXXXX. @* Translated & Icon *@
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                            <input asp-for="FirstName" class="form-control form-control-sm" />
+                            <span asp-validation-for="FirstName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="LastName" class="form-label fw-semibold"></label>
+                            <input asp-for="LastName" class="form-control form-control-sm" />
+                            <span asp-validation-for="LastName" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Email" type="email" class="form-control form-control-sm" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="StorageName" class="form-label fw-semibold"></label>
+                            <select asp-for="StorageName" class="form-select form-select-sm" asp-items="@Model.AvailableStorages">
+                                <option value="">-- Select Storage --</option> @* Translated *@
+                            </select>
+                            <span asp-validation-for="StorageName" class="text-danger small"></span>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

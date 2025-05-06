@@ -1,0 +1,166 @@
+﻿@model IMS.ViewModels.HomeIndexViewModel
+@using IMS.Models 
+
+@{
+    ViewData["Title"] = Model.ShowDashboard ? "Панель керування" : "Головна";
+    Layout = "_Layout";
+}
+
+@if (Model.ShowDashboard && Model.DashboardData != null)
+{
+    <h1>@ViewData["Title"]</h1>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-xl-3 g-4">
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-calculator me-2"></i>Зведення Накладних (Пот. Місяць)</div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Сума постачань <i class="bi bi-arrow-down-circle text-primary ms-1"></i>
+                            <span class="badge bg-primary-subtle text-primary-emphasis rounded-pill">@Model.DashboardData.InvoiceSummary.SupplySumCurrentMonth.ToString("C2")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Сума видач <i class="bi bi-arrow-up-circle text-success ms-1"></i>
+                            <span class="badge bg-success-subtle text-success-emphasis rounded-pill">@Model.DashboardData.InvoiceSummary.ReleaseSumCurrentMonth.ToString("C2")</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Накладні-чернетки
+                            <span class="badge bg-warning rounded-pill">@Model.DashboardData.InvoiceSummary.DraftInvoiceCount</span>
+                        </li>
+                    </ul>
+                    <small class="text-muted d-block mt-2">* Враховано тільки проведені накладні поточного місяця для сум.</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100 @(Model.DashboardData.LowStockInfo.LowStockItemsCount > 0 ? "border-danger" : "")">
+                <div class="card-header @(Model.DashboardData.LowStockInfo.LowStockItemsCount > 0 ? "text-bg-danger" : "")"><i class="bi bi-exclamation-triangle me-2"></i>Низькі Залишки</div>
+                <div class="card-body text-center d-flex flex-column justify-content-center">
+                    <div>
+                        <h5 class="card-title">Позицій потребують поповнення:</h5>
+                        <p class="display-4 fw-bold @(Model.DashboardData.LowStockInfo.LowStockItemsCount > 0 ? "text-danger" : "")">
+                            @Model.DashboardData.LowStockInfo.LowStockItemsCount
+                        </p>
+                    </div>
+                </div>
+                <div class="card-footer text-end">
+                    <a asp-action="LowStockItems" asp-controller="Home" class="btn btn-sm @(Model.DashboardData.LowStockInfo.LowStockItemsCount > 0 ? "btn-danger" : "btn-outline-secondary disabled")">Переглянути список</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-clock-history me-2"></i>Останні Накладні</div>
+                <div class="card-body">
+                    @if (Model.DashboardData.RecentInvoices.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var invoice in Model.DashboardData.RecentInvoices)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-start">
+                                    <div class="ms-2 me-auto">
+                                        <div class="fw-bold">
+                                            <a asp-controller="Invoice" asp-action="Details" asp-route-id="@invoice.InvoiceId">
+                                                @invoice.DisplayInfo
+                                            </a>
+                                        </div>
+                                    </div>
+                                    @{
+                                        string statusBadgeClass = invoice.Status switch
+                                        {
+                                            InvoiceStatus.draft => "text-bg-warning",
+                                            InvoiceStatus.processed => "text-bg-success",
+                                            InvoiceStatus.cancelled => "text-bg-danger",
+                                            _ => "text-bg-secondary"
+                                        };
+                                    }
+                                    <span class="badge @statusBadgeClass rounded-pill">@invoice.Status</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="card-text text-muted text-center">Недавні накладні відсутні.</p>
+                    }
+                </div>
+                <div class="card-footer text-end"> <a asp-controller="Invoice" asp-action="Index" class="btn btn-sm btn-outline-secondary">Всі накладні</a> </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-file-earmark-arrow-down me-2"></i>Експорт Накладних</div>
+                <div class="card-body d-flex flex-column">
+                    <p class="card-text small text-muted">Оберіть період для експорту даних про рух товарів (з проведених накладних) у форматі JSON.</p>
+                    <form asp-controller="Home" asp-action="ExportInvoicesJson" method="get" target="_blank" class="mt-auto">
+                        <div class="mb-2">
+                            <label for="exportDateFrom" class="form-label form-label-sm">Дата Від:</label>
+                            <input type="date" id="exportDateFrom" name="dateFrom" class="form-control form-control-sm" required />
+                        </div>
+                        <div class="mb-3">
+                            <label for="exportDateTo" class="form-label form-label-sm">Дата До:</label>
+                            <input type="date" id="exportDateTo" name="dateTo" class="form-control form-control-sm" required />
+                        </div>
+                        <button type="submit" class="btn btn-success btn-sm w-100"><i class="bi bi-download me-1"></i> Експортувати</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col">
+            <div class="card h-100">
+                <div class="card-header"><i class="bi bi-currency-dollar me-2"></i>Топ Видач (Вартість, Ост. 30 днів)</div>
+                <div class="card-body">
+                    @if (Model.DashboardData.TopMovingProducts.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @{
+                                int rank = 1;
+                            }
+                            @foreach (var product in Model.DashboardData.TopMovingProducts)
+                            {
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <div class="me-auto">
+                                        <span class="fw-bold me-2">@(rank++).</span>
+                                        <a asp-controller="Product" asp-action="Details" asp-route-productName="@product.ProductName" title="Деталі товару: @product.ProductName">
+                                            @product.ProductName
+                                        </a>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success-emphasis rounded-pill">@product.TotalSoldValue.ToString("C2")</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="card-text text-muted text-center">Немає даних про видачі за останній місяць.</p>
+                    }
+                </div>
+            </div>
+        </div>
+
+
+    </div> 
+}
+else
+{
+    <div class="text-center">
+        <h1 class="display-4">Вітаємо в IMS</h1>
+        <p>Система управління запасами.</p>
+        @if (User.Identity == null || !User.Identity.IsAuthenticated)
+        {
+            <p><a asp-controller="Account" asp-action="Login" class="btn btn-primary">Увійти</a></p>
+        }
+        else 
+        {
+            <p>Ви увійшли як @User.Identity.Name. Використовуйте бічне меню для навігації.</p>
+        }
+    </div>
+}
+
+@section Scripts {
+}
