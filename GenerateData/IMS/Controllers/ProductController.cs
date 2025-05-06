@@ -369,6 +369,44 @@ namespace IMS.Controllers
         }
 
         [HttpGet]
+        public async Task<IActionResult> GetProductDetailsJson(string productName)
+        {
+            if (string.IsNullOrWhiteSpace(productName))
+            {
+                return Json(null); // Повертаємо null, якщо назва порожня
+            }
+
+            try
+            {
+                var product = await _context.Products
+                    .AsNoTracking()
+                    .Include(p => p.UnitCodeNavigation) // Включаємо одиницю виміру
+                    .FirstOrDefaultAsync(p => p.ProductName == productName);
+
+                if (product == null)
+                {
+                    return Json(null); // Товар не знайдено
+                }
+
+                // Повертаємо анонімний об'єкт або DTO з потрібними даними
+                return Json(new
+                {
+                    unitName = product.UnitCodeNavigation?.UnitName ?? "N/A", // Назва од.вим.
+                    lastPrice = product.LastPrice // Остання ціна
+                                                  // Додайте інші поля, якщо потрібно
+                });
+            }
+            catch (Exception ex)
+            {
+                // Логування помилки
+                _logger.LogError(ex, "Помилка отримання деталей товару через JSON для {ProductName}", productName);
+                // Повертаємо помилку або null
+                // return StatusCode(500, "Server error");
+                return Json(null);
+            }
+        }
+
+        [HttpGet]
         public async Task<IActionResult> Autocomplete(string term)
         {
             if (string.IsNullOrWhiteSpace(term))

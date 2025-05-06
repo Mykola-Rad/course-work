@@ -1,0 +1,41 @@
+﻿@model X.PagedList.IPagedList<IMS.Models.Product>
+@using IMS.Models
+@using X.PagedList
+
+@{
+    bool hasData = Model != null && Model.Any();
+    const int colspan = 4; 
+}
+
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Product Name</th>
+                <th>Unit</th>
+                <th>Last Price</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (hasData)
+            {
+                @foreach (var product in Model)
+                {
+                    <tr>
+                        <td>
+                                @product.ProductName
+                        </td>
+                        <td>@(product.UnitCodeNavigation?.UnitName ?? "--") (@product.UnitCode)</td>
+                        <td>@product.LastPrice.ToString("C2")</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="@colspan" class="text-center text-muted">No products found.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

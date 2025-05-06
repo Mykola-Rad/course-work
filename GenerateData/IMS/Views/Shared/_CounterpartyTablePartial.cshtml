@@ -1,18 +1,18 @@
 ﻿@model X.PagedList.IPagedList<IMS.Models.Counterparty>
 @using IMS.Models
-@using X.PagedList 
+@using X.PagedList
 
 @{
     bool showRoles = ViewData["ShowRolesColumn"] as bool? ?? false;
     bool showActions = ViewData["ShowActionColumn"] as bool? ?? false;
-    bool fullActions = ViewData["ShowFullActions"] as bool? ?? false; 
+    bool fullActions = ViewData["ShowFullActions"] as bool? ?? false;
 
     int colspan = 3; 
     if (showRoles) colspan++;
     if (showActions) colspan++;
 }
 
-<table class="table table-sm table-hover">
+<table class="table table-sm table-hover table-bordered table-striped">
     <thead class="table-light">
         <tr>
             <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Name)</th>
@@ -20,16 +20,16 @@
             <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Email)</th>
             @if (showRoles)
             {
-                <th>Ролі</th>
+                <th>Roles</th>
             }
             @if (showActions)
             {
-                <th>Дії</th>
+                <th>Actions</th> 
             }
         </tr>
     </thead>
     <tbody>
-        @if (Model != null && Model.Any()) 
+        @if (Model != null && Model.Any())
         {
             @foreach (var item in Model)
             {
@@ -49,14 +49,14 @@
                                     {
                                         "supplier" => "text-bg-primary",
                                         "customer" => "text-bg-success",
-                                        _ => "text-bg-secondary"
+                                        _ => "text-bg-light" 
                                     };
                                     <span class="badge rounded-pill @badgeClass me-1">@role.Name</span>
                                 }
                             }
                             else
                             {
-                                <span class="text-muted fst-italic">-- Немає --</span>
+                                <span class="text-muted fst-italic">-- None --</span>
                             }
                         </td>
                     }
@@ -64,13 +64,19 @@
                     @if (showActions)
                     {
                         <td>
-                            <a asp-controller="Counterparty" asp-action="Details" asp-route-name="@item.Name" class="btn btn-sm btn-outline-info">Деталі</a>
-                            @if (fullActions) 
+                            <a asp-controller="Counterparty" asp-action="Details" asp-route-name="@item.Name" class="btn btn-sm btn-outline-info" title="Details">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+                            @if (fullActions)
                             {
                                 <text> | </text>
-                                <a asp-controller="Counterparty" asp-action="Edit" asp-route-name="@item.Name" class="btn btn-sm btn-outline-secondary">Редагувати</a>
+                                <a asp-controller="Counterparty" asp-action="Edit" asp-route-name="@item.Name" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
                                 <text> | </text>
-                                <a asp-controller="Counterparty" asp-action="Delete" asp-route-name="@item.Name" class="btn btn-sm btn-outline-danger">Видалити</a>
+                                <a asp-controller="Counterparty" asp-action="Delete" asp-route-name="@item.Name" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    <i class="bi bi-trash"></i>
+                                </a>
                             }
                         </td>
                     }
@@ -80,7 +86,7 @@
         else
         {
             <tr>
-                <td colspan="@colspan" class="text-center text-muted">Контрагентів за вашим запитом не знайдено.</td>
+                <td colspan="@colspan" class="text-center text-muted">No counterparties found matching your query.</td> 
             </tr>
         }
     </tbody>
