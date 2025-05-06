@@ -1,29 +1,32 @@
 ﻿@model X.PagedList.IPagedList<IMS.Models.User>
- @using IMS.Models
- @using X.PagedList;
+@using IMS.Models
+@using X.PagedList;
+@using X.PagedList.Mvc.Core;
 
 @{
-    ViewData["Title"] = "Керування користувачами";
+    ViewData["Title"] = "Users management";
     Layout = "_Layout";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <a asp-action="CreateUser" class="btn btn-primary">Створити нового користувача</a>
-
+<div class="p-3 mb-3 bg-light border rounded-3 d-flex justify-content-between align-items-center">
+    <a asp-action="CreateUser" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Create a new user
+    </a>
     <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
-        <i class="bi bi-funnel"></i> Фільтри / Пошук
+        <i class="bi bi-funnel"></i> Filters / Search
     </button>
 </div>
 
-<table class="table table-striped table-hover">
-    <thead>
+
+<table class="table table-striped table-hover table-sm table-bordered">
+    <thead class="table-light">
         <tr>
-            <th>@Html.DisplayNameFor(model => model.First().Username)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Role)</th>
-            <th>Прив'язаний комірник</th>
-            <th></th> 
+            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Username)</th>
+            <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Role)</th>
+            <th>Attached storage keeper</th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -33,75 +36,55 @@
             {
                 <tr>
                     <td>@Html.DisplayFor(modelItem => user.Username)</td>
-                    <td>@Html.DisplayFor(modelItem => user.Role)</td> 
+                    <td>
+                        
+                        @{
+                            string roleBadgeClass = user.Role switch
+                            {
+                                UserRole.owner => "text-bg-danger",  
+                                UserRole.manager => "text-bg-warning",
+                                UserRole.storage_keeper => "text-bg-info", 
+                                _ => "text-bg-secondary"              
+                            };
+                        }
+                        <span class="badge rounded-pill @roleBadgeClass">@user.Role</span>
+                    </td>
                     <td>
                         @if (user.StorageKeeper != null)
                         {
-                            <span>@user.StorageKeeper.LastName @user.StorageKeeper.FirstName (@user.StorageKeeper.PhoneNumber)</span>
+                            <a asp-controller="StorageKeeper"
+                               asp-action="Details"
+                               asp-route-phoneNumber="@user.StorageKeeper.PhoneNumber" 
+                               title="View keeper details">
+                                @user.StorageKeeper.LastName @user.StorageKeeper.FirstName (@user.StorageKeeper.PhoneNumber)
+                            </a>
                         }
                         else
                         {
-                            <span class="text-muted">-- Не застосовується --</span> 
+                            <span class="text-muted fst-italic">-- Not attached --</span>
                         }
                     </td>
                     <td>
-                        <a asp-action="EditUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-secondary">Редагувати</a> |
-                        <a asp-action="DeleteUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-danger">Видалити</a>
+                        <a asp-action="EditUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-secondary" title="Edit">
+                            <i class="bi bi-pencil-square"></i> 
+                        </a> |
+                        <a asp-action="DeleteUser" asp-route-id="@user.UserId" class="btn btn-sm btn-outline-danger" title="Delete">
+                            <i class="bi bi-trash"></i> 
+                        </a>
                     </td>
                 </tr>
             }
         }
         else
         {
-            <tr><td colspan="4" class="text-center text-muted">Користувачів за вашим запитом не знайдено.</td></tr>
+            <tr><td colspan="4" class="text-center text-muted">No users were found for your query.</td></tr>
         }
     </tbody>
 </table>
 
-<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
-    <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Фільтри та Пошук Користувачів</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-    </div>
-    <div class="offcanvas-body">
-        <form asp-action="Users" method="get" id="userFilterForm">
-            <div class="mb-3 position-relative">
-                <label for="searchStringInput" class="form-label fw-semibold">Пошук за логіном</label>
-                <input type="text" id="searchStringInput" name="searchString" value="@ViewData["CurrentNameFilter"]"
-                       class="form-control form-control-sm" autocomplete="off"
-                       data-autocomplete="true"
-                       data-autocomplete-url="@Url.Action("AutocompleteUsers", "Admin")" 
-                       data-autocomplete-min-length="2"
-                       data-autocomplete-list-target="#user-autocomplete-list" /> 
-
-                <ul id="user-autocomplete-list" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
-            </div>
-            <div class="mb-3">
-                <label for="roleFilterSelect" class="form-label fw-semibold">Фільтр за роллю</label>
-                <select id="roleFilterSelect" name="filterRole" asp-items="@ViewBag.RoleFilterList" class="form-select form-select-sm">
-                    <option value="">-- Всі ролі --</option>
-                </select>
-            </div>
-
-            <div class="d-grid gap-2 mt-4">
-                <button type="submit" class="btn btn-primary">Застосувати</button>
-                <button type="button" class="btn btn-outline-secondary"
-                        data-reset-form-target="#userFilterForm">
-                    Скинути Все
-                </button> 
-            </div>
-        </form>
-    </div>
-</div>
-
 <div class="d-flex justify-content-center mt-3">
     @Html.PagedListPager(Model, page => Url.Action("Users",
-            new
-            {
-                page = page,
-                searchString = ViewData["CurrentNameFilter"],
-                filterRole = ViewData["CurrentRoleFilter"]   
-            }),
+            new { page = page, searchString = ViewData["CurrentNameFilter"], filterRole = ViewData["CurrentRoleFilter"] }),
             new PagedListRenderOptions
     {
         LiElementClasses = new[] { "page-item" },
@@ -115,6 +98,43 @@
     })
 </div>
 
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Filters and Search Users</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Users" method="get" id="userFilterForm">
+            <div class="mb-3 position-relative">
+                <label for="searchStringInput" class="form-label fw-semibold">Search by username</label> 
+                <input type="text" id="searchStringInput" name="searchString" value="@ViewData["CurrentNameFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteUsers", "Admin")"
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#user-autocomplete-list" />
+                <ul id="user-autocomplete-list" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+            <div class="mb-3">
+                <label for="roleFilterSelect" class="form-label fw-semibold">Roles filter</label> 
+                <select id="roleFilterSelect" name="filterRole" asp-items="@ViewBag.RoleFilterList" class="form-select form-select-sm">
+                    <option value="">-- All roles --</option>
+                </select>
+            </div>
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Apply
+                </button>
+                <button type="button" class="btn btn-outline-secondary"
+                        data-reset-form-target="#counterpartyFilterForm">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset All
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

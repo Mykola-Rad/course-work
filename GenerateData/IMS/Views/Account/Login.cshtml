@@ -1,41 +1,52 @@
-﻿@model IMS.ViewModels.LoginViewModel 
+﻿@model IMS.ViewModels.LoginViewModel
 @{
     ViewData["Title"] = "Вхід до системи";
-    Layout = "_LayoutLogin";
+    Layout = "_LayoutLogin"; 
 }
 
-<h2>@ViewData["Title"]</h2>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <section>
-            <form asp-controller="Account" asp-action="Login" method="post">
-                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5 col-xl-4">
+            <div class="card shadow-sm">
+                <div class="card-body p-4">
 
-                <div class="form-floating mb-3">
-                    <input asp-for="Username" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                    <label asp-for="Username">@Html.DisplayNameFor(m => m.Username)</label>
-                    <span asp-validation-for="Username" class="text-danger"></span>
-                </div>
-                <div class="form-floating mb-3">
-                    <input asp-for="Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
-                    <label asp-for="Password">@Html.DisplayNameFor(m => m.Password)</label>
-                    <span asp-validation-for="Password" class="text-danger"></span>
-                </div>
-                <div class="checkbox mb-3">
-                    <label asp-for="RememberMe" class="form-label">
-                        <input class="form-check-input" asp-for="RememberMe" />
-                        @Html.DisplayNameFor(m => m.RememberMe)
-                    </label>
-                </div>
-                <div>
-                    @Html.AntiForgeryToken() 
-                    <button id="login-submit" type="submit" class="w-100 btn btn-lg btn-primary">Увійти</button>
-                </div>
-            </form>
-        </section>
+                    <h2 class="card-title text-center mb-4">@ViewData["Title"]</h2> 
+
+                    <section>
+                        <form asp-controller="Account" asp-action="Login" method="post">
+                            @Html.AntiForgeryToken()
+
+                            <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                            <div class="form-floating mb-3">
+                                <input asp-for="Username" class="form-control form-control-sm" autocomplete="username" aria-required="true" placeholder="Username" /> 
+                                <label asp-for="Username">@Html.DisplayNameFor(m => m.Username)</label> 
+                                <span asp-validation-for="Username" class="text-danger small"></span> 
+                            </div>
+                            <div class="form-floating mb-3">
+                                <input asp-for="Password" type="password" class="form-control form-control-sm" autocomplete="current-password" aria-required="true" placeholder="Password" /> 
+                                <label asp-for="Password">@Html.DisplayNameFor(m => m.Password)</label>
+                                <span asp-validation-for="Password" class="text-danger small"></span>
+                            </div>
+
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" asp-for="RememberMe" />
+                                <label class="form-check-label" asp-for="RememberMe">
+                                    @Html.DisplayNameFor(m => m.RememberMe)
+                                </label>
+                            </div>
+
+                            <div class="d-grid">
+                                <button id="login-submit" type="submit" class="btn btn-primary">Login</button> 
+                            </div>
+                        </form>
+                    </section>
+                </div> 
+            </div> 
+        </div> 
     </div>
-</div>
+</div> 
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

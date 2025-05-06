@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Npgsql;
 using X.PagedList.EF;
 using X.PagedList;
+using System.Security.Claims;
 
 namespace IMS.Controllers
 {
@@ -57,6 +58,37 @@ namespace IMS.Controllers
                     .Include(i => i.ReceiverStorageNameNavigation)
                     .AsNoTracking()
                     .AsQueryable();
+
+                if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole(UserRole.storage_keeper.ToString()))
+                {
+                    string? keeperPhoneNumber = null;
+                    var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier); // Отримуємо ID поточного користувача
+
+                    if (!string.IsNullOrEmpty(currentUserIdString) && int.TryParse(currentUserIdString, out int userId))
+                    {
+                        // Завантажуємо користувача разом з його пов'язаним StorageKeeper
+                        var currentUser = await _context.Users
+                                                   .AsNoTracking()
+                                                   .Include(u => u.StorageKeeper) // ВАЖЛИВО: включаємо StorageKeeper
+                                                   .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                        keeperPhoneNumber = currentUser?.StorageKeeper?.PhoneNumber; // Безпечно отримуємо номер телефону
+                    }
+
+                    if (!string.IsNullOrEmpty(keeperPhoneNumber))
+                    {
+                        invoicesQuery = invoicesQuery.Where(i =>
+                            i.SenderKeeperPhone == keeperPhoneNumber ||
+                            i.ReceiverKeeperPhone == keeperPhoneNumber);
+                    }
+                    else
+                    {
+                        _logger.LogWarning("Користувач {UserName} (ID: {UserIdString}) має роль 'storage_keeper', але не вдалося знайти відповідного комірника або його номер телефону через навігаційну властивість.",
+                                            User.Identity?.Name, currentUserIdString);
+                        invoicesQuery = invoicesQuery.Where(i => false); // Не показувати жодних накладних
+                    }
+                }
+
 
                 if (!string.IsNullOrEmpty(invoiceType) && Enum.TryParse<InvoiceType>(invoiceType, true, out var typeToFilter))
                 {

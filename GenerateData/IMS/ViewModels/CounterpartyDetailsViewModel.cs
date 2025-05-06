@@ -13,8 +13,6 @@ namespace IMS.ViewModels
         public int CurrentInvoicesPage { get; set; }
         public int CurrentSuppliedProductsPage { get; set; }
         public int CurrentPurchasedProductsPage { get; set; }
-
-        // Прапорці ролей для умовного рендерингу вкладок
         public bool IsSupplier { get; set; }
         public bool IsCustomer { get; set; }
     }

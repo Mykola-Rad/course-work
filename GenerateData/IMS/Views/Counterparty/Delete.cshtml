@@ -1,71 +1,92 @@
 ﻿@model IMS.Models.Counterparty
+@using IMS.Models 
 
 @{
-    ViewData["Title"] = $"Видалити: {Model.Name}";
+    ViewData["Title"] = $"Delete Counterparty: {Model.Name}";
     Layout = "_Layout";
     bool canDelete = ViewBag.CanDelete ?? true;
+    var warningMessage = ViewBag.WarningMessage as string;
 }
 
-<h1>@ViewData["Title"]</h1>
-
-<h3 class="text-danger">Ви впевнені, що хочете видалити цього контрагента?</h3>
-
-@if (!canDelete && ViewBag.WarningMessage != null)
-{
-    <div class="alert alert-warning" role="alert">
-        @ViewBag.WarningMessage <br />
-        Видалення неможливе, доки існують ці залежності.
-    </div>
-}
-
-<div>
-    <hr />
-    <dl class="row">
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Name)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Name)</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.PhoneNumber)</dd>
-
-        <dt class="col-sm-3">@Html.DisplayNameFor(model => model.Email)</dt>
-        <dd class="col-sm-9">@Html.DisplayFor(model => model.Email)</dd>
-
-        <dt class="col-sm-3">Призначені Ролі</dt>
-        <dd class="col-sm-9">
-            @if (Model.Roles != null && Model.Roles.Any())
-            {
-                foreach (var role in Model.Roles.OrderBy(r => r.Name))
-                {
-                    string badgeClass = "text-bg-secondary";
-                    switch (role.Name?.ToLowerInvariant())
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm border-danger">
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-danger mb-3">Are you sure you want to delete this counterparty?</h3> 
+                    @if (!canDelete && !string.IsNullOrEmpty(warningMessage))
                     {
-                        case "supplier": badgeClass = "text-bg-primary"; break;
-                        case "customer": badgeClass = "text-bg-success"; break;
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @warningMessage <br />
+                            Deletion is not possible while these dependencies exist.
+                        </div>
                     }
-                    <span class="badge rounded-pill @badgeClass me-1" style="font-size: 0.8em;">
-                        @role.Name
-                    </span>
-                }
-            }
-            else
-            {
-                <span class="text-muted">-- Не призначено --</span>
-            }
-        </dd>
-    </dl>
 
-    <form asp-action="Delete" method="post">
-        @Html.AntiForgeryToken()
-        <input type="hidden" asp-for="Name" />
+                    <h4>Counterparty Details</h4> 
+                    <hr />
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Name)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Name)</dd>
 
-        @if (canDelete)
-        {
-            <button type="submit" class="btn btn-danger">Видалити</button>
-        }
-        else
-        {
-            <button type="submit" class="btn btn-danger" disabled title="@ViewBag.WarningMessage">Видалити</button>
-        }
-        | <a asp-action="Index" class="btn btn-secondary">Скасувати</a>
-    </form>
-</div>
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.PhoneNumber)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.PhoneNumber)</dd>
+
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.Email)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.Email)</dd>
+
+                        <dt class="col-sm-4 fw-semibold">Assigned Roles</dt> 
+                        <dd class="col-sm-8">
+                            @if (Model.Roles != null && Model.Roles.Any())
+                            {
+                                @foreach (var role in Model.Roles.OrderBy(r => r.Name))
+                                {
+                                    string badgeClass = role.Name?.ToLowerInvariant() switch
+                                    {
+                                        "supplier" => "text-bg-primary",
+                                        "customer" => "text-bg-success",
+                                        _ => "text-bg-light"
+                                    };
+                                    <span class="badge rounded-pill @badgeClass me-1">@role.Name</span>
+                                }
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">-- None --</span> 
+                            }
+                        </dd>
+                    </dl>
+
+                    <form asp-action="Delete" method="post">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="Name" /> 
+
+                        <div class="d-flex justify-content-end mt-3">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            @if (canDelete)
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-danger" disabled title="@(warningMessage ?? "Deletion not allowed due to dependencies")">
+                                    <i class="bi bi-trash me-1"></i>Delete
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+</div> 
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

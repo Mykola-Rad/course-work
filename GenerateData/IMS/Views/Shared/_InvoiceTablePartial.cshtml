@@ -3,106 +3,126 @@
 @using IMS.Models
 
 @{
-	bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
 
-	var currentInvoiceTypeStr = ViewContext.ViewData["CurrentInvoiceType"] as string;
-	InvoiceType? currentInvoiceType = null;
-	if (!string.IsNullOrEmpty(currentInvoiceTypeStr) && Enum.TryParse<InvoiceType>(currentInvoiceTypeStr, true, out var parsedType))
-	{
-		currentInvoiceType = parsedType;
-	}
+    var currentInvoiceTypeStr = ViewContext.ViewData["CurrentInvoiceType"] as string;
+    InvoiceType? currentInvoiceType = null;
+    if (!string.IsNullOrEmpty(currentInvoiceTypeStr) && Enum.TryParse<InvoiceType>(currentInvoiceTypeStr, true, out var parsedType))
+    {
+        currentInvoiceType = parsedType;
+    }
+    bool showAllColumns = !currentInvoiceType.HasValue;
+    bool showSupplyCols = showAllColumns || currentInvoiceType == InvoiceType.supply;
+    bool showReleaseCols = showAllColumns || currentInvoiceType == InvoiceType.release;
+    bool showTransferCols = showAllColumns || currentInvoiceType == InvoiceType.transfer;
 
-	bool showAllColumns = !currentInvoiceType.HasValue;
-	bool showSupplyCols = showAllColumns || currentInvoiceType == InvoiceType.supply;
-	bool showReleaseCols = showAllColumns || currentInvoiceType == InvoiceType.release;
-	bool showTransferCols = showAllColumns || currentInvoiceType == InvoiceType.transfer;
-
-	int colspan = 2;
-	if (showAllColumns) colspan++;
-	colspan++;
-	if (showSupplyCols || showReleaseCols) colspan++;
-	if (showReleaseCols || showTransferCols) colspan++;
-	if (showSupplyCols || showTransferCols) colspan++;
-	colspan++;
+    int colspan = 2; 
+    if (showAllColumns) colspan++;
+    colspan++; 
+    if (showSupplyCols || showReleaseCols) colspan++; 
+    if (showReleaseCols || showTransferCols) colspan++; 
+    if (showSupplyCols || showTransferCols) colspan++; 
+    colspan++; 
 }
 
-<table class="table table-sm table-hover table-bordered mt-2">
-	<thead class="table-light">
-		<tr>
-			<th>ID</th>
-			<th>Дата</th>
-			@if (showAllColumns)
-			{
-				<th>Тип</th>
-			}
-			<th>Статус</th>
-			@if (showSupplyCols || showReleaseCols)
-			{
-				<th>Контрагент</th>
-			}
-			@if (showReleaseCols || showTransferCols)
-			{
-				<th>Зі складу</th>
-			}
-			@if (showSupplyCols || showTransferCols)
-			{
-				<th>На склад</th>
-			}
-			<th style ="width: 220px;">Дії</th>
-		</tr>
-	</thead>
-	<tbody>
-		@if (Model.Any())
-		{
-			@foreach (var item in Model)
-			{
-				<tr>
-					<td>@item.InvoiceId</td>
-					<td>@item.Date.ToString("dd.MM.yyyy")</td>
-					@if (showAllColumns)
-					{
-						<td>@item.Type</td>
-					}
-					<td>@item.Status</td>
-					@if (showSupplyCols || showReleaseCols)
-					{
-						<td>
-							@if (!string.IsNullOrEmpty(item.CounterpartyName))
-							{
-								<a asp-controller="Counterparty" asp-action="Details" asp-route-name="@item.CounterpartyName">@item.CounterpartyName</a>
-							}
-							else
-							{
-								<span class="text-muted">-</span>
-							}
-						</td>
-					}
-					@if (showReleaseCols || showTransferCols)
-					{
-						<td>@(item.SenderStorageName ?? "-")</td>
-					}
-					@if (showSupplyCols || showTransferCols)
-					{
-						<td>@(item.ReceiverStorageName ?? "-")</td>
-					}
-					<td>
-						<a asp-controller="Invoice" asp-action="Details" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-info">Деталі</a>
-						@if (canManage && item.Status == InvoiceStatus.draft)
-						{
-							<text> | </text>
-							<a asp-controller="Invoice" asp-action="Edit" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-secondary">Редаг.</a>
-							<text> | </text>
-							<a asp-controller="Invoice" asp-action="Delete" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-danger">Видал.</a>
-						}
-					</td>
-				</tr>
-			}
-		}
-		else
-		{
-			<tr>
-				<td colspan="@colspan" class="text-center text-muted">Накладні за вказаними критеріями відсутні.</td>
-			</tr>
-		}
-	</tbody>
+<table class="table table-sm table-hover table-bordered table-striped mt-2">
+    <thead class="table-light">
+        <tr>
+            <th>ID</th>
+            <th>Date</th>
+            @if (showAllColumns)
+            {
+                <th>Type</th>
+            }
+            <th>Status</th>
+            @if (showSupplyCols || showReleaseCols)
+            {
+                <th>Counterparty</th>
+            }
+            @if (showReleaseCols || showTransferCols)
+            {
+                <th>From Storage</th>
+            }
+            @if (showSupplyCols || showTransferCols)
+            {
+                <th>To Storage</th>
+            }
+            <th>Actions</th> 
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null && Model.Any())
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.InvoiceId</td>
+                    <td>@item.Date.ToString("dd.MM.yyyy")</td>
+                    @if (showAllColumns)
+                    {
+                        <td>
+                             @{
+                                string typeBadgeClass = item.Type switch {
+                                    InvoiceType.supply => "text-bg-primary",
+                                    InvoiceType.release => "text-bg-success",
+                                    InvoiceType.transfer => "text-bg-info",
+                                    _ => "text-bg-secondary"
+                                };
+                            }
+                            <span class="badge rounded-pill @typeBadgeClass">@item.Type</span>
+                        </td>
+                    }
+                    <td>
+                         @{
+                            string statusBadgeClass = item.Status switch {
+                                InvoiceStatus.draft => "text-bg-warning",
+                                InvoiceStatus.processed => "text-bg-success",
+                                InvoiceStatus.cancelled => "text-bg-danger",
+                                _ => "text-bg-secondary"
+                            };
+                        }
+                        <span class="badge rounded-pill @statusBadgeClass">@item.Status</span>
+                    </td>
+                    @if (showSupplyCols || showReleaseCols)
+                    {
+                        <td>
+                            @if (!string.IsNullOrEmpty(item.CounterpartyName))
+                            { <a asp-controller="Counterparty" asp-action="Details" asp-route-name="@item.CounterpartyName">@item.CounterpartyName</a> }
+                            else { <span class="text-muted">-</span> }
+                        </td>
+                    }
+                    @if (showReleaseCols || showTransferCols)
+                    {
+                        <td>@(item.SenderStorageName ?? "-")</td>
+                    }
+                    @if (showSupplyCols || showTransferCols)
+                    {
+                        <td>@(item.ReceiverStorageName ?? "-")</td>
+                    }
+                    <td>
+                        <a asp-controller="Invoice" asp-action="Details" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-info" title="Details">
+                            <i class="bi bi-info-circle"></i>
+                        </a>
+                        @if (canManage && item.Status == InvoiceStatus.draft)
+                        {
+                            <text> | </text>
+                            <a asp-controller="Invoice" asp-action="Edit" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                 <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <text> | </text>
+                            <a asp-controller="Invoice" asp-action="Delete" asp-route-id="@item.InvoiceId" class="btn btn-sm btn-outline-danger" title="Delete">
+                                 <i class="bi bi-trash"></i>
+                            </a>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="@colspan" class="text-center text-muted">No invoices found matching your criteria.</td>
+            </tr>
+        }
+    </tbody>
 </table>

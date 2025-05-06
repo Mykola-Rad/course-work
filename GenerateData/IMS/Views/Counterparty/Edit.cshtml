@@ -1,75 +1,85 @@
 ﻿@model IMS.ViewModels.CounterpartyViewModel
+@using IMS.Models
 
 @{
-    ViewData["Title"] = $"Редагувати: {Model.OriginalName}";
+    ViewData["Title"] = $"Edit Counterparty: {Model.OriginalName}";
     Layout = "_Layout";
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit" asp-route-name="@Model.OriginalName" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            <input type="hidden" asp-for="OriginalName" />
-
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-                <div class="form-text text-warning">Увага: Ви редагуєте первинний ключ (Назву). Переконайтеся, що нова назва унікальна.</div>
-            </div>
-            <div class="mb-3">
-                <label asp-for="PhoneNumber" class="form-label"></label>
-                <input asp-for="PhoneNumber" class="form-control" />
-                <span asp-validation-for="PhoneNumber" class="text-danger"></span>
-            </div>
-            <div class="mb-3">
-                <label asp-for="Email" class="form-label"></label>
-                <input asp-for="Email" type="email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-
-            <div class="mb-3">
-                <label class="form-label">Призначені Ролі</label>
-                <div class="border p-2 rounded">
-                    @if (Model.RolesCheckboxes != null && Model.RolesCheckboxes.Any())
-                    {
-                        @for (int i = 0; i < Model.RolesCheckboxes.Count; i++)
-                        {
-                            <div class="form-check">
-                                <input type="hidden" asp-for="@Model.RolesCheckboxes[i].Id" />
-                                <input type="hidden" asp-for="@Model.RolesCheckboxes[i].Name" />
-                                <input class="form-check-input" type="checkbox"
-                                       name="SelectedRoleIds" 
-                                       value="@Model.RolesCheckboxes[i].Id"
-                                       id="role_@Model.RolesCheckboxes[i].Id"
-                                       asp-for="@Model.RolesCheckboxes[i].IsAssigned" />
-                                <label class="form-check-label" for="role_@Model.RolesCheckboxes[i].Id">
-                                    @Model.RolesCheckboxes[i].Name
-                                </label>
-                            </div>
-                        }
-                    }
-                    else
-                    {
-                        <p class="text-muted">Немає доступних ролей для призначення.</p>
-                    }
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
                 </div>
-                <span asp-validation-for="SelectedRoleIds" class="text-danger"></span>
-            </div>
+                <div class="card-body">
+                    <form asp-action="Edit" asp-route-name="@Model.OriginalName" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
+                        <input type="hidden" asp-for="OriginalName" />
 
-            <div class="mb-3 mt-4">
-                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
-                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
-            </div>
-        </form>
-    </div>
-</div>
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control form-control-sm" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                            <div class="form-text text-warning small"><i class="bi bi-exclamation-triangle me-1"></i>Warning: You are editing the primary identifier (Name). Ensure the new name is unique.</div> 
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="PhoneNumber" class="form-label fw-semibold"></label>
+                            <input asp-for="PhoneNumber" class="form-control form-control-sm" />
+                            <span asp-validation-for="PhoneNumber" class="text-danger small"></span>
+                        </div>
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Email" type="email" class="form-control form-control-sm" />
+                            <span asp-validation-for="Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Assigned Roles</label> 
+                            <div class="border p-3 rounded bg-light bg-opacity-50">
+                                @if (Model.RolesCheckboxes != null && Model.RolesCheckboxes.Any())
+                                {
+                                    @for (int i = 0; i < Model.RolesCheckboxes.Count; i++)
+                                    {
+                                        <div class="form-check">
+                                            <input type="hidden" asp-for="@Model.RolesCheckboxes[i].Id" />
+                                            <input type="hidden" asp-for="@Model.RolesCheckboxes[i].Name" />
+                                            <input class="form-check-input" type="checkbox"
+                                                   id="role_@Model.RolesCheckboxes[i].Id"
+                                                   asp-for="@Model.RolesCheckboxes[i].IsAssigned" /> 
+                                            <label class="form-check-label" for="role_@Model.RolesCheckboxes[i].Id">
+                                                @Model.RolesCheckboxes[i].Name
+                                            </label>
+                                        </div>
+                                    }
+                                }
+                                else
+                                {
+                                    <p class="text-muted mb-0">No roles available for assignment.</p> 
+                                }
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+</div> 
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

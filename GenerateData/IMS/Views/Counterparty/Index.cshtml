@@ -4,94 +4,99 @@
 @using X.PagedList
 
 @{
-	ViewData["Title"] = "Контрагенти";
-	Layout = "_Layout";
+    ViewData["Title"] = "Counterparties";
+    Layout = "_Layout";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
-	<a asp-action="Create" class="btn btn-primary">Додати контрагента</a>
-
-	<button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
-		<i class="bi bi-funnel"></i> Фільтри / Пошук
-	</button>
+<div class="p-3 mb-3 bg-light border rounded-3 d-flex justify-content-between align-items-center">
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-plus-circle me-1"></i>Add Counterparty
+    </a>
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Filters / Search
+    </button>
 </div>
 
-@await Html.PartialAsync("_CounterpartyTablePartial", Model,
-		new ViewDataDictionary(ViewData) {
-		{ "ShowRolesColumn", true },      
-        { "ShowActionColumn", true },     
-        { "ShowFullActions", true }      
+<div class="table-responsive">
+    @await Html.PartialAsync("_CounterpartyTablePartial", Model,
+            new ViewDataDictionary(ViewData) {
+    { "ShowRolesColumn", true },
+    { "ShowActionColumn", true },
+    { "ShowFullActions", true }
     })
+</div>
 
 <div class="d-flex justify-content-center mt-3">
-	@Html.PagedListPager(Model, page => Url.Action("Index",
-			new
-			{
-				page = page,
-				filterName = ViewData["CurrentNameFilter"],    
-				filterPhone = ViewData["CurrentPhoneFilter"],
-				filterEmail = ViewData["CurrentEmailFilter"],
-				filterRoleId = ViewData["CurrentRoleFilter"]
-			}),
-			new PagedListRenderOptions
-	{ 
-		LiElementClasses = new[] { "page-item" },
-		PageClasses = new[] { "page-link" },
-		UlElementClasses = new[] { "pagination", "pagination-sm" },
-		DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
-		DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
-		DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
-		DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
-		ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
-	})
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+            new
+            {
+                page = page,
+                filterName = ViewData["CurrentNameFilter"],
+                filterPhone = ViewData["CurrentPhoneFilter"],
+                filterEmail = ViewData["CurrentEmailFilter"],
+                filterRoleId = ViewData["CurrentRoleFilter"]
+            }),
+            new PagedListRenderOptions
+    {
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+    })
 </div>
 
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
-	<div class="offcanvas-header border-bottom">
-		<h5 class="offcanvas-title" id="offcanvasFiltersLabel">Фільтри та Пошук Контрагентів</h5>
-		<button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
-	</div>
-	<div class="offcanvas-body">
-		<form asp-action="Index" method="get" id="counterpartyFilterForm">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Filters and Search Counterparties</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="counterpartyFilterForm">
 
-			<div class="mb-2 position-relative">
-				<label for="fName" class="form-label fw-semibold">Назва містить</label>
-				<input type="text" id="fName" name="filterName" value="@ViewData["CurrentNameFilter"]"
-					   class="form-control form-control-sm" autocomplete="off"
-					   data-autocomplete="true"
-					   data-autocomplete-url="@Url.Action("AutocompleteName", "Counterparty")"
-					   data-autocomplete-min-length="2"
-					   data-autocomplete-list-target="#counterpartyNameAutocompleteList" />
-				<ul id="counterpartyNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
-			</div>
-			<div class="mb-2">
-				<label for="fPhone" class="form-label fw-semibold">Телефон містить</label>
-				<input type="text" id="fPhone" name="filterPhone" value="@ViewData["CurrentPhoneFilter"]" class="form-control form-control-sm" />
-			</div>
-			<div class="mb-2">
-				<label for="fEmail" class="form-label fw-semibold">Email містить</label>
-				<input type="text" id="fEmail" name="filterEmail" value="@ViewData["CurrentEmailFilter"]" class="form-control form-control-sm" />
-			</div>
-			<div class="mb-3">
-				<label for="fRole" class="form-label fw-semibold">Роль</label>
-				<select id="fRole" name="filterRoleId" asp-items="@ViewBag.RoleFilterList" class="form-select form-select-sm">
-					<option value="">-- Всі ролі --</option>
-				</select>
-			</div>
+            <div class="mb-2 position-relative">
+                <label for="fName" class="form-label fw-semibold">Search by Name</label>
+                <input type="text" id="fName" name="filterName" value="@ViewData["CurrentNameFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteName", "Counterparty")"
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#counterpartyNameAutocompleteList" />
+                <ul id="counterpartyNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+            <div class="mb-2">
+                <label for="fPhone" class="form-label fw-semibold">Search by Phone</label>
+                <input type="text" id="fPhone" name="filterPhone" value="@ViewData["CurrentPhoneFilter"]" class="form-control form-control-sm" />
+            </div>
+            <div class="mb-2">
+                <label for="fEmail" class="form-label fw-semibold">Search by Email</label>
+                <input type="text" id="fEmail" name="filterEmail" value="@ViewData["CurrentEmailFilter"]" class="form-control form-control-sm" />
+            </div>
+            <div class="mb-3">
+                <label for="fRole" class="form-label fw-semibold">Role</label>
+                <select id="fRole" name="filterRoleId" asp-items="@ViewBag.RoleFilterList" class="form-select form-select-sm">
+                    <option value="">-- All Roles --</option>
+                </select>
+            </div>
 
-			<div class="d-grid gap-2 mt-4">
-				<button type="submit" class="btn btn-primary">Застосувати</button>
-				<button type="button" class="btn btn-outline-secondary"
-						data-reset-form-target="#counterpartyFilterForm">
-					Скинути Все
-				</button> 
-			</div>
-		</form>
-	</div>
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Apply
+                </button>
+                <button type="button" class="btn btn-outline-secondary"
+                        data-reset-form-target="#counterpartyFilterForm">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset All
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
 
 @section Scripts {
-	<partial name="_ValidationScriptsPartial" />
- }
+    <partial name="_ValidationScriptsPartial" />
+}

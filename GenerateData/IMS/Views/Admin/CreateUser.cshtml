@@ -1,62 +1,74 @@
 ﻿@model IMS.ViewModels.UserViewModel
+@using IMS.Models
 
 @{
-    ViewData["Title"] = "Створити користувача";
+    ViewData["Title"] = "Create New User"; 
     Layout = "_Layout";
 }
 
-<h1>@ViewData["Title"]</h1>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1> 
+                </div>
+                <div class="card-body">
+                    <form asp-action="CreateUser" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-<hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="CreateUser" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                        <div class="mb-3">
+                            <label asp-for="Username" class="form-label fw-semibold"></label> 
+                            <input asp-for="Username" class="form-control form-control-sm" />
+                            <span asp-validation-for="Username" class="text-danger small"></span>
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="Username" class="form-label"></label>
-                <input asp-for="Username" class="form-control" />
-                <span asp-validation-for="Username" class="text-danger"></span>
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold"></label>
+                            <input asp-for="Password" type="password" class="form-control form-control-sm" />
+                            <span asp-validation-for="Password" class="text-danger small"></span>
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="Password" class="form-label"></label>
-                <input asp-for="Password" type="password" class="form-control" />
-                <span asp-validation-for="Password" class="text-danger"></span>
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="ConfirmPassword" class="form-label fw-semibold"></label>
+                            <input asp-for="ConfirmPassword" type="password" class="form-control form-control-sm" />
+                            <span asp-validation-for="ConfirmPassword" class="text-danger small"></span>
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="ConfirmPassword" class="form-label"></label>
-                <input asp-for="ConfirmPassword" type="password" class="form-control" />
-                <span asp-validation-for="ConfirmPassword" class="text-danger"></span>
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label fw-semibold"></label>
+                            <select asp-for="Role" asp-items="Html.GetEnumSelectList<UserRole>()" class="form-select form-select-sm" id="roleSelect">
+                                <option value="">-- Select Role --</option> 
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger small"></span>
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="Role" class="form-label"></label>
-                <select asp-for="Role" asp-items="Html.GetEnumSelectList<UserRole>()" class="form-select" id="roleSelect">
-                    <option value="">-- Оберіть роль --</option>
-                </select>
-                <span asp-validation-for="Role" class="text-danger"></span>
-            </div>
+                        <div class="mb-3" id="storageKeeperSelectDiv" style="display: none;">
+                            <label asp-for="SelectedStorageKeeperPhoneNumber" class="form-label fw-semibold"></label>
+                            <select asp-for="SelectedStorageKeeperPhoneNumber" asp-items="@(new SelectList(Model.AvailableKeepers ?? Enumerable.Empty<SelectListItem>(), "Value", "Text"))" class="form-select form-select-sm">
+                                <option value="">-- Not Selected --</option> 
+                            </select>
+                            <span asp-validation-for="SelectedStorageKeeperPhoneNumber" class="text-danger small"></span>
+                            <div class="form-text small">Select from existing keepers who do not have a login yet.</div> 
+                        </div>
 
-            <div class="mb-3" id="storageKeeperSelectDiv" style="display: none;">
-                <label asp-for="SelectedStorageKeeperPhoneNumber" class="form-label"></label>
-                <select asp-for="SelectedStorageKeeperPhoneNumber" asp-items="@(new SelectList(Model.AvailableKeepers ?? Enumerable.Empty<SelectListItem>(), "Value", "Text"))" class="form-select">
-                    <option value="">-- Не вибрано --</option>
-                </select>
-                <span asp-validation-for="SelectedStorageKeeperPhoneNumber" class="text-danger"></span>
-                <div class="form-text">Оберіть зі списку існуючих комірників, які ще не мають логіну.</div>
-            </div>
+                        <hr class="my-4"> 
 
-
-            <div class="mb-3">
-                <button type="submit" class="btn btn-primary">Створити</button>
-                <a asp-action="Users" class="btn btn-secondary">Назад до списку</a>
-            </div>
-        </form>
-    </div>
-</div>
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Users" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel 
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-check-circle me-1"></i>Create 
+                            </button>
+                        </div>
+                    </form>
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+</div> 
 
 
 @section Scripts {
@@ -64,19 +76,19 @@
     <script>
         $(document).ready(function () {
             function toggleKeeperSelect() {
-                var selectedRoleValue = $('#roleSelect').val(); 
-
-                var storageKeeperExpectedValue = '@((int)UserRole.storage_keeper)';
+                var selectedRoleValue = $('#roleSelect').val();
+                var storageKeeperExpectedValue = '@Convert.ToInt32(UserRole.storage_keeper)'; 
 
                 if (selectedRoleValue === storageKeeperExpectedValue) {
-                    $('#storageKeeperSelectDiv').show();
+                    $('#storageKeeperSelectDiv').slideDown(); 
                 } else {
-                    $('#storageKeeperSelectDiv').hide();
+                    $('#storageKeeperSelectDiv').slideUp(); 
                 }
             }
 
             toggleKeeperSelect();
+
             $('#roleSelect').on('change', toggleKeeperSelect);
         });
     </script>
- }
+}

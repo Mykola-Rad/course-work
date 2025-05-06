@@ -28,21 +28,44 @@ namespace IMS.Controllers
         // GET: StorageProduct
         [HttpGet("")]
         [AllowAnonymous]
-        public async Task<IActionResult> Index(string? searchString = null, string? filterUnitName = null, int page = 1)
+        public async Task<IActionResult> Index(
+        string? searchString = null,
+        string? filterUnitName = null,
+        bool filterLowStock = false,
+        int page = 1)
         {
             ViewData["CurrentSearch"] = searchString;
             ViewData["CurrentUnitFilter"] = filterUnitName;
+            ViewData["CurrentLowStockFilter"] = filterLowStock;
+
             try
             {
                 var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
                 bool isKeeper = User.IsInRole(UserRole.storage_keeper.ToString());
+                bool isManagerOrOwner = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
 
-                if (isKeeper) 
+                if (isKeeper && !string.IsNullOrEmpty(userIdString))
                 {
-                    return await GetKeeperStockViewAsync(userIdString, searchString, filterUnitName, page);
+                    return await GetKeeperStockViewAsync(userIdString, searchString, filterUnitName, filterLowStock, page);
                 }
-                else 
+                else if (isManagerOrOwner) 
                 {
+                    if (filterLowStock)
+                    {
+                        return await GetDetailedLowStockViewForManagerAsync(searchString, filterUnitName, page);
+                    }
+                    else
+                    {
+                        return await GetManagerStockSummaryViewAsync(searchString, filterUnitName, page);
+                    }
+                }
+                else
+                {
+                    if (filterLowStock)
+                    {
+                        TempData["ErrorMessage"] = "Доступ заборонено.";
+                        return RedirectToAction("Index", "Home");
+                    }
                     return await GetManagerStockSummaryViewAsync(searchString, filterUnitName, page);
                 }
             }
@@ -50,7 +73,7 @@ namespace IMS.Controllers
             {
                 _logger.LogError(ex, "Помилка при отриманні залишків на складах (Index action)");
                 TempData["ErrorMessage"] = "Не вдалося завантажити залишки.";
-                return RedirectToAction("Index", "Home"); 
+                return RedirectToAction("Index", "Home");
             }
         }
 
@@ -109,18 +132,17 @@ namespace IMS.Controllers
             }
         }
 
-        private async Task<IActionResult> GetKeeperStockViewAsync(string? userIdString, string? searchString, string? filterUnitName, int page) 
+        private async Task<IActionResult> GetKeeperStockViewAsync(string userIdString, string? searchString, string? filterUnitName, bool filterLowStock, int page) // Додано filterLowStock
         {
             ViewData["Title"] = "Поточні залишки на вашому складі";
-            ViewData["CurrentSearch"] = searchString;
-            ViewData["CurrentUnitFilter"] = filterUnitName;
+            // ViewData фільтрів вже встановлено в Index
 
             IPagedList<StorageProduct> pagedKeeperStockList;
 
             if (int.TryParse(userIdString, out int userId))
             {
                 var keeperStorageName = await _context.StorageKeepers
-                                                      .Where(sk => sk.UserId == userId).Select(sk => sk.StorageName).FirstOrDefaultAsync();
+                    .Where(sk => sk.UserId == userId).Select(sk => sk.StorageName).FirstOrDefaultAsync();
 
                 if (!string.IsNullOrEmpty(keeperStorageName))
                 {
@@ -138,6 +160,12 @@ namespace IMS.Controllers
                     if (!string.IsNullOrEmpty(filterUnitName))
                     {
                         query = query.Where(sp => sp.ProductNameNavigation.UnitCode == filterUnitName);
+                    }
+
+                    if (filterLowStock)
+                    {
+                        query = query.Where(sp => sp.MinimalCount > 0 && sp.Count <= sp.MinimalCount);
+                        ViewData["Title"] = $"Низькі залишки на складі: {keeperStorageName}";
                     }
 
                     query = query.OrderBy(sp => sp.ProductName);
@@ -197,6 +225,35 @@ namespace IMS.Controllers
 
             await PopulateUnitNameFilterList(filterUnitName); 
             return View("IndexManager", pagedSummaryList); 
+        }
+
+        private async Task<IActionResult> GetDetailedLowStockViewForManagerAsync(string? searchString, string? filterUnitName, int page)
+        {
+            ViewData["Title"] = "Товари з низькими залишками (всі склади)"; 
+
+            var query = _context.StorageProducts
+                .AsNoTracking()
+                .Include(sp => sp.StorageNameNavigation) 
+                .Include(sp => sp.ProductNameNavigation)
+                    .ThenInclude(p => p.UnitCodeNavigation) 
+                .Where(sp => sp.MinimalCount > 0 && sp.Count <= sp.MinimalCount); 
+
+            if (!string.IsNullOrEmpty(searchString))
+            {
+                query = query.Where(sp => sp.ProductName.ToLower().Contains(searchString.ToLower()));
+            }
+            if (!string.IsNullOrEmpty(filterUnitName))
+            {
+                query = query.Where(sp => sp.ProductNameNavigation.UnitCodeNavigation.UnitName == filterUnitName);
+            }
+
+            var sortedQuery = query.OrderBy(sp => sp.StorageName).ThenBy(sp => sp.ProductName);
+
+            var pagedLowStockItems = await sortedQuery.ToPagedListAsync(page, _pageSize);
+
+            await PopulateUnitNameFilterList(filterUnitName);
+
+            return View("LowStockList", pagedLowStockItems);
         }
 
 
