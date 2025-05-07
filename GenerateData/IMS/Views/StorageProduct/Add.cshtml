@@ -1,78 +1,108 @@
 ﻿@model IMS.ViewModels.AddStorageProductViewModel
+@using IMS.Models 
 
 @{
-    Layout = "_Layout";
+    // ViewData["Title"] може бути встановлено в контролері або тут
     bool isStorageFixed = !string.IsNullOrEmpty(Model.PreSelectedStorageName);
+    ViewData["Title"] = isStorageFixed ? $"Add Product to Storage: {Model.PreSelectedStorageName}" : "Add Product to Stock"; // Translated
+    Layout = "_Layout";
+
+    // Визначаємо, куди повертатися кнопці "Cancel"
+    string backAction = isStorageFixed ? "Details" : "Index";
+    string backController = "Storage"; // В обох випадках, ймовірно, повертаємось до функціоналу складів
+    string backText = isStorageFixed ? "Back to Storage Details" : "Back to Storages List";
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
-
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Add" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
-
-            @if (isStorageFixed)
-            {
-                <input type="hidden" asp-for="PreSelectedStorageName" />
-                <div class="mb-3">
-                    <label class="form-label">Склад</label>
-                    <p class="form-control-plaintext"><strong>@Model.PreSelectedStorageName</strong></p>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
                 </div>
-            }
-            else
-            {
-                <div class="mb-3">
-                    <label asp-for="SelectedStorageName" class="form-label"></label>
-                    <select asp-for="SelectedStorageName" asp-items="@Model.AvailableStorages" class="form-select">
-                        <option value="">-- Оберіть склад --</option>
-                    </select>
-                    <span asp-validation-for="SelectedStorageName" class="text-danger"></span>
-                </div>
-            }
+                <div class="card-body">
+                    <form asp-action="Add" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-            <div class="mb-3">
-                <label asp-for="SelectedProductName" class="form-label"></label>
-                <select asp-for="SelectedProductName" asp-items="@Model.AvailableProducts" class="form-select">
-                    <option value="">-- Оберіть товар --</option>
-                </select>
-                <span asp-validation-for="SelectedProductName" class="text-danger"></span>
-                @if (!isStorageFixed)
-                {
-                    <div class="form-text">Переконайтесь, що обраного товару ще немає на обраному складі.</div>
-                }
-            </div>
+                        @* Приховане поле для передачі PreSelectedStorageName, якщо він є *@
+                        @if (isStorageFixed)
+                        {
+                            <input type="hidden" asp-for="PreSelectedStorageName" />
+                            @* Важливо: Якщо склад фіксований, SelectedStorageName теж має бути встановлений для валідації *@
+                            <input type="hidden" asp-for="SelectedStorageName" value="@Model.PreSelectedStorageName" />
+                        }
 
-            <div class="row">
-                <div class="col-md-6 mb-3">
-                    <label asp-for="Count" class="form-label"></label>
-                    <input asp-for="Count" type="number" step="any" min="0" class="form-control" />
-                    <span asp-validation-for="Count" class="text-danger"></span>
-                </div>
-                <div class="col-md-6 mb-3">
-                    <label asp-for="MinimalCount" class="form-label"></label>
-                    <input asp-for="MinimalCount" type="number" step="any" min="0" class="form-control" />
-                    <span asp-validation-for="MinimalCount" class="text-danger"></span>
-                </div>
-            </div>
+                        @* --- Відображення/Вибір Складу --- *@
+                        <div class="mb-3">
+                            <label asp-for="SelectedStorageName" class="form-label fw-semibold">Storage</label> @* Змінив на SelectedStorageName для уніфікації *@
+                            @if (isStorageFixed)
+                            {
+                                <p class="form-control-plaintext form-control-sm ps-0"><strong>@Model.PreSelectedStorageName</strong></p>
+                            }
+                            else
+                            {
+                                @* Текстове поле з автозаповненням для вибору складу *@
+                                <div class="position-relative">
+                                    <input asp-for="SelectedStorageName" type="text" class="form-control form-control-sm storage-autocomplete" autocomplete="off" placeholder="Start typing storage name..."
+                                           data-autocomplete="true"
+                                           data-autocomplete-url="@Url.Action("AutocompleteStorageName", "Storage")" @* URL до автозаповнення складів *@
+                                           data-autocomplete-min-length="2"
+                                           data-autocomplete-list-target="#addStorageProductStorageAutocompleteList" />
+                                    <ul id="addStorageProductStorageAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+                                </div>
+                                <span asp-validation-for="SelectedStorageName" class="text-danger small"></span>
+                            }
+                        </div>
 
-            <div class="mb-3 mt-3">
-                <button type="submit" class="btn btn-primary">Додати на склад</button>
-                @if (isStorageFixed)
-                {
-                    <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.PreSelectedStorageName" class="btn btn-secondary">Назад до складу</a>
-                }
-                else
-                {
-                    <a asp-controller="Storage" asp-action="Index" class="btn btn-secondary">Назад до списку складів</a>
-                }
-            </div>
-        </form>
-    </div>
-</div>
+                        @* --- Вибір Товару (змінено на Autocomplete) --- *@
+                        <div class="mb-3">
+                            <label asp-for="SelectedProductName" class="form-label fw-semibold"></label>
+                            <div class="position-relative">
+                                <input asp-for="SelectedProductName" type="text" class="form-control form-control-sm product-name-autocomplete" autocomplete="off" placeholder="Start typing product name..."
+                                       data-autocomplete="true"
+                                       data-autocomplete-url="@Url.Action("Autocomplete", "Product")" @* URL до автозаповнення товарів *@
+                                       data-autocomplete-min-length="2"
+                                       data-autocomplete-list-target="#addStorageProductProductAutocompleteList" />
+                                <ul id="addStorageProductProductAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+                            </div>
+                            <span asp-validation-for="SelectedProductName" class="text-danger small"></span>
+                            @if (!isStorageFixed)
+                            {
+                                <div class="form-text small">Ensure the selected product does not already exist in the chosen stock (if adding for the first time).</div> @* Translated *@
+                            }
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Count" class="form-label fw-semibold"></label>
+                                <input asp-for="Count" type="number" step="0.01" min="0" class="form-control form-control-sm" /> @* Додав step 0.01 *@
+                                <span asp-validation-for="Count" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="MinimalCount" class="form-label fw-semibold"></label>
+                                <input asp-for="MinimalCount" type="number" step="0.01" min="0" class="form-control form-control-sm" /> @* Додав step 0.01 *@
+                                <span asp-validation-for="MinimalCount" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="@backAction" asp-controller="@backController" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Add to Stock @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

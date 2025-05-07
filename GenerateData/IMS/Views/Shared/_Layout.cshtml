@@ -14,6 +14,7 @@
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
 </head>
 <body>
+
     <div class="page-wrapper">
         <aside class="sidebar">
             <button id="sidebarToggle" class="btn btn-light btn-sm sidebar-toggle-btn shadow-sm" title="Згорнути/Розгорнути меню">
@@ -48,15 +49,31 @@
         <main role="main" class="main-content">
             @if (TempData["SuccessMessage"] != null)
             {
-                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                <div class="alert alert-success alert-dismissible fade show auto-dismiss-alert" role="alert">
                     @TempData["SuccessMessage"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }
             @if (TempData["ErrorMessage"] != null)
             {
-                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                <div class="alert alert-danger alert-dismissible fade show auto-dismiss-alert" role="alert">
                     @TempData["ErrorMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["WarningMessage"] != null) @* Якщо ви використовуєте WarningMessage *@
+            {
+                @* Додано клас "auto-dismiss-alert" *@
+                <div class="alert alert-warning alert-dismissible fade show auto-dismiss-alert" role="alert">
+                    @TempData["WarningMessage"]
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            }
+            @if (TempData["InfoMessage"] != null) @* Якщо ви використовуєте InfoMessage *@
+            {
+                @* Додано клас "auto-dismiss-alert" *@
+                <div class="alert alert-info alert-dismissible fade show auto-dismiss-alert" role="alert">
+                    @TempData["InfoMessage"]
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             }

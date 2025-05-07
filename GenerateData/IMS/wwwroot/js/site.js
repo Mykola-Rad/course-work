@@ -94,4 +94,24 @@ $(document).ready(function () {
     });
     initializeAutocomplete();
     initializeResetButtons();
+    var $autoDismissAlerts = $('.auto-dismiss-alert');
+
+    if ($autoDismissAlerts.length) {
+        // Встановлюємо таймер для закриття всіх таких повідомлень
+        setTimeout(function () {
+            $autoDismissAlerts.each(function () {
+                var alertElement = this;
+                // Використовуємо API Bootstrap 5 для програмного закриття
+                var alertInstance = bootstrap.Alert.getInstance(alertElement);
+                if (alertInstance) {
+                    alertInstance.close(); // Це запустить стандартну анімацію зникнення
+                } else {
+                    // Запасний варіант, якщо екземпляр не знайдено (малоймовірно)
+                    $(alertElement).fadeOut(500, function () {
+                        $(this).remove();
+                    });
+                }
+            });
+        }, 3000);
+    }
 });

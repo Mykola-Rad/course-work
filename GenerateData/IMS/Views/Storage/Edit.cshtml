@@ -1,65 +1,89 @@
 ﻿@model IMS.Models.Storage
+@using IMS.Models 
 
 @{
-    ViewData["Title"] = $"Редагувати склад: {ViewBag.OriginalName}";
+    var originalName = ViewBag.OriginalName as string ?? Model.Name; // Залишаємо для використання в заголовку та маршруті
+    ViewData["Title"] = $"Edit Storage: {originalName}"; // Translated
     Layout = "_Layout";
-    var originalName = ViewBag.OriginalName ?? Model.Name; 
 }
 
-<h1>@ViewData["Title"]</h1>
-<hr />
-<div class="row">
-    <div class="col-md-8">
-        <form asp-action="Edit" asp-route-name="@originalName" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-10 col-lg-9 col-xl-8">
+            @* Колонка може бути ширшою для цієї форми *@
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    @* <hr /> -- Прибрано *@
+                    <form asp-action="Edit" asp-route-name="@originalName" method="post">
+                        @* Переконайтесь, що asp-route-name відповідає параметру в Edit POST *@
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-            <div class="mb-3">
-                <label asp-for="Name" class="form-label"></label>
-                <input asp-for="Name" class="form-control" />
-                <span asp-validation-for="Name" class="text-danger"></span>
-                <div class="form-text text-warning">Увага: Ви редагуєте первинний ключ (назву складу). Переконайтеся, що нова назва унікальна.</div>
-            </div>
+                        @* Можливо, потрібне приховане поле для OriginalName, якщо Name можна змінювати і воно є ключем.
+                           Але ваш asp-route-name="@originalName" вже передає старе ім'я для пошуку.
+                           Якщо сама властивість Model.Name теж змінюється, то все окей.
+                        *@
+                        @* <input type="hidden" name="originalName" value="@originalName" /> *@
 
-            <div class="row">
-                <div class="col-md-8 mb-3">
-                    <label asp-for="StreetName" class="form-label"></label>
-                    <input asp-for="StreetName" class="form-control" />
-                    <span asp-validation-for="StreetName" class="text-danger"></span>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label asp-for="HouseNumber" class="form-label"></label>
-                    <input asp-for="HouseNumber" class="form-control" />
-                    <span asp-validation-for="HouseNumber" class="text-danger"></span>
-                </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-5 mb-3">
-                    <label asp-for="City" class="form-label"></label>
-                    <input asp-for="City" class="form-control" />
-                    <span asp-validation-for="City" class="text-danger"></span>
-                </div>
-                <div class="col-md-4 mb-3">
-                    <label asp-for="Region" class="form-label"></label>
-                    <input asp-for="Region" class="form-control" />
-                    <span asp-validation-for="Region" class="text-danger"></span>
-                </div>
-                <div class="col-md-3 mb-3">
-                    <label asp-for="PostalCode" class="form-label"></label>
-                    <input asp-for="PostalCode" class="form-control" />
-                    <span asp-validation-for="PostalCode" class="text-danger"></span>
-                </div>
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control form-control-sm" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                            <div class="form-text text-warning small"><i class="bi bi-exclamation-triangle me-1"></i>Warning: You are editing the primary identifier (Storage Name). Ensure the new name is unique.</div> @* Translated & Icon *@
+                        </div>
 
-            <div class="mb-3 mt-4">
-                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
-                <a asp-action="Index" class="btn btn-secondary">Назад до списку</a>
-            </div>
-        </form>
-    </div>
-</div>
+                        <div class="row g-3">
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="StreetName" class="form-label fw-semibold"></label>
+                                <input asp-for="StreetName" class="form-control form-control-sm" />
+                                <span asp-validation-for="StreetName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="HouseNumber" class="form-label fw-semibold"></label>
+                                <input asp-for="HouseNumber" class="form-control form-control-sm" />
+                                <span asp-validation-for="HouseNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            <div class="col-md-5 mb-3">
+                                <label asp-for="City" class="form-label fw-semibold"></label>
+                                <input asp-for="City" class="form-control form-control-sm" />
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Region" class="form-label fw-semibold"></label>
+                                <input asp-for="Region" class="form-control form-control-sm" />
+                                <span asp-validation-for="Region" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="PostalCode" class="form-label fw-semibold"></label>
+                                <input asp-for="PostalCode" class="form-control form-control-sm" />
+                                <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

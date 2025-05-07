@@ -1,120 +1,141 @@
 ﻿@model X.PagedList.IPagedList<IMS.Models.Product>
- @using IMS.Models
- @using X.PagedList.Mvc.Core;
- @using X.PagedList;
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
 
 @{
-    ViewData["Title"] = "Довідник товарів";
+    ViewData["Title"] = "Product Catalog"; // Translated
     Layout = "_Layout";
     bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<div class="d-flex justify-content-between align-items-center mb-3">
+@* Панель дій *@
+<div class="p-3 mb-3 bg-light border rounded-3 d-flex justify-content-between align-items-center">
     @if (canManage)
     {
-        <a asp-action="Create" class="btn btn-primary">Створити новий товар</a>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Create New Product @* Translated & Icon *@
+        </a>
     }
-    <button class="btn btn-secondary btn-sm ms-auto" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
-        <i class="bi bi-funnel"></i> Фільтри / Пошук
+    else
+    {
+        <span></span> @* Placeholder для вирівнювання, якщо кнопка "Створити" відсутня *@
+    }
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Filters / Search @* Translated *@
     </button>
 </div>
 
-<table class="table table-sm table-bordered table-hover">
-    <thead class="table-light">
-        <tr>
-            <th>@Html.DisplayNameFor(model => model.First().ProductName)</th>
-            <th>Одиниця виміру</th>
-            <th>@Html.DisplayNameFor(model => model.First().LastPrice)</th>
-            <th>Дії</th>
-        </tr>
-    </thead>
-    <tbody>
-        @if (Model.Any())
-        {
-            @foreach (var item in Model)
+@* Додано table-striped *@
+<div class="table-responsive">
+    <table class="table table-sm table-bordered table-hover table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().ProductName)</th>
+                <th>Unit of Measure</th> @* Translated *@
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().LastPrice)</th>
+                <th>Actions</th> @* Translated *@
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
             {
-                <tr>
-                    <td>@Html.DisplayFor(modelItem => item.ProductName)</td>
-                    <td>@Html.DisplayFor(modelItem => item.UnitCodeNavigation.UnitName)</td>
-                    <td>@item.LastPrice.ToString("C2")</td>
-                    <td>
-                        <a asp-action="Details" asp-route-productName="@item.ProductName" class="btn btn-sm btn-info">Деталі</a>
-                        @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
-                        {
-                            <text> | </text>
-                            <a asp-action="Edit" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-secondary">Редагувати</a>
-                            <text> | </text>
-                            <a asp-action="Delete" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-danger">Видалити</a>
-                        }
-                    </td>
-                </tr>
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.ProductName)</td>
+                        <td>@Html.DisplayFor(modelItem => item.UnitCodeNavigation.UnitName)</td>
+                        <td>@item.LastPrice.ToString("C2")</td>
+                        <td>
+                            <a asp-action="Details" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-info" title="Details">
+                                @* Icon & Title *@
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+                            @if (canManage)
+                            {
+                                <text> | </text>
+                                <a asp-action="Edit" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                    @* Icon & Title *@
+                                    <i class="bi bi-pencil-square"></i>
+                                </a>
+                                <text> | </text>
+                                <a asp-action="Delete" asp-route-productName="@item.ProductName" class="btn btn-sm btn-outline-danger" title="Delete">
+                                    @* Icon & Title *@
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            }
+                        </td>
+                    </tr>
+                }
             }
-        }
-        else
-        {
-            <tr><td colspan="4" class="text-center text-muted">Товарів за вашим запитом не знайдено.</td></tr>
-        }
-    </tbody>
-</table>
+            else
+            {
+                <tr><td colspan="4" class="text-center text-muted">No products found matching your query.</td></tr> @* Translated *@
+            }
+        </tbody>
+    </table>
+</div>
 
-<div class="d-flex justify-content-center">
+@* Пагінатор (без змін) *@
+<div class="d-flex justify-content-center mt-3">
     @Html.PagedListPager(Model, page => Url.Action("Index", new
         {
-            page = page, 
-            searchString = ViewData["CurrentNameFilter"], 
-            filterUnitCode = ViewData["CurrentUnitFilter"] 
+            page = page,
+            searchString = ViewData["CurrentNameFilter"],
+            filterUnitCode = ViewData["CurrentUnitFilter"]
         }),
             new PagedListRenderOptions
     {
         LiElementClasses = new[] { "page-item" },
         PageClasses = new[] { "page-link" },
-        UlElementClasses = new[] { "pagination" },
-        DisplayLinkToFirstPage = PagedListDisplayMode.Always,
-        DisplayLinkToLastPage = PagedListDisplayMode.Always,
-        DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
-        DisplayLinkToNextPage = PagedListDisplayMode.Always,
-        DisplayLinkToIndividualPages = true,
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
     })
 </div>
 
+@* Offcanvas для фільтрів (з перекладом) *@
 <div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
     <div class="offcanvas-header border-bottom">
-        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Фільтри та Пошук Товарів</h5>
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Filters and Search Products</h5> @* Translated *@
         <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
     </div>
     <div class="offcanvas-body">
         <form asp-action="Index" method="get" id="productFilterForm">
             <div class="mb-3 position-relative">
-                <label for="searchStringInput" class="form-label fw-semibold">Пошук за назвою</label>
+                <label for="searchStringInput" class="form-label fw-semibold">Search by name</label> @* Translated *@
                 <input type="text" id="searchStringInput" name="searchString" value="@ViewData["CurrentNameFilter"]"
                        class="form-control form-control-sm" autocomplete="off"
                        data-autocomplete="true"
-                       data-autocomplete-url="@Url.Action("Autocomplete", "Product")" 
+                       data-autocomplete-url="@Url.Action("Autocomplete", "Product")"
                        data-autocomplete-min-length="2"
-                       data-autocomplete-list-target="#autocomplete-list" /> 
+                       data-autocomplete-list-target="#autocomplete-list" />
                 <ul id="autocomplete-list" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
             </div>
             <div class="mb-3">
-                <label for="unitFilterSelect" class="form-label fw-semibold">Фільтр за од. вим.</label>
+                <label for="unitFilterSelect" class="form-label fw-semibold">Filter by Unit</label> @* Translated *@
                 <select id="unitFilterSelect" name="filterUnitCode" asp-items="@ViewBag.UnitCodeFilterList" class="form-select form-select-sm">
-                    <option value="">-- Всі одиниці --</option>
+                    <option value="">-- All Units --</option> @* Translated *@
                 </select>
             </div>
 
             <div class="d-grid gap-2 mt-4">
-                <button type="submit" class="btn btn-primary">Застосувати</button>
-                <button type="button" class="btn btn-outline-secondary"
-                        data-reset-form-target="#productFilterForm">
-                    Скинути Все
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Apply @* Translated & Icon *@
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-reset-form-target="#productFilterForm">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset All @* Translated & Icon *@
                 </button>
             </div>
         </form>
     </div>
 </div>
 
-
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

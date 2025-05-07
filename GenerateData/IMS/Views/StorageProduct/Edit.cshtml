@@ -1,59 +1,85 @@
 ﻿@model IMS.ViewModels.EditStorageProductViewModel
+@using IMS.Models 
 
 @{
-    ViewData["Title"] = $"Коригування: {Model.ProductDisplayName ?? Model.ProductName} на складі {Model.StorageName}";
+    ViewData["Title"] = $"Adjust Stock: {(Model.ProductDisplayName ?? Model.ProductName)} at {Model.StorageName}"; // Translated
     Layout = "_Layout";
 }
 
-<h1>@ViewData["Title"]</h1>
-<p class="text-danger">Увага! Виконується ручне коригування залишків. Використовуйте обережно.</p>
-<hr />
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7 col-xl-6">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning" role="alert">
+                        @* Змінив на alert-warning, додав іконку *@
+                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+                        <strong>Attention!</strong> You are performing a manual stock adjustment. Use with caution. @* Translated *@
+                    </div>
+                    @* <hr /> -- Прибрано *@
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit" asp-route-storageName="@Model.StorageName" asp-route-productName="@Model.ProductName" method="post">
-            @Html.AntiForgeryToken()
-            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                    <form asp-action="Edit" asp-route-storageName="@Model.StorageName" asp-route-productName="@Model.ProductName" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-            <input type="hidden" asp-for="StorageName" />
-            <input type="hidden" asp-for="ProductName" />
+                        <input type="hidden" asp-for="StorageName" />
+                        <input type="hidden" asp-for="ProductName" />
+                        @* Додав приховані поля, якщо DisplayName потрібні на POST (зазвичай ні) *@
+                        @* <input type="hidden" asp-for="ProductDisplayName" /> *@
+                        @* <input type="hidden" asp-for="UnitName" /> *@
 
-            <div class="mb-3">
-                <label class="form-label">Склад</label>
-                <p class="form-control-plaintext"><strong>@Html.DisplayFor(model => model.StorageName)</strong></p>
-            </div>
-            <div class="mb-3">
-                <label class="form-label">Товар</label>
-                <p class="form-control-plaintext"><strong>@Html.DisplayFor(model => model.ProductDisplayName) (@Html.DisplayFor(model => model.UnitName))</strong></p>
-            </div>
 
-            <div class="mb-3">
-                <label asp-for="Count" class="form-label"></label>
-                <input asp-for="Count" type="number" step="any" min="0" class="form-control" />
-                <span asp-validation-for="Count" class="text-danger"></span>
-            </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Storage</label> @* Translated *@
+                            <p class="form-control-plaintext ps-0"><strong>@Html.DisplayFor(model => model.StorageName)</strong></p>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Product</label> @* Translated *@
+                            <p class="form-control-plaintext ps-0"><strong>@Html.DisplayFor(model => model.ProductDisplayName) (@Html.DisplayFor(model => model.UnitName))</strong></p>
+                        </div>
 
-            <div class="mb-3">
-                <label asp-for="MinimalCount" class="form-label"></label>
-                <input asp-for="MinimalCount" type="number" step="any" min="0" class="form-control" />
-                <span asp-validation-for="MinimalCount" class="text-danger"></span>
-            </div>
+                        <hr> @* Розділювач перед полями вводу *@
 
-            <div class="mb-3">
-                <label asp-for="AdjustmentReason" class="form-label"></label>
-                <textarea asp-for="AdjustmentReason" class="form-control" rows="3"></textarea>
-                <span asp-validation-for="AdjustmentReason" class="text-danger"></span>
-                <div class="form-text">Вкажіть причину зміни (напр., 'Інвентаризація 01.01.2024', 'Списання пошкодженого', 'Корекція помилки').</div>
-            </div>
+                        <div class="mb-3">
+                            <label asp-for="Count" class="form-label fw-semibold"></label>
+                            <input asp-for="Count" type="number" step="any" min="0" class="form-control form-control-sm" />
+                            <span asp-validation-for="Count" class="text-danger small"></span>
+                        </div>
 
-            <div class="mb-3 mt-4">
-                <button type="submit" class="btn btn-primary">Зберегти зміни</button>
-                <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.StorageName" class="btn btn-secondary">Скасувати</a>
-            </div>
-        </form>
-    </div>
-</div>
+                        <div class="mb-3">
+                            <label asp-for="MinimalCount" class="form-label fw-semibold"></label>
+                            <input asp-for="MinimalCount" type="number" step="any" min="0" class="form-control form-control-sm" />
+                            <span asp-validation-for="MinimalCount" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="AdjustmentReason" class="form-label fw-semibold"></label>
+                            <textarea asp-for="AdjustmentReason" class="form-control form-control-sm" rows="3"></textarea>
+                            <span asp-validation-for="AdjustmentReason" class="text-danger small"></span>
+                            <div class="form-text small">Please specify the reason for this adjustment (e.g., 'Inventory count 2024-05-07', 'Damaged goods write-off', 'Error correction').</div> @* Translated & smaller text *@
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            @* Кнопка "Скасувати" повертає на сторінку деталей складу *@
+                            <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.StorageName" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-1"></i>Save Changes @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />
- }
+}

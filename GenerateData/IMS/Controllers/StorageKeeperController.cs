@@ -484,6 +484,7 @@ namespace IMS.Controllers
                 {
                     var invoicesQuery = _context.Invoices
                        .Where(i => i.SenderKeeperPhone == phoneNumber || i.ReceiverKeeperPhone == phoneNumber)
+                       .Include(i => i.ListEntries)
                        .OrderByDescending(i => i.Date).ThenByDescending(i => i.InvoiceId)
                        .AsNoTracking();
                     pagedInvoices = await invoicesQuery.ToPagedListAsync(iPage, _pageSize);

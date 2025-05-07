@@ -4,7 +4,7 @@
 
 @{
     bool hasData = Model != null && Model.Any();
-    const int colspan = 4; 
+    const int colspan = 3; // Оновлено на 3, оскільки зараз 3 видимі колонки
 }
 
 <div class="table-responsive">
@@ -14,6 +14,7 @@
                 <th>Product Name</th>
                 <th>Unit</th>
                 <th>Last Price</th>
+                @* Якщо в майбутньому знадобиться колонка дій, додасте її сюди і оновите colspan *@
             </tr>
         </thead>
         <tbody>
@@ -23,10 +24,13 @@
                 {
                     <tr>
                         <td>
+                            @* --- Зроблено посиланням --- *@
+                            <a asp-controller="Product" asp-action="Details" asp-route-productName="@product.ProductName">
                                 @product.ProductName
+                            </a>
                         </td>
                         <td>@(product.UnitCodeNavigation?.UnitName ?? "--") (@product.UnitCode)</td>
-                        <td>@product.LastPrice.ToString("C2")</td>
+                        <td class="text-end">@product.LastPrice.ToString("C2")</td> @* Додав text-end для цін *@
                     </tr>
                 }
             }
