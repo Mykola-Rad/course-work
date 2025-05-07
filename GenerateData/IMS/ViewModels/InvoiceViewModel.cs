@@ -1,40 +1,41 @@
-﻿using IMS.Models; 
-using Microsoft.AspNetCore.Mvc.Rendering; 
+﻿using IMS.Models;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace IMS.ViewModels
 {
-    public class InvoiceViewModel : IValidatableObject 
+    public class InvoiceViewModel : IValidatableObject
     {
-        public int InvoiceId { get; set; } 
+        public int InvoiceId { get; set; }
 
-        [Required(ErrorMessage = "Вкажіть дату.")]
+        [Required(ErrorMessage = "Please enter the date.")]
         [DataType(DataType.Date)]
-        [Display(Name = "Дата документа")]
+        [Display(Name = "Document Date")]
         public DateOnly Date { get; set; } = DateOnly.FromDateTime(DateTime.Today);
 
-        [Required(ErrorMessage = "Оберіть тип накладної.")]
-        [Display(Name = "Тип накладної")]
+        [Required(ErrorMessage = "Please select the invoice type.")]
+        [Display(Name = "Invoice Type")]
         public InvoiceType Type { get; set; }
 
-        [Display(Name = "Статус")]
+        [Display(Name = "Status")]
         public InvoiceStatus Status { get; set; } = InvoiceStatus.draft;
 
-        [Display(Name = "Контрагент")]
+        [Display(Name = "Counterparty")]
         public string? CounterpartyName { get; set; }
 
-        [Display(Name = "Склад-Відправник")]
+        [Display(Name = "Sender Storage")]
         public string? SenderStorageName { get; set; }
 
-        [Display(Name = "Склад-Одержувач")]
+        [Display(Name = "Receiver Storage")]
         public string? ReceiverStorageName { get; set; }
 
-        [Display(Name = "Комірник-Відправник")]
+        [Display(Name = "Sender Keeper")]
         public string? SenderKeeperPhone { get; set; }
 
-        [Display(Name = "Комірник-Одержувач")]
+        [Display(Name = "Receiver Keeper")]
         public string? ReceiverKeeperPhone { get; set; }
 
         public List<InvoiceListEntryViewModel> ListEntries { get; set; } = new List<InvoiceListEntryViewModel>();
@@ -55,33 +56,33 @@ namespace IMS.ViewModels
 
             if (needsCounterparty && string.IsNullOrEmpty(CounterpartyName))
             {
-                yield return new ValidationResult("Контрагент є обов'язковим для цього типу накладної.", new[] { nameof(CounterpartyName) });
+                yield return new ValidationResult("Counterparty is required for this invoice type.", new[] { nameof(CounterpartyName) });
             }
             if (needsSenderStorage && string.IsNullOrEmpty(SenderStorageName))
             {
-                yield return new ValidationResult("Склад-Відправник є обов'язковим для цього типу накладної.", new[] { nameof(SenderStorageName) });
+                yield return new ValidationResult("Sender Storage is required for this invoice type.", new[] { nameof(SenderStorageName) });
             }
             if (needsReceiverStorage && string.IsNullOrEmpty(ReceiverStorageName))
             {
-                yield return new ValidationResult("Склад-Одержувач є обов'язковим для цього типу накладної.", new[] { nameof(ReceiverStorageName) });
+                yield return new ValidationResult("Receiver Storage is required for this invoice type.", new[] { nameof(ReceiverStorageName) });
             }
             if (Type == InvoiceType.transfer && SenderStorageName == ReceiverStorageName && !string.IsNullOrEmpty(SenderStorageName))
             {
-                yield return new ValidationResult("Склад-Відправник та Склад-Одержувач не можуть бути однаковими для переміщення.", new[] { nameof(ReceiverStorageName) });
+                yield return new ValidationResult("Sender Storage and Receiver Storage cannot be the same for a transfer.", new[] { nameof(ReceiverStorageName) });
             }
 
             if (needsSenderKeeper && string.IsNullOrEmpty(SenderKeeperPhone))
             {
-                yield return new ValidationResult("Комірник-Відправник є обов'язковим для цього типу накладної.", new[] { nameof(SenderKeeperPhone) });
+                yield return new ValidationResult("Sender Keeper is required for this invoice type.", new[] { nameof(SenderKeeperPhone) });
             }
             if (needsReceiverKeeper && string.IsNullOrEmpty(ReceiverKeeperPhone))
             {
-                yield return new ValidationResult("Комірник-Одержувач є обов'язковим для цього типу накладної.", new[] { nameof(ReceiverKeeperPhone) });
+                yield return new ValidationResult("Receiver Keeper is required for this invoice type.", new[] { nameof(ReceiverKeeperPhone) });
             }
 
-            if (ListEntries == null || !ListEntries.Any(le => !le.IsMarkedForDeletion)) 
+            if (ListEntries == null || !ListEntries.Any(le => !le.IsMarkedForDeletion))
             {
-                yield return new ValidationResult("Накладна має містити хоча б одну позицію товару.", new[] { nameof(ListEntries) });
+                yield return new ValidationResult("The invoice must contain at least one product item.", new[] { nameof(ListEntries) });
             }
             else
             {
@@ -91,7 +92,7 @@ namespace IMS.ViewModels
                     {
                         if (entry.Price <= 0)
                         {
-                            yield return new ValidationResult($"Ціна для товару '{entry.ProductName}' має бути більше нуля.", new[] { nameof(ListEntries) });
+                            yield return new ValidationResult($"Price for product '{entry.ProductName}' must be greater than zero.", new[] { nameof(ListEntries) });
                         }
                     }
                 }
