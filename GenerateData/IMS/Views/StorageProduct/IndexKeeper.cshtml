@@ -1,0 +1,224 @@
+﻿@model X.PagedList.IPagedList<IMS.Models.StorageProduct>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = "Current Stock Items"; // Translated (Може бути уточнено, якщо це склад конкретного комірника, напр. "My Stock Items")
+    Layout = "_Layout";
+    var currentSearch = ViewData["CurrentSearch"] as string;
+    var currentUnitFilter = ViewData["CurrentUnitFilter"] as string;
+    // bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    // canManage тут не використовується, тому можна прибрати, якщо не потрібне для інших цілей.
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* Панель дій - тільки кнопка фільтрів та повернення на дашборд *@
+<div class="p-3 mb-3 bg-light border rounded-3 d-flex justify-content-end align-items-center">
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Filters / Search @* Translated *@
+    </button>
+    @* Кнопка "На Дашборд" видалена, оскільки є стандартна "Home" в бічному меню *@
+    @* <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary btn-sm ms-2">Back to Dashboard</a> *@
+</div>
+
+@* Додано table-bordered table-striped та обгортку table-responsive *@
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>Product</th> @* Translated *@
+                <th class="text-end">Current Qty</th> @* Translated & Aligned *@
+                <th class="text-end">Min. Stock</th> @* Translated & Aligned *@
+                <th>Unit</th> @* Translated *@
+                @* На цій сторінці, схоже, окремої колонки "Actions" не було, редагування Min.Stock вбудоване *@
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr data-storage-name="@item.StorageName" data-product-name="@item.ProductName">
+                        <td>
+                            <a asp-controller="Product" asp-action="Details" asp-route-productName="@item.ProductName">
+                                @item.ProductName
+                            </a>
+                        </td>
+                        <td class="text-end">@item.Count.ToString("N2")</td>
+                        <td class="min-count-td text-end">
+                            @* Додав text-end *@
+                            <span class="min-count-display">@item.MinimalCount.ToString("N2")</span>
+                            <div class="min-count-edit input-group input-group-sm" style="display: none;">
+                                <input type="text" class="form-control form-control-sm min-count-input" value="@item.MinimalCount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture)" /> @* Додав form-control-sm *@
+                                <button class="btn btn-sm btn-outline-success min-count-save" type="button" title="Save"><i class="bi bi-check-lg"></i></button> @* Додав btn-sm *@
+                                <button class="btn btn-sm btn-outline-secondary min-count-cancel" type="button" title="Cancel"><i class="bi bi-x-lg"></i></button> @* Додав btn-sm *@
+                            </div>
+                            <button class="btn btn-link btn-sm edit-min-inline-btn p-0 ms-2 align-baseline" type="button" title="Edit Min. Stock"><i class="bi bi-pencil-square"></i></button> @* Додав ms-2 для відступу *@
+                            <div class="min-count-error text-danger small" style="display: none;"></div>
+                        </td>
+                        <td>@item.ProductNameNavigation?.UnitCodeNavigation?.UnitName</td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="4" class="text-center text-muted">No products found matching your query.</td></tr> @* Translated & Colspan=4 *@
+            }
+        </tbody>
+    </table>
+</div>
+
+@* Пагінатор (без змін, але передає filterLowStock=false, якщо це спільна дія Index) *@
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+            new
+            {
+                page = page,
+                searchString = currentSearch,
+                filterUnitName = currentUnitFilter,
+                filterLowStock = false // Явно вказуємо, що це не звіт по низьких залишках
+            }),
+            new PagedListRenderOptions
+    {
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+    })
+</div>
+
+@Html.AntiForgeryToken() @* Залишаємо для AJAX POST редагування мін. залишку *@
+
+@* Offcanvas для фільтрів (з перекладом) *@
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Stock Items Filters</h5> @* Translated *@
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="keeperFilterForm">
+            @* Унікальний ID *@
+            @* Якщо цей View викликається з Index, що може мати filterLowStock, то його треба передати *@
+            @* <input type="hidden" name="filterLowStock" value="false" /> *@
+            <div class="mb-3 position-relative">
+                <label for="searchStringInput" class="form-label fw-semibold">Search by Product Name</label> @* Translated *@
+                <input type="text" id="searchStringInput" name="searchString" value="@currentSearch"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteStockProductName", "StorageProduct")"
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#stockProductNameAutocompleteList" />
+                <ul id="stockProductNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+            <div class="mb-3">
+                <label for="unitFilterSelect" class="form-label fw-semibold">Filter by Unit</label> @* Translated *@
+                <select id="unitFilterSelect" name="filterUnitName" asp-items="@ViewBag.UnitNameFilterList" class="form-select form-select-sm">
+                    <option value="">-- All Units --</option> @* Translated *@
+                </select>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Apply @* Translated & Icon *@
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-reset-form-target="#keeperFilterForm">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset All @* Translated & Icon *@
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+@section Scripts {
+	<script>
+		$(document).ready(function () {
+			$('table').on('click', '.edit-min-inline-btn', function () {
+				var td = $(this).closest('tr').find('td.min-count-td');
+				td.find('.min-count-display').hide();
+				td.find('.min-count-edit').show();
+				td.find('.min-count-input').focus().select();
+				td.find('.min-count-error').hide().text('');
+			});
+
+			$('table').on('click', '.min-count-cancel', function () {
+				var td = $(this).closest('td.min-count-td');
+				td.find('.min-count-edit').hide();
+				td.find('.min-count-display').show();
+				td.find('.min-count-error').hide().text('');
+			});
+
+			$('table').on('click', '.min-count-save', function () {
+				var saveButton = $(this);
+				var td = saveButton.closest('td.min-count-td');
+				var editDiv = td.find('.min-count-edit');
+				var displaySpan = td.find('.min-count-display');
+				var errorDiv = td.find('.min-count-error');
+				var inputField = editDiv.find('.min-count-input');
+				var tr = td.closest('tr');
+
+				var storageName = tr.data('storage-name');
+				var productName = tr.data('product-name');
+			   var newValue = inputField.val()?.replace(',', '.');
+
+				errorDiv.hide().text('');
+				if (newValue === '' || newValue === null || isNaN(parseFloat(newValue)) || parseFloat(newValue) < 0) {
+                     errorDiv.text('Enter a valid non-negative number.').show();
+                     return;
+				}
+
+				var token = $('input[name="__RequestVerificationToken"]').val();
+				var postUrl = "@Url.Action("EditMinimalCountOnly", "StorageProduct")";
+
+				var dataToSend = {
+					StorageName: storageName,
+					ProductName: productName,
+					MinimalCount: newValue,
+					 __RequestVerificationToken: token
+				};
+
+				console.log("Sending AJAX Data:", dataToSend);
+
+				saveButton.prop('disabled', true);
+
+				$.ajax({
+					url: postUrl,
+					method: "POST",
+					data: dataToSend,
+					success: function (response) {
+						console.log("AJAX Success:", response);
+						if (response.success) {
+							 var formattedValue = parseFloat(response.newMinimalCount).toLocaleString('uk-UA', {
+								 minimumFractionDigits: 2,
+								 maximumFractionDigits: 2
+							 });
+							displaySpan.text(formattedValue);
+							editDiv.hide();
+							displaySpan.show();
+						} else {
+							var errorMessage = response.message || "Error saving.";
+							 if(response.errors && response.errors.length > 0) {
+								  errorMessage += ": " + response.errors.join("; ");
+							 }
+							errorDiv.text(errorMessage).show();
+						}
+					},
+					error: function (jqXHR, textStatus, errorThrown) {
+						console.error("AJAX Error: " + textStatus + " - " + errorThrown);
+						console.error("Server Response: ", jqXHR.responseText);
+                         errorDiv.text('Server communication error.').show();
+					},
+					complete: function() {
+						saveButton.prop('disabled', false);
+					}
+				});
+			});
+		});
+	</script>
+ }

@@ -1,0 +1,142 @@
+﻿@model IMS.ViewModels.StorageKeeperDetailsViewModel
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = $"Keeper Details: {Model.Keeper.FirstName} {Model.Keeper.LastName}";
+    Layout = "_Layout";
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+    var activeTab = ViewData["ActiveTab"] as string ?? "info";
+}
+
+@* Обгортаємо все в Card *@
+<div class="card shadow-sm mt-3">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h1 class="mb-0 h4">@($"{Model.Keeper.FirstName} {Model.Keeper.LastName}") <small class="text-muted">(@Model.Keeper.PhoneNumber)</small></h1>
+        <div>
+            @* Обгортка для кнопок у хедері *@
+            @* Універсальна кнопка "Назад" *@
+            @if (Model.FromStorage && !string.IsNullOrEmpty(Model.Keeper.StorageName))
+            {
+                <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.Keeper.StorageName" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Storage @* Translated & Icon *@
+                </a>
+            }
+            else
+            {
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                    <i class="bi bi-arrow-left me-1"></i>Back to Keepers List @* Translated & Icon *@
+                </a>
+            }
+        </div>
+    </div>
+    <div class="card-body">
+        @* Навігація по вкладках *@
+        <nav class="mb-3">
+            <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                <button class="nav-link @(activeTab == "info" ? "active" : "")" id="nav-info-tab" data-bs-toggle="tab" data-bs-target="#nav-info" type="button" role="tab" aria-controls="nav-info" aria-selected="@(activeTab == "info")">Information</button> @* Translated *@
+                @if (!Model.FromStorage) // Показуємо вкладку накладних, тільки якщо не перейшли зі складу
+                {
+                    <button class="nav-link @(activeTab == "invoices" ? "active" : "")" id="nav-invoices-tab" data-bs-toggle="tab" data-bs-target="#nav-invoices" type="button" role="tab" aria-controls="nav-invoices" aria-selected="@(activeTab == "invoices")">Invoices</button> @* Translated *@
+                }
+            </div>
+        </nav>
+
+        @* Контент вкладок *@
+        <div class="tab-content pt-3" id="nav-tabContent">
+
+            @* --- Панель "Інформація" --- *@
+            <div class="tab-pane fade @(activeTab == "info" ? "show active" : "")" id="nav-info" role="tabpanel" aria-labelledby="nav-info-tab" tabindex="0">
+                <h4>Keeper Details</h4> @* Translated *@
+                <hr />
+                <dl class="row">
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Keeper.LastName)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.LastName)</dd>
+
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Keeper.FirstName)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.FirstName)</dd>
+
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Keeper.PhoneNumber)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.PhoneNumber)</dd>
+
+                    <dt class="col-sm-3 fw-semibold">@Html.DisplayNameFor(model => model.Keeper.Email)</dt>
+                    <dd class="col-sm-9">@Html.DisplayFor(model => model.Keeper.Email)</dd>
+
+                    <dt class="col-sm-3 fw-semibold">Assigned Storage</dt> @* Translated *@
+                    <dd class="col-sm-9">
+                        @if (Model.Keeper.StorageNameNavigation != null)
+                        {
+                            <a asp-controller="Storage" asp-action="Details" asp-route-name="@Model.Keeper.StorageName">
+                                @Model.Keeper.StorageNameNavigation.Name
+                            </a>
+                        }
+                        else
+                        {
+                            <span class="text-muted fst-italic">N/A</span>
+                        } @* Translated *@
+                    </dd>
+
+                    <dt class="col-sm-3 fw-semibold">Linked Login</dt> @* Translated *@
+                    <dd class="col-sm-9">
+                        @if (Model.Keeper.User != null)
+                        {
+                            <a asp-controller="Admin" asp-action="EditUser" asp-route-id="@Model.Keeper.UserId">@Model.Keeper.User.Username</a>
+                        }
+                        else
+                        {
+                            <span class="text-muted fst-italic">-- None --</span>
+                        } @* Translated *@
+                    </dd>
+                </dl>
+                @* Кнопку редагування перенесено в card-header для вкладки "info" *@
+            </div>
+
+            @* --- Панель "Накладні" (умовно) --- *@
+            @if (!Model.FromStorage)
+            {
+                <div class="tab-pane fade @(activeTab == "invoices" ? "show active" : "")" id="nav-invoices" role="tabpanel" aria-labelledby="nav-invoices-tab" tabindex="0">
+                    <h4>Invoices related to Keeper <span class="text-muted">(@Model.Keeper.PhoneNumber)</span></h4> @* Translated *@
+                    <hr />
+                    @if (Model.RelatedInvoices != null && Model.RelatedInvoices.Any())
+                    {
+                        @* Використовуємо Partial для таблиці накладних *@
+                        @await Html.PartialAsync("_InvoiceTablePartial", Model.RelatedInvoices)
+
+                        @* Пагінатор для Накладних *@
+                        <div class="d-flex justify-content-center mt-3">
+                            @Html.PagedListPager(Model.RelatedInvoices, page => Url.Action("Details",
+                                     new
+                                     {
+                                         phoneNumber = Model.Keeper.PhoneNumber,
+                                         iPage = page,
+                                         activeTab = "invoices",
+                                         fromStorage = Model.FromStorage
+                                     }),
+                                     new PagedListRenderOptions
+                    {
+                        LiElementClasses = new[] { "page-item" },
+                        PageClasses = new[] { "page-link" },
+                        UlElementClasses = new[] { "pagination", "pagination-sm" },
+                        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+                        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+                        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+                    })
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-muted text-center mt-3">No invoices related to this keeper.</p>
+                    } @* Translated *@
+                </div>
+            }
+        </div> @* Кінець tab-content *@
+    </div> @* кінець card-body *@
+</div> @* кінець card *@
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+@* Скрипти для активації вкладок по хешу зазвичай не потрібні, якщо сервер керує класом 'active' *@
+}

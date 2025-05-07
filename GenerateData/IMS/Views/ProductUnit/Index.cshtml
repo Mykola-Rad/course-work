@@ -1,0 +1,120 @@
+﻿@model X.PagedList.IPagedList<IMS.Models.ProductUnit>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = "Units of Measure"; // Translated
+    Layout = "_Layout";
+    bool canManage = User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* Оновлена Панель Дій *@
+<div class="p-3 mb-3 bg-light border rounded-3 d-flex justify-content-between align-items-center">
+    @if (canManage)
+    {
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-1"></i>Create New Unit @* Translated & Icon *@
+        </a>
+    }
+    else
+    {
+        <span></span> @* Placeholder для збереження вирівнювання, якщо кнопка "Створити" відсутня *@
+    }
+
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Search @* Translated *@
+    </button>
+</div>
+
+@* Додано table-bordered table-striped та обгортку table-responsive *@
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-bordered table-striped">
+        <thead class="table-light">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().UnitCode)</th>
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().UnitName)</th>
+                <th>Actions</th> @* Translated *@
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@Html.DisplayFor(modelItem => item.UnitCode)</td>
+                        <td>@Html.DisplayFor(modelItem => item.UnitName)</td>
+                        <td>
+                            @* Оновлені кнопки дій з іконками *@
+                            <a asp-action="Edit" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-secondary" title="Edit">
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-unitCode="@item.UnitCode" class="btn btn-sm btn-outline-danger" title="Delete">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="3" class="text-center text-muted">No units of measure found matching your query.</td></tr> @* Translated *@
+            }
+        </tbody>
+    </table>
+</div>
+
+@* Пагінатор (без змін) *@
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+            new { page = page, searchString = ViewData["CurrentFilter"] }),
+            new PagedListRenderOptions
+    {
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+    })
+</div>
+
+@* Offcanvas для фільтрів (з перекладом) *@
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Search Units of Measure</h5> @* Translated *@
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="productUnitFilterForm">
+            <div class="mb-3 position-relative">
+                <label for="searchInput" class="form-label fw-semibold">Search by Code or Name</label> @* Translated *@
+                <input type="text" id="searchInput" name="searchString" value="@ViewData["CurrentFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("Autocomplete", "ProductUnit")"
+                       data-autocomplete-min-length="1"
+                       data-autocomplete-list-target="#unit-autocomplete-list" />
+                <ul id="unit-autocomplete-list" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-search me-1"></i>Search @* Translated & Icon (Змінив з "Apply" на "Search") *@
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-reset-form-target="#productUnitFilterForm">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset All @* Translated & Icon *@
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

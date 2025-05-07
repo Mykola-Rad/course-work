@@ -1,0 +1,28 @@
+﻿@{
+    ViewData["Title"] = "Access Denied"; 
+    Layout = "_Layout";
+}
+
+<div class="container mt-5 text-center">
+
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <h1 class="display-4 text-danger mb-3">
+                <i class="bi bi-slash-circle-fill me-2"></i>
+                @ViewData["Title"]
+            </h1>
+
+            <div class="alert alert-danger" role="alert">
+                <p class="lead mb-0">You do not have permission to access this resource.</p>
+            </div>
+
+            <div class="mt-4">
+                <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                    <i class="bi bi-arrow-left me-1"></i> Back to Home 
+                </a>
+            </div>
+
+        </div>
+    </div>
+</div> 

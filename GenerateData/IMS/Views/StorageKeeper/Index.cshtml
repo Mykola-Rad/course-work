@@ -1,0 +1,154 @@
+﻿@model X.PagedList.IPagedList<IMS.Models.StorageKeeper>
+@using IMS.Models
+@using X.PagedList.Mvc.Core
+@using X.PagedList
+
+@{
+    ViewData["Title"] = "Storage Keepers Management"; // Translated
+    Layout = "_Layout";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+@* Оновлена Панель Дій *@
+<div class="p-3 mb-3 bg-light border rounded-3 d-flex justify-content-between align-items-center">
+    <a asp-action="Create" class="btn btn-primary">
+        <i class="bi bi-person-plus-fill me-1"></i>Create New Keeper @* Translated & Icon *@
+    </a>
+    <button class="btn btn-secondary btn-sm" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFilters" aria-controls="offcanvasFilters">
+        <i class="bi bi-funnel"></i> Filters / Search @* Translated *@
+    </button>
+</div>
+
+@* Додано table-bordered та table-responsive *@
+<div class="table-responsive">
+    <table class="table table-sm table-hover table-striped table-bordered">
+        <thead class="table-light">
+            <tr>
+                <th>Full Name</th>
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().PhoneNumber)</th>
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().Email)</th>
+                <th>@Html.DisplayNameFor(model => model.FirstOrDefault().StorageNameNavigation)</th>
+                @* Прибрано стовпець "Прив'язаний логін", оскільки він не був у заголовках вашого останнього коду. Якщо потрібен, додайте сюди і в tbody. *@
+                <th>Actions</th> @* Translated *@
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                @foreach (var item in Model)
+                {
+                    <tr>
+                        <td>@($"{item.FirstName} {item.LastName}")</td>
+                        <td>@Html.DisplayFor(modelItem => item.PhoneNumber)</td>
+                        <td>@Html.DisplayFor(modelItem => item.Email)</td>
+                        <td>
+                            @if (item.StorageNameNavigation != null)
+                            {
+                                <a asp-controller="Storage" asp-action="Details" asp-route-name="@item.StorageName">
+                                    @Html.DisplayFor(modelItem => item.StorageNameNavigation.Name)
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted fst-italic">N/A</span> @* Translated *@
+                            }
+                        </td>
+                        <td>
+                            @* Оновлені кнопки дій з іконками *@
+                            <a asp-action="Details" asp-route-phoneNumber="@item.PhoneNumber" class="btn btn-sm btn-outline-info" title="Details">
+                                <i class="bi bi-info-circle"></i>
+                            </a>
+                            <a asp-action="Edit" asp-route-phoneNumber="@item.PhoneNumber" class="btn btn-sm btn-outline-secondary ms-1" title="Edit">
+                                @* Додав ms-1 *@
+                                <i class="bi bi-pencil-square"></i>
+                            </a>
+                            <a asp-action="Delete" asp-route-phoneNumber="@item.PhoneNumber" class="btn btn-sm btn-outline-danger ms-1" title="Delete">
+                                @* Додав ms-1 *@
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="5" class="text-center text-muted">No storage keepers found matching your query.</td> @* Translated & Colspan=5 *@
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@* Пагінатор (без змін) *@
+<div class="d-flex justify-content-center mt-3">
+    @Html.PagedListPager(Model, page => Url.Action("Index",
+            new
+            {
+                page = page,
+                filterFullName = ViewData["CurrentFullNameFilter"],
+                filterPhone = ViewData["CurrentPhoneFilter"],
+                filterEmail = ViewData["CurrentEmailFilter"],
+                filterStorageName = ViewData["CurrentStorageFilter"]
+            }),
+            new PagedListRenderOptions
+    {
+        LiElementClasses = new[] { "page-item" },
+        PageClasses = new[] { "page-link" },
+        UlElementClasses = new[] { "pagination", "pagination-sm" },
+        DisplayLinkToFirstPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToLastPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToPreviousPage = PagedListDisplayMode.IfNeeded,
+        DisplayLinkToNextPage = PagedListDisplayMode.IfNeeded,
+        ContainerDivClasses = new[] { "d-flex", "justify-content-center" }
+    })
+</div>
+
+@* Offcanvas для фільтрів (з перекладом та fw-semibold для всіх label) *@
+<div class="offcanvas offcanvas-end" tabindex="-1" id="offcanvasFilters" aria-labelledby="offcanvasFiltersLabel">
+    <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabel">Filters and Search Keepers</h5> @* Translated *@
+        <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    </div>
+    <div class="offcanvas-body">
+        <form asp-action="Index" method="get" id="keeperFilterForm">
+            <div class="mb-3 position-relative">
+                <label for="filterFullName" class="form-label fw-semibold">Full Name contains</label> @* Translated & fw-semibold *@
+                <input type="text" id="filterFullName" name="filterFullName" value="@ViewData["CurrentFullNameFilter"]"
+                       class="form-control form-control-sm" autocomplete="off"
+                       data-autocomplete="true"
+                       data-autocomplete-url="@Url.Action("AutocompleteFullName", "StorageKeeper")"
+                       data-autocomplete-min-length="2"
+                       data-autocomplete-list-target="#keeperFullNameAutocompleteList" />
+                <ul id="keeperFullNameAutocompleteList" class="list-group position-absolute w-100 mt-1" style="z-index: 1050; display: none;"></ul>
+            </div>
+            <div class="mb-3">
+                <label for="filterPhone" class="form-label fw-semibold">Phone starts with</label> @* Translated & fw-semibold *@
+                <input type="text" id="filterPhone" name="filterPhone" value="@ViewData["CurrentPhoneFilter"]" class="form-control form-control-sm" />
+            </div>
+            <div class="mb-3">
+                <label for="filterEmail" class="form-label fw-semibold">Email contains</label> @* Translated & fw-semibold *@
+                <input type="text" id="filterEmail" name="filterEmail" value="@ViewData["CurrentEmailFilter"]" class="form-control form-control-sm" />
+            </div>
+            <div class="mb-3">
+                <label for="filterStorage" class="form-label fw-semibold">Storage</label> @* Translated & fw-semibold *@
+                <select id="filterStorage" name="filterStorageName" asp-items="@ViewBag.StorageFilterList" class="form-select form-select-sm">
+                    <option value="">-- All Storages --</option> @* Translated *@
+                </select>
+            </div>
+            <div class="d-grid gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-check-lg me-1"></i>Apply
+                </button>
+                <button type="button" class="btn btn-outline-secondary" data-reset-form-target="#keeperFilterForm">
+                    <i class="bi bi-arrow-clockwise me-1"></i>Reset All
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

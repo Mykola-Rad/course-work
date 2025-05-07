@@ -1,0 +1,82 @@
+﻿@model IMS.Models.Storage
+@using IMS.Models 
+
+@{
+    ViewData["Title"] = "Create New Storage"; // Translated
+    Layout = "_Layout";
+}
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        @* Збільшив ширину колонки, щоб вмістити форму col-md-8 *@
+        <div class="col-md-10 col-lg-9 col-xl-8">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h1 class="mb-0 h4">@ViewData["Title"]</h1>
+                </div>
+                <div class="card-body">
+                    @* <hr /> -- Прибрано *@
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
+
+                        <div class="mb-3">
+                            <label asp-for="Name" class="form-label fw-semibold"></label>
+                            <input asp-for="Name" class="form-control form-control-sm" />
+                            <span asp-validation-for="Name" class="text-danger small"></span>
+                        </div>
+
+                        @* Внутрішня сітка для полів адреси *@
+                        <div class="row g-3">
+                            @* Додав g-3 для відступів між полями в рядку *@
+                            <div class="col-md-8 mb-3">
+                                <label asp-for="StreetName" class="form-label fw-semibold"></label>
+                                <input asp-for="StreetName" class="form-control form-control-sm" />
+                                <span asp-validation-for="StreetName" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="HouseNumber" class="form-label fw-semibold"></label>
+                                <input asp-for="HouseNumber" class="form-control form-control-sm" />
+                                <span asp-validation-for="HouseNumber" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="row g-3">
+                            @* Додав g-3 *@
+                            <div class="col-md-5 mb-3">
+                                <label asp-for="City" class="form-label fw-semibold"></label>
+                                <input asp-for="City" class="form-control form-control-sm" />
+                                <span asp-validation-for="City" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label asp-for="Region" class="form-label fw-semibold"></label>
+                                <input asp-for="Region" class="form-control form-control-sm" />
+                                <span asp-validation-for="Region" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <label asp-for="PostalCode" class="form-label fw-semibold"></label>
+                                <input asp-for="PostalCode" class="form-control form-control-sm" />
+                                <span asp-validation-for="PostalCode" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-plus-circle me-1"></i>Create @* Translated & Icon *@
+                            </button>
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

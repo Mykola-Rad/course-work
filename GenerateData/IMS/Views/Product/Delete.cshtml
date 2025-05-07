@@ -1,0 +1,81 @@
+﻿@model IMS.Models.Product
+@using IMS.Models 
+
+@{
+    ViewData["Title"] = "Delete Product"; // Translated
+    Layout = "_Layout";
+    // Отримуємо попередження з ViewData. Якщо його немає, то видалення можливе.
+    var warningMessage = ViewData["WarningMessage"] as string;
+    bool canDelete = string.IsNullOrEmpty(warningMessage);
+}
+
+<div class="container mt-3">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-7">
+            <div class="card shadow-sm border-danger">
+                @* Картка з червоним акцентом *@
+                <div class="card-header bg-danger text-white">
+                    <h1 class="mb-0 h4">@ViewData["Title"]: @Model.ProductName</h1>
+                </div>
+                <div class="card-body">
+                    <h3 class="text-danger">Are you sure you want to delete this product?</h3> @* Translated *@
+
+                    @if (!canDelete) // Якщо є попередження, показуємо його
+                    {
+                        <div class="alert alert-warning" role="alert">
+                            <i class="bi bi-exclamation-triangle-fill me-2"></i> @warningMessage
+                        </div>
+                    }
+                    else
+                    {
+                        <p class="text-danger">This action is irreversible!</p> @* Translated - показуємо, якщо можна видаляти *@
+                    }
+
+                    <h5 class="mt-4">Product Details:</h5> @* Translated *@
+                    <hr />
+                    <dl class="row mb-4">
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.ProductName)</dt>
+                        <dd class="col-sm-8">@Html.DisplayFor(model => model.ProductName)</dd>
+
+                        <dt class="col-sm-4 fw-semibold">Unit of Measure</dt> @* Translated *@
+                        <dd class="col-sm-8">@Model.UnitCodeNavigation?.UnitName (@Model.UnitCode)</dd>
+
+                        <dt class="col-sm-4 fw-semibold">@Html.DisplayNameFor(model => model.LastPrice)</dt>
+                        <dd class="col-sm-8">@Model.LastPrice.ToString("C2")</dd>
+                    </dl>
+
+                    <hr class="my-4">
+
+                    <form asp-action="Delete" method="post">
+                        @* Переконайтесь, що asp-action вірний (може бути DeleteConfirmed) *@
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="ProductName" /> @* Або інший PK *@
+
+                        <div class="d-flex justify-content-end">
+                            <a asp-action="Index" class="btn btn-secondary me-2">
+                                <i class="bi bi-x-circle me-1"></i>Cancel @* Translated & Icon *@
+                            </a>
+                            @if (canDelete)
+                            {
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="bi bi-trash3-fill me-1"></i>Delete Product @* Translated & Icon *@
+                                </button>
+                            }
+                            else
+                            {
+                                @* Кнопка заблокована, title береться з warningMessage *@
+                                <button type="button" class="btn btn-danger" disabled title="@(warningMessage ?? "Cannot delete due to dependencies.")">
+                                    <i class="bi bi-trash3-fill me-1"></i>Delete Product
+                                </button>
+                            }
+                        </div>
+                    </form>
+                </div> @* end card-body *@
+            </div> @* end card *@
+        </div> @* end col *@
+    </div> @* end row *@
+</div> @* end container *@
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

@@ -1,0 +1,96 @@
+﻿@using System.Security.Claims
+@using IMS.Models
+
+@if (User.Identity != null && User.Identity.IsAuthenticated)
+{
+    <nav class="nav flex-column nav-main-scrollable">
+        @* Додано клас для прокрутки *@
+        <li class="nav-item">
+            @* Посилання на Home/Dashboard *@
+            <a class="nav-link py-1 d-flex align-items-center @(ViewContext.RouteData.Values["controller"]?.ToString() == "Home" ? "active" : "")" asp-controller="Home" asp-action="Index">
+                <i class="bi bi-house-door-fill me-2"></i><span class="nav-link-text">Home</span>
+            </a>
+        </li>
+
+        @if (User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item">
+                <a class="nav-link nav-section-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapseStock" role="button" aria-expanded="true" aria-controls="collapseStock">
+                    <span class="nav-section-text">Stock</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+            </li>
+            <div class="collapse show" id="collapseStock">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item">
+                        <a class="nav-link py-1 d-flex align-items-center" asp-controller="StorageProduct" asp-action="Index">
+                            <i class="bi bi-box-seam me-2"></i><span class="nav-link-text">Current Stock</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link py-1 d-flex align-items-center" asp-controller="Invoice" asp-action="Index">
+                            <i class="bi bi-receipt me-2"></i><span class="nav-link-text">Invoices</span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        }
+
+        @{
+            bool canSeeAnyDirectory = User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString());
+        }
+        @if (canSeeAnyDirectory)
+        {
+            <li class="nav-item">
+                <a class="nav-link nav-section-header d-flex justify-content-between align-items-center @(canSeeAnyDirectory ? "" : "collapsed")" data-bs-toggle="collapse" href="#collapseDirectories" role="button" aria-expanded="@canSeeAnyDirectory.ToString().ToLower()" aria-controls="collapseDirectories">
+                    <span class="nav-section-text">References</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+            </li>
+            <div class="collapse @(canSeeAnyDirectory ? "show" : "")" id="collapseDirectories">
+                <ul class="nav flex-column ps-3">
+                    @if (User.IsInRole(UserRole.storage_keeper.ToString()) || User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+                    {
+                        <li class="nav-item"><a class="nav-link py-1 d-flex align-items-center" asp-controller="Product" asp-action="Index"><i class="bi bi-tags me-2"></i><span class="nav-link-text">Products</span></a></li>
+                    }
+                    @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+                    {
+                        <li class="nav-item"><a class="nav-link py-1 d-flex align-items-center" asp-controller="ProductUnit" asp-action="Index"><i class="bi bi-rulers me-2"></i><span class="nav-link-text">Units of Measure</span></a></li>
+                        <li class="nav-item"><a class="nav-link py-1 d-flex align-items-center" asp-controller="Storage" asp-action="Index"><i class="bi bi-house-gear me-2"></i><span class="nav-link-text">Storages</span></a></li>
+                        <li class="nav-item"><a class="nav-link py-1 d-flex align-items-center" asp-controller="Counterparty" asp-action="Index"><i class="bi bi-people me-2"></i><span class="nav-link-text">Counterparties</span></a></li>
+                    }
+                </ul>
+            </div>
+        }
+
+        @if (User.IsInRole(UserRole.manager.ToString()) || User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item">
+                <a class="nav-link nav-section-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapseStaff" role="button" aria-expanded="true" aria-controls="collapseStaff">
+                    <span class="nav-section-text">Staff</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+            </li>
+            <div class="collapse show" id="collapseStaff">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item"><a class="nav-link py-1 d-flex align-items-center" asp-controller="StorageKeeper" asp-action="Index"><i class="bi bi-person-badge me-2"></i><span class="nav-link-text">Storage Keepers</span></a></li>
+                </ul>
+            </div>
+        }
+
+        @if (User.IsInRole(UserRole.owner.ToString()))
+        {
+            <li class="nav-item">
+                <a class="nav-link nav-section-header d-flex justify-content-between align-items-center" data-bs-toggle="collapse" href="#collapseAdmin" role="button" aria-expanded="true" aria-controls="collapseAdmin">
+                    <span class="nav-section-text">Administration</span>
+                    <i class="bi bi-chevron-down small"></i>
+                </a>
+            </li>
+            <div class="collapse show" id="collapseAdmin">
+                <ul class="nav flex-column ps-3">
+                    <li class="nav-item"><a class="nav-link py-1 d-flex align-items-center" asp-controller="Admin" asp-action="Users"><i class="bi bi-person-lines-fill me-2"></i><span class="nav-link-text">User Accounts</span></a></li>
+                </ul>
+            </div>
+        }
+    </nav>
+}
