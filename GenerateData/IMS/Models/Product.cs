@@ -5,27 +5,27 @@ namespace IMS.Models;
 
 public partial class Product
 {
-    [Key] 
-    [Required(ErrorMessage = "Назва товару є обов'язковою.")]
-    [StringLength(100, ErrorMessage = "Назва товару не може перевищувати 100 символів.")]
-    [Display(Name = "Назва товару")]
+    [Key]
+    [Required(ErrorMessage = "Product name is required.")]
+    [StringLength(100, ErrorMessage = "Product name cannot exceed 100 characters.")]
+    [Display(Name = "Product Name")]
     public string ProductName { get; set; } = null!;
 
-    [Required(ErrorMessage = "Одиниця виміру є обов'язковою.")]
+    [Required(ErrorMessage = "Unit of measure is required.")]
     [StringLength(10)]
-    [Display(Name = "Код од. виміру")]
+    [Display(Name = "Unit Code")]
     public string UnitCode { get; set; } = null!;
 
-    [Required(ErrorMessage = "Ціна є обов'язковою.")]
-    [Range(0.01, 99999999.99, ErrorMessage = "Ціна повинна бути позитивним числом.")] 
-    [Display(Name = "Остання ціна")]
+    [Required(ErrorMessage = "Price is required.")]
+    [Range(0.01, 99999999.99, ErrorMessage = "Price must be a positive number.")]
+    [Display(Name = "Last Price")]
     public decimal LastPrice { get; set; }
 
     public virtual ICollection<ListEntry> ListEntries { get; set; } = new List<ListEntry>();
 
     public virtual ICollection<StorageProduct> StorageProducts { get; set; } = new List<StorageProduct>();
 
-    [ForeignKey("UnitCode")] 
-    [Display(Name = "Одиниця виміру")]
+    [ForeignKey("UnitCode")]
+    [Display(Name = "Unit of Measure")]
     public virtual ProductUnit UnitCodeNavigation { get; set; } = null!;
 }

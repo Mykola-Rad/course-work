@@ -8,26 +8,26 @@ namespace IMS.ViewModels
     {
         public int UserId { get; set; }
 
-        [Required(ErrorMessage = "Ім'я користувача є обов'язковим")]
-        [Display(Name = "Ім'я користувача (логін)")]
+        [Required(ErrorMessage = "Username is required")]
+        [Display(Name = "Username (login)")]
         public string Username { get; set; }
 
-        [Required(ErrorMessage = "Роль є обов'язковою")]
-        [Display(Name = "Роль")]
+        [Required(ErrorMessage = "Role is required")]
+        [Display(Name = "Role")]
         public UserRole Role { get; set; }
 
         [DataType(DataType.Password)]
-        [Display(Name = "Пароль (залиште порожнім, щоб не міняти)")]
-        [StringLength(100, ErrorMessage = "{0} має бути принаймні {2} символів.", MinimumLength = 6)]
+        [Display(Name = "Password (leave empty to not change)")]
+        [StringLength(100, ErrorMessage = "{0} must be at least {2} characters long.", MinimumLength = 6)]
         public string? Password { get; set; }
 
         [DataType(DataType.Password)]
-        [Display(Name = "Підтвердження пароля")]
-        [Compare("Password", ErrorMessage = "Пароль та підтвердження не співпадають.")]
+        [Display(Name = "Confirm Password")]
+        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
         public string? ConfirmPassword { get; set; }
 
 
-        [Display(Name = "Прив'язаний комірник")]
+        [Display(Name = "Assigned Storage Keeper")]
         public string? SelectedStorageKeeperPhoneNumber { get; set; }
         public IEnumerable<SelectListItem>? AvailableKeepers { get; set; }
     }

@@ -13,18 +13,18 @@ namespace IMS.ViewModels
         public string? ProductDisplayName { get; set; }
         public string? UnitName { get; set; }
 
-        [Required(ErrorMessage = "Вкажіть кількість.")]
-        [Range(0, 99999999.99, ErrorMessage = "Кількість має бути невід'ємною.")]
-        [Display(Name = "Поточна кількість")]
+        [Required(ErrorMessage = "Please enter the quantity.")]
+        [Range(0, 99999999.99, ErrorMessage = "Quantity must be non-negative.")]
+        [Display(Name = "Current Quantity")]
         public decimal Count { get; set; }
 
-        [Required(ErrorMessage = "Вкажіть мінімальний залишок.")]
-        [Range(0, 99999999.99, ErrorMessage = "Мінімальний залишок має бути невід'ємним.")]
-        [Display(Name = "Мінімальний залишок")]
+        [Required(ErrorMessage = "Please enter the minimal stock level.")]
+        [Range(0, 99999999.99, ErrorMessage = "Minimal stock level must be non-negative.")]
+        [Display(Name = "Minimal Stock Level")]
         public decimal MinimalCount { get; set; }
 
-        [StringLength(500, ErrorMessage = "Причина не може перевищувати 500 символів.")]
-        [Display(Name = "Причина коригування (необов'язково)")]
+        [StringLength(500, ErrorMessage = "Reason cannot exceed 500 characters.")]
+        [Display(Name = "Adjustment Reason (optional)")]
         public string? AdjustmentReason { get; set; }
     }
 }

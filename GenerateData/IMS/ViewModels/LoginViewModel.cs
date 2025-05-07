@@ -4,16 +4,16 @@ namespace IMS.ViewModels
 {
     public class LoginViewModel
     {
-        [Required(ErrorMessage = "Ім'я користувача є обов'язковим")]
-        [Display(Name = "Ім'я користувача")]
+        [Required(ErrorMessage = "Username is required")]
+        [Display(Name = "Username")]
         public string Username { get; set; }
 
-        [Required(ErrorMessage = "Пароль є обов'язковим")]
+        [Required(ErrorMessage = "Password is required")]
         [DataType(DataType.Password)]
-        [Display(Name = "Пароль")]
+        [Display(Name = "Password")]
         public string Password { get; set; }
 
-        [Display(Name = "Запам'ятати мене?")]
+        [Display(Name = "Remember me?")]
         public bool RememberMe { get; set; }
     }
 }

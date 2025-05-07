@@ -160,7 +160,7 @@
                             </form>
                         }
 
-                        @if (canManage && (Model.Status == InvoiceStatus.draft || Model.Status == InvoiceStatus.processing))
+                        @if ((Model.Status == InvoiceStatus.draft || Model.Status == InvoiceStatus.processing))
                         {
                             <form asp-action="CancelInvoice" asp-route-id="@Model.InvoiceId" method="post" class="d-inline-block" onsubmit="return confirm('Are you sure you want to cancel Invoice No. @Model.InvoiceId?')">
                                 @Html.AntiForgeryToken()

@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Npgsql;
 using X.PagedList.EF;
 using X.PagedList;
+using System.Security.Claims;
 
 namespace IMS.Controllers
 {
@@ -52,12 +53,44 @@ namespace IMS.Controllers
             try
             {
                 var invoicesQuery = _context.Invoices
-                    .Include(i => i.ListEntries)
-                    .Include(i => i.CounterpartyNameNavigation)
-                    .Include(i => i.SenderStorageNameNavigation)
-                    .Include(i => i.ReceiverStorageNameNavigation)
-                    .AsNoTracking()
-                    .AsQueryable();
+            .Include(i => i.ListEntries) // Важливо для розрахунку суми в _InvoiceTablePartial
+            .Include(i => i.CounterpartyNameNavigation)
+            .Include(i => i.SenderStorageNameNavigation)
+            .Include(i => i.ReceiverStorageNameNavigation)
+            .AsNoTracking()
+            .AsQueryable();
+
+                // --- ФІЛЬТР ДЛЯ КОМІРНИКА ---
+                if (User.Identity != null && User.Identity.IsAuthenticated && User.IsInRole(UserRole.storage_keeper.ToString()))
+                {
+                    string? keeperPhoneNumber = null;
+                    var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+                    if (!string.IsNullOrEmpty(currentUserIdString) && int.TryParse(currentUserIdString, out int userId))
+                    {
+                        var currentUser = await _context.Users
+                                                   .AsNoTracking()
+                                                   .Include(u => u.StorageKeeper) // Включаємо дані комірника
+                                                   .FirstOrDefaultAsync(u => u.UserId == userId);
+                        keeperPhoneNumber = currentUser?.StorageKeeper?.PhoneNumber;
+                    }
+
+                    if (!string.IsNullOrEmpty(keeperPhoneNumber))
+                    {
+                        invoicesQuery = invoicesQuery.Where(i =>
+                            i.SenderKeeperPhone == keeperPhoneNumber ||
+                            i.ReceiverKeeperPhone == keeperPhoneNumber);
+                        // ViewData["Title"] = "My Invoices"; // Опціонально змінити заголовок для комірника
+                    }
+                    else
+                    {
+                        _logger.LogWarning("User {UserName} (ID: {UserIdString}) has role 'storage_keeper', but their associated keeper profile or phone number could not be determined.",
+                                            User.Identity?.Name, currentUserIdString);
+                        // Якщо комірник, але дані не знайдено - не показуємо нічого
+                        invoicesQuery = invoicesQuery.Where(i => false);
+                    }
+                }
+
 
                 if (!string.IsNullOrEmpty(invoiceType) && Enum.TryParse<InvoiceType>(invoiceType, true, out var typeToFilter))
                 {
@@ -858,7 +891,7 @@ namespace IMS.Controllers
         // POST: Invoices/Cancel/5
         [HttpPost("Cancel/{id:int}")]
         [ValidateAntiForgeryToken]
-        [Authorize(Policy = "RequireManagerRole")]
+        [Authorize(Policy = "RequireStorageKeeperRole")]
         public async Task<IActionResult> CancelInvoice(int id)
         {
             var invoice = await _context.Invoices.FindAsync(id);
