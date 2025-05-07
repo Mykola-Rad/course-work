@@ -85,7 +85,7 @@ body {
 /* Клас для <nav> з _SideNavPartial.cshtml - для прокрутки */
 .sidebar .nav-main-scrollable {
     flex-grow: 1;
-    overflow-y: auto; /* Дозволяє прокрутку ТІЛЬКИ цього блоку */
+    overflow-y: hidden; /* Дозволяє прокрутку ТІЛЬКИ цього блоку */
     padding-bottom: 1rem;
 }
 
