@@ -8,21 +8,21 @@ namespace IMS.ViewModels
     {
         public string? PreSelectedStorageName { get; set; }
 
-        [Display(Name = "Склад")]
-        public string? SelectedStorageName { get; set; } 
+        [Display(Name = "Storage")]
+        public string? SelectedStorageName { get; set; }
 
-        [Required(ErrorMessage = "Необхідно обрати товар.")]
-        [Display(Name = "Товар")]
+        [Required(ErrorMessage = "Product selection is required.")]
+        [Display(Name = "Product")]
         public string SelectedProductName { get; set; } = null!;
 
-        [Required(ErrorMessage = "Вкажіть кількість.")]
-        [Range(0, 99999999.99, ErrorMessage = "Кількість має бути невід'ємною.")]
-        [Display(Name = "Початкова кількість")]
+        [Required(ErrorMessage = "Please enter the quantity.")]
+        [Range(0, 99999999.99, ErrorMessage = "Quantity must be non-negative.")]
+        [Display(Name = "Initial Quantity")]
         public decimal Count { get; set; } = 0;
 
-        [Required(ErrorMessage = "Вкажіть мінімальний залишок.")]
-        [Range(0, 99999999.99, ErrorMessage = "Мінімальний залишок має бути невід'ємним.")]
-        [Display(Name = "Мінімальний залишок")]
+        [Required(ErrorMessage = "Please enter the minimal stock level.")]
+        [Range(0, 99999999.99, ErrorMessage = "Minimal stock level must be non-negative.")]
+        [Display(Name = "Minimal Stock Level")]
         public decimal MinimalCount { get; set; } = 0;
 
         public SelectList? AvailableStorages { get; set; }
@@ -33,8 +33,8 @@ namespace IMS.ViewModels
             if (string.IsNullOrEmpty(PreSelectedStorageName) && string.IsNullOrEmpty(SelectedStorageName))
             {
                 yield return new ValidationResult(
-                    "Необхідно обрати склад.", 
-                    new[] { nameof(SelectedStorageName) } 
+                    "Storage selection is required.",
+                    new[] { nameof(SelectedStorageName) }
                 );
             }
         }

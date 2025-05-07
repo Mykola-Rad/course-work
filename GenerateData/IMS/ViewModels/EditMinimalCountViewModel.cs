@@ -11,9 +11,9 @@ namespace IMS.ViewModels
 
         public string? ProductDisplayName { get; set; }
 
-        [Required(ErrorMessage = "Вкажіть мінімальний залишок.")]
-        [Range(0.00, 99999999.99, ErrorMessage = "Мінімальний залишок має бути невід'ємним.")]
-        [Display(Name = "Новий Мінімальний залишок")]
+        [Required(ErrorMessage = "Please enter the minimal stock level.")]
+        [Range(0.00, 99999999.99, ErrorMessage = "Minimal stock level must be non-negative.")]
+        [Display(Name = "New Minimal Stock Level")]
         public decimal MinimalCount { get; set; }
     }
 }

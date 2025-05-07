@@ -7,14 +7,14 @@ namespace IMS.Models;
 public partial class ProductUnit
 {
     [Key]
-    [Required(ErrorMessage = "Код одиниці виміру є обов'язковим.")]
-    [StringLength(10, ErrorMessage = "Код одиниці виміру не може перевищувати 10 символів.")]
-    [Display(Name = "Код одиниці")]
+    [Required(ErrorMessage = "Unit code is required.")]
+    [StringLength(10, ErrorMessage = "Unit code cannot exceed 10 characters.")]
+    [Display(Name = "Unit Code")]
     public string UnitCode { get; set; } = null!;
 
-    [Required(ErrorMessage = "Назва одиниці виміру є обов'язковою.")]
-    [StringLength(50, ErrorMessage = "Назва одиниці виміру не може перевищувати 50 символів.")]
-    [Display(Name = "Назва одиниці")]
+    [Required(ErrorMessage = "Unit name is required.")]
+    [StringLength(50, ErrorMessage = "Unit name cannot exceed 50 characters.")]
+    [Display(Name = "Unit Name")]
     public string UnitName { get; set; } = null!;
 
     public virtual ICollection<Product> Products { get; set; } = new List<Product>();
